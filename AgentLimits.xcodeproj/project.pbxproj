@@ -1,0 +1,589 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		42D45BBB2EF64A5000A51EA8 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 42D45BBA2EF64A5000A51EA8 /* WidgetKit.framework */; };
+		42D45BBD2EF64A5000A51EA8 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 42D45BBC2EF64A5000A51EA8 /* SwiftUI.framework */; };
+		42D45BCC2EF64A5100A51EA8 /* AgentLimitsWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 42D45BB82EF64A5000A51EA8 /* AgentLimitsWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		42D45BCA2EF64A5100A51EA8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 42D45B822EF649FD00A51EA8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 42D45BB72EF64A5000A51EA8;
+			remoteInfo = AgentLimitsWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		42D45BD12EF64A5100A51EA8 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				42D45BCC2EF64A5100A51EA8 /* AgentLimitsWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		42D45B8A2EF649FE00A51EA8 /* AgentLimits.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AgentLimits.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		42D45BB82EF64A5000A51EA8 /* AgentLimitsWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AgentLimitsWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		42D45BBA2EF64A5000A51EA8 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		42D45BBC2EF64A5000A51EA8 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		7A1B2C3D4E5F678901234567 /* Configurations/DevelopmentTeam.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Configurations/DevelopmentTeam.xcconfig; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		42D45B8C2EF649FE00A51EA9 /* Exceptions for "AgentLimits" folder in "AgentLimits" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 42D45B892EF649FE00A51EA8 /* AgentLimits */;
+		};
+		42D45BCD2EF64A5100A51EA8 /* Exceptions for "AgentLimitsWidget" folder in "AgentLimitsWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 42D45BB72EF64A5000A51EA8 /* AgentLimitsWidgetExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		01349414347243A598E67AD9 /* AgentLimitsShared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = AgentLimitsShared;
+			sourceTree = "<group>";
+		};
+		42D45B8C2EF649FE00A51EA8 /* AgentLimits */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				42D45B8C2EF649FE00A51EA9 /* Exceptions for "AgentLimits" folder in "AgentLimits" target */,
+			);
+			path = AgentLimits;
+			sourceTree = "<group>";
+		};
+		42D45BBE2EF64A5000A51EA8 /* AgentLimitsWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				42D45BCD2EF64A5100A51EA8 /* Exceptions for "AgentLimitsWidget" folder in "AgentLimitsWidgetExtension" target */,
+			);
+			path = AgentLimitsWidget;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		42D45B872EF649FE00A51EA8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		42D45BB52EF64A5000A51EA8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				42D45BBD2EF64A5000A51EA8 /* SwiftUI.framework in Frameworks */,
+				42D45BBB2EF64A5000A51EA8 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		42D45B812EF649FD00A51EA8 = {
+			isa = PBXGroup;
+			children = (
+				7A1B2C3D4E5F678901234568 /* Configurations */,
+				42D45B8C2EF649FE00A51EA8 /* AgentLimits */,
+				01349414347243A598E67AD9 /* AgentLimitsShared */,
+				42D45BBE2EF64A5000A51EA8 /* AgentLimitsWidget */,
+				42D45BB92EF64A5000A51EA8 /* Frameworks */,
+				42D45B8B2EF649FE00A51EA8 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		42D45B8B2EF649FE00A51EA8 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				42D45B8A2EF649FE00A51EA8 /* AgentLimits.app */,
+				42D45BB82EF64A5000A51EA8 /* AgentLimitsWidgetExtension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		42D45BB92EF64A5000A51EA8 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				42D45BBA2EF64A5000A51EA8 /* WidgetKit.framework */,
+				42D45BBC2EF64A5000A51EA8 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		7A1B2C3D4E5F678901234568 /* Configurations */ = {
+			isa = PBXGroup;
+			children = (
+				7A1B2C3D4E5F678901234567 /* Configurations/DevelopmentTeam.xcconfig */,
+			);
+			name = Configurations;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		42D45B892EF649FE00A51EA8 /* AgentLimits */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 42D45BAB2EF649FF00A51EA8 /* Build configuration list for PBXNativeTarget "AgentLimits" */;
+			buildPhases = (
+				42D45B862EF649FE00A51EA8 /* Sources */,
+				42D45B872EF649FE00A51EA8 /* Frameworks */,
+				42D45B882EF649FE00A51EA8 /* Resources */,
+				42D45BD12EF64A5100A51EA8 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				42D45BCB2EF64A5100A51EA8 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				01349414347243A598E67AD9 /* AgentLimitsShared */,
+				42D45B8C2EF649FE00A51EA8 /* AgentLimits */,
+			);
+			name = AgentLimits;
+			packageProductDependencies = (
+			);
+			productName = AgentLimits;
+			productReference = 42D45B8A2EF649FE00A51EA8 /* AgentLimits.app */;
+			productType = "com.apple.product-type.application";
+		};
+		42D45BB72EF64A5000A51EA8 /* AgentLimitsWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 42D45BCE2EF64A5100A51EA8 /* Build configuration list for PBXNativeTarget "AgentLimitsWidgetExtension" */;
+			buildPhases = (
+				42D45BB42EF64A5000A51EA8 /* Sources */,
+				42D45BB52EF64A5000A51EA8 /* Frameworks */,
+				42D45BB62EF64A5000A51EA8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				01349414347243A598E67AD9 /* AgentLimitsShared */,
+				42D45BBE2EF64A5000A51EA8 /* AgentLimitsWidget */,
+			);
+			name = AgentLimitsWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = AgentLimitsWidgetExtension;
+			productReference = 42D45BB82EF64A5000A51EA8 /* AgentLimitsWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		42D45B822EF649FD00A51EA8 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2620;
+				LastUpgradeCheck = 2620;
+				TargetAttributes = {
+					42D45B892EF649FE00A51EA8 = {
+						CreatedOnToolsVersion = 26.2;
+					};
+					42D45BB72EF64A5000A51EA8 = {
+						CreatedOnToolsVersion = 26.2;
+					};
+				};
+			};
+			buildConfigurationList = 42D45B852EF649FD00A51EA8 /* Build configuration list for PBXProject "AgentLimits" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+				ja,
+			);
+			mainGroup = 42D45B812EF649FD00A51EA8;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 42D45B8B2EF649FE00A51EA8 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				42D45B892EF649FE00A51EA8 /* AgentLimits */,
+				42D45BB72EF64A5000A51EA8 /* AgentLimitsWidgetExtension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		42D45B882EF649FE00A51EA8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		42D45BB62EF64A5000A51EA8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		42D45B862EF649FE00A51EA8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		42D45BB42EF64A5000A51EA8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		42D45BCB2EF64A5100A51EA8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 42D45BB72EF64A5000A51EA8 /* AgentLimitsWidgetExtension */;
+			targetProxy = 42D45BCA2EF64A5100A51EA8 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		42D45BA92EF649FF00A51EA8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7A1B2C3D4E5F678901234567 /* Configurations/DevelopmentTeam.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		42D45BAA2EF649FF00A51EA8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7A1B2C3D4E5F678901234567 /* Configurations/DevelopmentTeam.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		42D45BAC2EF649FF00A51EA8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7A1B2C3D4E5F678901234567 /* Configurations/DevelopmentTeam.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ALLOW_ENTITLEMENTS_MODIFICATION = YES;
+				CODE_SIGN_ENTITLEMENTS = AgentLimits/AgentLimits.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = AgentLimits/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = AgentLimits;
+				INFOPLIST_KEY_CFBundleName = AgentLimits;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.9;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dmng.agentlimit.AgentLimit;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		42D45BAD2EF649FF00A51EA8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7A1B2C3D4E5F678901234567 /* Configurations/DevelopmentTeam.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = AgentLimits/AgentLimits.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = AgentLimits/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = AgentLimits;
+				INFOPLIST_KEY_CFBundleName = AgentLimits;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.9;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dmng.agentlimit.AgentLimit;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		42D45BCF2EF64A5100A51EA8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7A1B2C3D4E5F678901234567 /* Configurations/DevelopmentTeam.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = AgentLimitsWidget/AgentLimitsWidget.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = AgentLimitsWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = AgentLimitsWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.9;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dmng.agentlimit.AgentLimit.AgentLimitWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		42D45BD02EF64A5100A51EA8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7A1B2C3D4E5F678901234567 /* Configurations/DevelopmentTeam.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = AgentLimitsWidget/AgentLimitsWidget.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = AgentLimitsWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = AgentLimitsWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.9;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dmng.agentlimit.AgentLimit.AgentLimitWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		42D45B852EF649FD00A51EA8 /* Build configuration list for PBXProject "AgentLimits" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				42D45BA92EF649FF00A51EA8 /* Debug */,
+				42D45BAA2EF649FF00A51EA8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		42D45BAB2EF649FF00A51EA8 /* Build configuration list for PBXNativeTarget "AgentLimits" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				42D45BAC2EF649FF00A51EA8 /* Debug */,
+				42D45BAD2EF649FF00A51EA8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		42D45BCE2EF64A5100A51EA8 /* Build configuration list for PBXNativeTarget "AgentLimitsWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				42D45BCF2EF64A5100A51EA8 /* Debug */,
+				42D45BD02EF64A5100A51EA8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 42D45B822EF649FD00A51EA8 /* Project object */;
+}

@@ -1,0 +1,54 @@
+/* Menu */
+"menu.openSettings" = "設定ウィンドウを開く";
+"menu.displayMode" = "表示モード";
+"menu.displayMode.used" = "使用量";
+"menu.displayMode.remaining" = "残り使用量";
+"menu.quit" = "終了";
+"menu.language" = "言語";
+"menu.language.system" = "システム";
+"menu.language.japanese" = "日本語";
+"menu.language.english" = "English";
+
+/* ContentView */
+"content.login" = "ログイン";
+"content.usageLimit" = "使用制限";
+"content.autoRefresh" = "ログイン済みのサービスは1分ごとに自動更新されます。";
+"content.refreshNow" = "今すぐ更新";
+"content.clearData" = "データを削除";
+"content.clearDataConfirmTitle" = "データ削除";
+"content.clearDataConfirmMessage" = "内部ブラウザのログイン情報とサイトデータを削除します。";
+"content.clearDataConfirmAction" = "削除する";
+"content.clearDataCancel" = "キャンセル";
+"content.provider" = "Agent";
+"content.latestUsage" = "最新の使用状況";
+"content.5hours" = "5時間";
+"content.week" = "週";
+"content.updated" = "更新:";
+"content.notFetched" = "未取得です。下部でログインしてください。";
+"content.reset" = "リセット:";
+"content.popupClose" = "閉じる";
+
+/* Display Mode */
+"displayMode.used" = "使用量";
+"displayMode.remaining" = "残り使用量";
+
+/* Status */
+"status.notFetched" = "未取得";
+"status.loadingLogin" = "ログイン画面を読み込み中です";
+"status.updated" = "更新しました";
+
+/* Errors */
+"error.fetchFailed" = "取得に失敗しました: %@";
+"error.parseFailed" = "取得結果の解析に失敗しました。";
+"error.loginNotLoaded" = "ログイン画面の読み込みが完了していません。";
+"error.missingOrg" = "組織IDを取得できませんでした。利用状況ページを開き直してください。";
+"error.appGroupUnavailable" = "App Group が利用できません。Signing & Capabilities を確認してください。";
+
+/* Relative Time */
+"time.withinMinute" = "1分以内";
+"time.minutesAgo" = "%d分前";
+"time.hoursAgo" = "%d時間前";
+"time.daysAgo" = "%d日前";
+"time.minutesLater" = "%d分後";
+"time.hoursLater" = "%d時間後";
+"time.daysLater" = "%d日後";

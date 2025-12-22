@@ -1,0 +1,54 @@
+/* Menu */
+"menu.openSettings" = "Open Settings";
+"menu.displayMode" = "Display Mode";
+"menu.displayMode.used" = "Usage";
+"menu.displayMode.remaining" = "Remaining";
+"menu.quit" = "Quit";
+"menu.language" = "Language";
+"menu.language.system" = "System";
+"menu.language.japanese" = "日本語";
+"menu.language.english" = "English";
+
+/* ContentView */
+"content.login" = "Login";
+"content.usageLimit" = "Usage Limit";
+"content.autoRefresh" = "Logged-in services auto-refresh every minute.";
+"content.refreshNow" = "Refresh Now";
+"content.clearData" = "Clear Data";
+"content.clearDataConfirmTitle" = "Clear Data";
+"content.clearDataConfirmMessage" = "This will remove login data and website storage for the embedded browser.";
+"content.clearDataConfirmAction" = "Clear";
+"content.clearDataCancel" = "Cancel";
+"content.provider" = "Agent";
+"content.latestUsage" = "Latest Usage";
+"content.5hours" = "5 Hours";
+"content.week" = "Week";
+"content.updated" = "Updated:";
+"content.notFetched" = "Not fetched. Please login below.";
+"content.reset" = "Reset:";
+"content.popupClose" = "Close";
+
+/* Display Mode */
+"displayMode.used" = "Usage";
+"displayMode.remaining" = "Remaining";
+
+/* Status */
+"status.notFetched" = "Not fetched";
+"status.loadingLogin" = "Loading login page...";
+"status.updated" = "Updated";
+
+/* Errors */
+"error.fetchFailed" = "Failed to fetch: %@";
+"error.parseFailed" = "Failed to parse response.";
+"error.loginNotLoaded" = "Login page not loaded.";
+"error.missingOrg" = "Could not get organization ID. Please reload the usage page.";
+"error.appGroupUnavailable" = "App Group unavailable. Check Signing & Capabilities.";
+
+/* Relative Time */
+"time.withinMinute" = "Within 1 min";
+"time.minutesAgo" = "%d min ago";
+"time.hoursAgo" = "%d hours ago";
+"time.daysAgo" = "%d days ago";
+"time.minutesLater" = "In %d min";
+"time.hoursLater" = "In %d hours";
+"time.daysLater" = "In %d days";

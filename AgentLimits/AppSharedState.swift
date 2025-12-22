@@ -1,0 +1,58 @@
+// MARK: - AppSharedState.swift
+// Shared application state for menu bar and settings window.
+// Manages WebView pool, view model, and page-ready observation.
+
+import Combine
+import Foundation
+
+// MARK: - App Shared State
+
+/// Shared state container for the entire application.
+/// Initializes WebView pool, view model, and observes page-ready changes.
+@MainActor
+final class AppSharedState: ObservableObject {
+    let webViewPool: UsageWebViewPool
+    let viewModel: UsageViewModel
+
+    private var isStarted = false
+    private var cancellables: Set<AnyCancellable> = []
+
+    init() {
+        let pool = UsageWebViewPool()
+        self.webViewPool = pool
+        self.viewModel = UsageViewModel(webViewPool: pool)
+        observePageReadyChanges()
+        let storedMode = UserDefaults.standard.string(forKey: UserDefaultsKeys.displayMode)
+            .flatMap { UsageDisplayMode(rawValue: $0) } ?? .used
+        viewModel.updateDisplayMode(storedMode)
+        startBackgroundRefresh()
+    }
+
+    /// Starts background refresh and loads WebViews (called once)
+    func startBackgroundRefresh() {
+        guard !isStarted else { return }
+        isStarted = true
+        loadWebViews()
+        viewModel.startAutoRefresh()
+    }
+
+    /// Preloads WebViews for all providers
+    private func loadWebViews() {
+        for provider in UsageProvider.allCases {
+            webViewPool.getWebViewStore(for: provider).loadIfNeeded()
+        }
+    }
+
+    /// Sets up Combine subscriptions to observe page-ready state changes
+    private func observePageReadyChanges() {
+        for provider in UsageProvider.allCases {
+            let store = webViewPool.getWebViewStore(for: provider)
+            store.$isPageReady
+                .removeDuplicates()
+                .sink { [weak self] isReady in
+                    self?.viewModel.handlePageReadyChange(for: provider, isReady: isReady)
+                }
+                .store(in: &cancellables)
+        }
+    }
+}

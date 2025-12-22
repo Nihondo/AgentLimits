@@ -1,0 +1,17 @@
+/* Widget */
+"widget.description" = "5時間と週あたりの使用率を表示します。";
+"widget.notFetched" = "未取得";
+"widget.pleaseLogin" = "アプリでログインしてください";
+"widget.5hourLimit" = "5時間の使用制限";
+"widget.weeklyLimit" = "週間の使用制限";
+"widget.reset" = "リセット時間";
+"widget.updated" = "更新:";
+
+/* Relative Time */
+"time.withinMinute" = "1分以内";
+"time.minutesAgo" = "%d分前";
+"time.hoursAgo" = "%d時間前";
+"time.daysAgo" = "%d日前";
+"time.minutesLater" = "%d分後";
+"time.hoursLater" = "%@時間後";
+"time.daysLater" = "%d日後";

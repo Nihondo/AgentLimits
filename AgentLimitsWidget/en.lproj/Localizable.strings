@@ -1,0 +1,17 @@
+/* Widget */
+"widget.description" = "Displays 5-hour and weekly usage rates.";
+"widget.notFetched" = "Not fetched";
+"widget.pleaseLogin" = "Please login in app";
+"widget.5hourLimit" = "5-Hour Limit";
+"widget.weeklyLimit" = "Weekly Limit";
+"widget.reset" = "Resets at";
+"widget.updated" = "Updated:";
+
+/* Relative Time */
+"time.withinMinute" = "Within 1 min";
+"time.minutesAgo" = "%d min ago";
+"time.hoursAgo" = "%d hours ago";
+"time.daysAgo" = "%d days ago";
+"time.minutesLater" = "In %d min";
+"time.hoursLater" = "In %@ hours";
+"time.daysLater" = "In %d days";

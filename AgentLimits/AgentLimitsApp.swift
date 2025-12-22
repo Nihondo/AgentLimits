@@ -1,0 +1,128 @@
+// MARK: - AgentLimitsApp.swift
+// Main application entry point for AgentLimits menu bar app.
+// Provides menu bar UI, settings window, and deep link handling.
+
+import SwiftUI
+import AppKit
+
+// MARK: - Window Configuration
+
+private enum WindowId {
+    static let settings = "settings"
+}
+
+// MARK: - Deep Link Handling
+
+/// Handles agentlimits:// URL scheme for widget tap actions
+private enum DeepLinkHandler {
+    /// Opens the usage settings page for the specified provider
+    static func handleURL(_ url: URL) {
+        guard url.scheme == "agentlimits",
+              url.host == "open-usage",
+              let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              let providerValue = components.queryItems?.first(where: { $0.name == "provider" })?.value,
+              let provider = UsageProvider(rawValue: providerValue) else {
+            return
+        }
+        NSWorkspace.shared.open(provider.usageURL)
+    }
+}
+
+// MARK: - App Delegate
+
+/// App delegate for handling deep links and configuring app as accessory (menu bar only)
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        // Run as accessory app (no dock icon)
+        NSApp.setActivationPolicy(.accessory)
+    }
+
+    /// Handles incoming URLs from widget taps
+    func application(_ application: NSApplication, open urls: [URL]) {
+        for url in urls {
+            DeepLinkHandler.handleURL(url)
+        }
+    }
+}
+
+// MARK: - Main App
+
+/// Main SwiftUI App providing menu bar extra and settings window
+@main
+struct AgentLimitsApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+    @StateObject private var appState = AppSharedState()
+
+    var body: some Scene {
+        MenuBarExtra("AgentLimits", systemImage: "gauge") {
+            MenuBarContentView()
+                .environmentObject(appState)
+        }
+        Window("AgentLimits", id: WindowId.settings) {
+            ContentView(viewModel: appState.viewModel, webViewPool: appState.webViewPool)
+        }
+        .handlesExternalEvents(matching: [])
+        .commandsRemoved()
+    }
+}
+
+// MARK: - Menu Bar Content
+
+/// Menu bar dropdown content with settings, display mode, and language options
+private struct MenuBarContentView: View {
+    @AppStorage(UserDefaultsKeys.displayMode) private var displayMode: UsageDisplayMode = .used
+    @Environment(\.openWindow) private var openWindow
+    @EnvironmentObject private var appState: AppSharedState
+    @ObservedObject private var languageManager = LanguageManager.shared
+
+    var body: some View {
+        Button("menu.openSettings".localized()) {
+            openWindow(id: WindowId.settings)
+            NSApp.activate(ignoringOtherApps: true)
+        }
+        Menu("menu.displayMode".localized()) {
+            Button {
+                displayMode = .used
+            } label: {
+                if displayMode == .used {
+                    Label("menu.displayMode.used".localized(), systemImage: "checkmark")
+                } else {
+                    Text("menu.displayMode.used".localized())
+                }
+            }
+            Button {
+                displayMode = .remaining
+            } label: {
+                if displayMode == .remaining {
+                    Label("menu.displayMode.remaining".localized(), systemImage: "checkmark")
+                } else {
+                    Text("menu.displayMode.remaining".localized())
+                }
+            }
+        }
+        Menu("menu.language".localized()) {
+            ForEach(AppLanguage.allCases) { language in
+                Button {
+                    languageManager.setLanguage(language)
+                } label: {
+                    if languageManager.currentLanguage == language {
+                        Label(language.displayName, systemImage: "checkmark")
+                    } else {
+                        Text(language.displayName)
+                    }
+                }
+            }
+        }
+        Divider()
+        Button("menu.quit".localized()) {
+            NSApplication.shared.terminate(nil)
+        }
+        .onChange(of: displayMode) {
+            appState.viewModel.updateDisplayMode(displayMode)
+        }
+        .onAppear {
+            appState.viewModel.updateDisplayMode(displayMode)
+            appState.startBackgroundRefresh()
+        }
+    }
+}
