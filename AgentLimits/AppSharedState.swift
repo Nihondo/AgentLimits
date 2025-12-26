@@ -22,10 +22,14 @@ final class AppSharedState: ObservableObject {
         self.webViewPool = pool
         self.viewModel = UsageViewModel(webViewPool: pool)
         observePageReadyChanges()
+        observeCookieChanges()
         let storedMode = UserDefaults.standard.string(forKey: UserDefaultsKeys.displayMode)
             .flatMap { UsageDisplayMode(rawValue: $0) } ?? .used
         viewModel.updateDisplayMode(storedMode)
         startBackgroundRefresh()
+
+        // Initialize WakeUpScheduler to sync LaunchAgents on startup
+        _ = WakeUpScheduler.shared
     }
 
     /// Starts background refresh and loads WebViews (called once)
@@ -51,6 +55,18 @@ final class AppSharedState: ObservableObject {
                 .removeDuplicates()
                 .sink { [weak self] isReady in
                     self?.viewModel.handlePageReadyChange(for: provider, isReady: isReady)
+                }
+                .store(in: &cancellables)
+        }
+    }
+
+    /// Observes cookie changes to trigger login-based navigation
+    private func observeCookieChanges() {
+        for provider in UsageProvider.allCases {
+            let store = webViewPool.getWebViewStore(for: provider)
+            store.$cookieChangeToken
+                .sink { [weak self] _ in
+                    self?.viewModel.handleCookieChange(for: provider)
                 }
                 .store(in: &cancellables)
         }

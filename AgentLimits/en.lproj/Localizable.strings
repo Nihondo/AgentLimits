@@ -1,5 +1,10 @@
+/* Tabs */
+"tab.usage" = "Usage";
+"tab.wakeUp" = "Wake Up";
+"tab.notification" = "Notification";
+
 /* Menu */
-"menu.openSettings" = "Open Settings";
+"menu.openSettings" = "AgentLimits Settings...";
 "menu.displayMode" = "Display Mode";
 "menu.displayMode.used" = "Usage";
 "menu.displayMode.remaining" = "Remaining";
@@ -10,7 +15,7 @@
 "menu.language.english" = "English";
 
 /* ContentView */
-"content.login" = "Login";
+"content.login" = "Login to get current usage";
 "content.usageLimit" = "Usage Limit";
 "content.autoRefresh" = "Logged-in services auto-refresh every minute.";
 "content.refreshNow" = "Refresh Now";
@@ -19,7 +24,7 @@
 "content.clearDataConfirmMessage" = "This will remove login data and website storage for the embedded browser.";
 "content.clearDataConfirmAction" = "Clear";
 "content.clearDataCancel" = "Cancel";
-"content.provider" = "Agent";
+"content.provider" = "Service";
 "content.latestUsage" = "Latest Usage";
 "content.5hours" = "5 Hours";
 "content.week" = "Week";
@@ -52,3 +57,47 @@
 "time.minutesLater" = "In %d min";
 "time.hoursLater" = "In %d hours";
 "time.daysLater" = "In %d days";
+
+/* Wake Up */
+"menu.wakeUp" = "Wake up";
+"menu.wakeUpNow" = " - Run Now";
+"menu.wakeUpSettings" = "Wake up Settings...";
+"wakeUp.windowTitle" = "Wake up Settings";
+"wakeUp.title" = "Wake up Schedule";
+"wakeUp.description" = "Calls CLI at scheduled times to start 5-hour sessions";
+"wakeUp.provider" = "Service";
+"wakeUp.enabled" = "Enable schedule";
+"wakeUp.selectHours" = "Select hours to run (multiple)";
+"wakeUp.selectedHours" = "Selected:";
+"wakeUp.noHoursSelected" = "None";
+"wakeUp.hoursSelected" = "hours selected";
+"wakeUp.testNow" = "Test Now";
+"wakeUp.command" = "Command";
+"wakeUp.additionalArgs" = "Additional Arguments";
+"wakeUp.additionalArgsPlaceholder" = "e.g. --model=\"<<model-name>>\"";
+"wakeUp.status" = "Status";
+"wakeUp.nextRun" = "Next run:";
+"wakeUp.notScheduled" = "Not scheduled";
+"wakeUp.lastResult" = "Last result:";
+"wakeUp.success" = "Success";
+"wakeUp.startAtLogin" = "Start app at login";
+
+/* Login Item */
+"loginItem.requiresApproval" = "Requires approval in System Settings";
+"loginItem.notFound" = "Login item not found";
+
+/* Threshold Notification */
+"menu.thresholdSettings" = "Threshold Notification Settings...";
+"notification.windowTitle" = "Threshold Notification Settings";
+"notification.title" = "Usage Threshold Notification";
+"notification.description" = "Notifies when usage exceeds threshold";
+"notification.provider" = "Service";
+"notification.authorization" = "Notification permission required";
+"notification.requestAuth" = "Request Permission";
+"notification.primaryWindow" = "5-Hour Limit";
+"notification.secondaryWindow" = "Weekly Limit";
+"notification.enabled" = "Enable threshold notification";
+"notification.threshold" = "Threshold:";
+"notification.alertTitle" = "%@ Usage Warning";
+"notification.alertBody5h" = "5-hour usage limit has reached %d%%";
+"notification.alertBodyWeek" = "Weekly usage limit has reached %d%%";

@@ -39,6 +39,7 @@ final class UsageViewModel: ObservableObject {
     private var displayMode: UsageDisplayMode = .used
     private var providerStates: [UsageProvider: ProviderState] = [:]
     private var manualRefreshRequests: Set<UsageProvider> = []
+    private var lastLoginRedirectAt: [UsageProvider: Date] = [:]
 
     init(
         webViewPool: UsageWebViewPool,
@@ -152,6 +153,19 @@ final class UsageViewModel: ObservableObject {
         }
     }
 
+    /// Called when cookies change; triggers login-based navigation for Claude
+    func handleCookieChange(for provider: UsageProvider) {
+        guard provider == .claudeCode else { return }
+        let store = webViewPool.getWebViewStore(for: provider)
+        Task {
+            let isLoggedIn = await checkLoginStatus(for: provider, using: store.webView)
+            guard isLoggedIn else { return }
+            guard !isUsageURL(store.webView.url, provider: provider) else { return }
+            guard canRedirectLogin(for: provider) else { return }
+            store.reloadFromOrigin()
+        }
+    }
+
     private func refreshAutoEligibleProviders() async {
         for provider in UsageProvider.allCases {
             let isEnabled = providerStates[provider]?.isAutoRefreshEnabled
@@ -188,6 +202,9 @@ final class UsageViewModel: ObservableObject {
                 self.snapshot = snapshot
             }
             WidgetCenter.shared.reloadTimelines(ofKind: snapshot.provider.widgetKind)
+
+            // Check thresholds and send notifications if needed
+            await ThresholdNotificationManager.shared.checkThresholdsIfNeeded(for: snapshot)
         } catch {
             if shouldDisableAutoRefresh(for: provider, error: error) {
                 var state = getProviderState(for: provider)
@@ -305,5 +322,16 @@ final class UsageViewModel: ObservableObject {
             || normalized.contains("unauthorized")
             || normalized.contains("http 401")
             || normalized.contains("http 403")
+    }
+
+    private func canRedirectLogin(for provider: UsageProvider) -> Bool {
+        let now = Date()
+        let cooldown: TimeInterval = 5
+        if let lastRedirectAt = lastLoginRedirectAt[provider],
+           now.timeIntervalSince(lastRedirectAt) < cooldown {
+            return false
+        }
+        lastLoginRedirectAt[provider] = now
+        return true
     }
 }

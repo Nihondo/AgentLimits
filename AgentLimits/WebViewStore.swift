@@ -16,21 +16,37 @@ final class WebViewStore: ObservableObject {
     let usageURL: URL
     @Published var isPageReady = false
     @Published var popupWebView: WKWebView?
+    @Published var cookieChangeToken = UUID()
     let targetHost: String
     private var coordinator: WebViewCoordinator?
+    private let cookieStore: WKHTTPCookieStore
+    private var cookieObserver: CookieObserver?
 
     init(initialProvider: UsageProvider = .chatgptCodex) {
         let configuration = WKWebViewConfiguration()
         configuration.websiteDataStore = .default()
         configuration.preferences.javaScriptCanOpenWindowsAutomatically = true
+        let cookieStore = configuration.websiteDataStore.httpCookieStore
         self.webView = WKWebView(frame: .zero, configuration: configuration)
         self.usageURL = initialProvider.usageURL
         self.targetHost = initialProvider.usageHost
+        self.cookieStore = cookieStore
         let coordinator = WebViewCoordinator(store: self)
         self.coordinator = coordinator
         self.webView.navigationDelegate = coordinator
         self.webView.uiDelegate = coordinator
+        let observer = CookieObserver(store: self)
+        self.cookieObserver = observer
+        cookieStore.add(observer)
         loadIfNeeded()
+    }
+
+    deinit {
+        if let observer = cookieObserver {
+            MainActor.assumeIsolated {
+                cookieStore.remove(observer)
+            }
+        }
     }
 
     /// Loads the usage URL if not already loaded
@@ -55,6 +71,20 @@ final class WebViewStore: ObservableObject {
     func closePopupWebView() {
         popupWebView?.stopLoading()
         popupWebView = nil
+    }
+
+    private final class CookieObserver: NSObject, WKHTTPCookieStoreObserver {
+        private weak var store: WebViewStore?
+
+        init(store: WebViewStore) {
+            self.store = store
+        }
+
+        func cookiesDidChange(in cookieStore: WKHTTPCookieStore) {
+            Task { @MainActor in
+                store?.cookieChangeToken = UUID()
+            }
+        }
     }
 }
 

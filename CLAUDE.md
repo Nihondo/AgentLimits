@@ -29,6 +29,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 3. `UsageViewModel` manages auto-refresh (60s interval) and per-provider state
 4. `UsageSnapshotStore` persists snapshots as JSON under App Group container
 5. Widgets read their respective snapshot files (no network access)
+6. `ThresholdNotificationManager` checks usage against thresholds and sends notifications
 
 ### Key Components
 
@@ -36,7 +37,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 |------|---------|
 | `CodexUsageFetcher.swift` | Codex API + JS token extraction |
 | `ClaudeUsageFetcher.swift` | Claude API + JS org ID extraction |
-| `UsageViewModel.swift` | State management, auto-refresh, per-provider tracking |
+| `UsageViewModel.swift` | State management, auto-refresh, per-provider tracking, threshold check |
 | `AgentLimitsShared/UsageModels.swift` | Shared models/store (`UsageSnapshot`, `UsageWindow`, `UsageSnapshotStore`, `UsageProvider`) |
 | `AppUsageModels.swift` | App-only display mode + localized errors |
 | `WidgetUsageModels.swift` | Widget-only localized errors |
@@ -44,6 +45,27 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 | `UsageWebViewPool.swift` | Per-provider WebViewStore management |
 | `AppSharedState.swift` | Shared app state for menu bar and settings window |
 | `AgentLimitsWidget.swift` | Widget TimelineProvider and donut gauge UI |
+| `WakeUpScheduler.swift` | LaunchAgent-based CLI scheduler for starting 5h sessions |
+| `WakeUpSettingsView.swift` | Wake Up schedule configuration UI |
+| `Notification/ThresholdNotificationManager.swift` | Usage threshold notification logic |
+| `Notification/ThresholdNotificationSettings.swift` | Per-provider, per-window threshold settings model |
+| `Notification/ThresholdNotificationStore.swift` | Threshold settings persistence |
+| `Notification/ThresholdSettingsView.swift` | Threshold notification settings UI |
+
+### Features
+
+#### Wake Up (LaunchAgent-based CLI Scheduler)
+- Schedules CLI commands (`codex exec` / `claude -p`) at user-defined hours
+- Creates LaunchAgent plist files in `~/Library/LaunchAgents/`
+- Per-provider schedule with additional CLI arguments support
+- Test execution from settings UI
+
+#### Threshold Notification
+- Sends system notifications when usage exceeds configured threshold
+- Per-provider settings (Codex / Claude separately)
+- Per-window settings (5h / weekly separately)
+- Default threshold: 90%
+- Duplicate prevention: notifies only once per reset cycle
 
 ### Shared Data Model
 
@@ -59,6 +81,14 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 ├── usage_snapshot.json        # Codex
 └── usage_snapshot_claude.json # Claude
 ```
+
+### UserDefaults Keys
+
+| Key | Purpose |
+|-----|---------|
+| `usage_display_mode` | Display mode (used% / remaining%) |
+| `wake_up_schedules` | Wake Up schedules (JSON array) |
+| `threshold_notification_settings` | Threshold settings (JSON array) |
 
 ### Widget Kinds
 
@@ -77,3 +107,4 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 - Keep `AGENTS.md` and `CLAUDE.md` in English
 - Backend APIs are undocumented and may change without notice
 - Display mode (used% vs remaining%) is set from the menu bar and shared between app and widgets via cached snapshots
+- Wake Up uses `launchctl bootstrap/bootout` for modern macOS LaunchAgent management

@@ -113,13 +113,27 @@ final class ClaudeUsageFetcher {
         return response.toSnapshot(fetchedAt: Date(), parseResetDate: parseResetDate)
     }
 
-    /// Checks if user is logged in by verifying organization cookie or API
+    /// Checks if user is logged in by verifying the session cookie
     @MainActor
     func hasValidSession(using webView: WKWebView) async -> Bool {
-        do {
-            return try await scriptRunner.runBooleanScript(Self.loginCheckScript, webView: webView)
-        } catch {
-            return false
+        await hasValidSessionCookie(using: webView)
+    }
+
+    private func hasValidSessionCookie(using webView: WKWebView) async -> Bool {
+        let cookieStore = webView.configuration.websiteDataStore.httpCookieStore
+        return await withCheckedContinuation { continuation in
+            cookieStore.getAllCookies { cookies in
+                let now = Date()
+                let isValid = cookies.contains { cookie in
+                    guard cookie.name == "sessionKey" else { return false }
+                    guard cookie.domain.hasSuffix("claude.ai") else { return false }
+                    if let expiresDate = cookie.expiresDate {
+                        return expiresDate > now
+                    }
+                    return true
+                }
+                continuation.resume(returning: isValid)
+            }
         }
     }
 

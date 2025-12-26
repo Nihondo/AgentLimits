@@ -25,8 +25,11 @@ struct ContentView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             headerView
-            controlView
+            Divider()
+
+            providerPicker
             UsageSummaryView(snapshot: viewModel.snapshot, displayMode: displayMode)
+            controlView
             Divider()
             Text("content.login".localized())
                 .font(.headline)
@@ -89,22 +92,27 @@ struct ContentView: View {
     }
 
     private var headerView: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("\(viewModel.selectedProvider.displayName) " + "content.usageLimit".localized())
+        VStack(alignment: .leading, spacing: 4) {
+            Text("content.usageLimit".localized())
                 .font(.title2)
                 .bold()
-            Picker("content.provider".localized(), selection: $viewModel.selectedProvider) {
-                ForEach(UsageProvider.allCases) { provider in
-                    Text(provider.displayName)
-                        .tag(provider)
-                }
-            }
-            .pickerStyle(.segmented)
-            .frame(maxWidth: 260)
             Text("content.autoRefresh".localized())
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
+    }
+
+    // MARK: - Provider Picker
+
+    private var providerPicker: some View {
+        Picker("content.provider".localized(), selection: $viewModel.selectedProvider) {
+            ForEach(UsageProvider.allCases) { provider in
+                Text(provider.displayName)
+                    .tag(provider)
+            }
+        }
+        .pickerStyle(.segmented)
+        .frame(maxWidth: 260)
     }
 
     private var controlView: some View {
@@ -129,10 +137,15 @@ struct ContentView: View {
                     .controlSize(.small)
             }
 
+            Spacer()
+
             Text(viewModel.statusMessage)
-                .font(.caption)
+                .font(.footnote)
                 .foregroundStyle(.secondary)
         }
+        .padding()
+        .background(.thinMaterial)
+        .cornerRadius(8)
     }
 
 }
@@ -190,7 +203,7 @@ private struct UsageSummaryView: View {
                     Text("content.updated".localized())
                     Text(snapshot.fetchedAt, style: .relative)
                 }
-                .font(.caption)
+                .font(.footnote)
                 .foregroundStyle(.secondary)
             } else {
                 Text("content.notFetched".localized())
@@ -214,10 +227,10 @@ private struct UsageWindowRow: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Text(title)
-                    .font(.subheadline)
+                    .font(.body)
                 Spacer()
                 Text(windowPercentText)
-                    .font(.subheadline)
+                    .font(.body)
                     .monospacedDigit()
             }
             if let window {
@@ -229,7 +242,7 @@ private struct UsageWindowRow: View {
                         Text("-")
                     }
                 }
-                .font(.caption)
+                .font(.footnote)
                 .foregroundStyle(.secondary)
             }
         }

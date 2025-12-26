@@ -54,13 +54,15 @@ struct AgentLimitsApp: App {
     @StateObject private var appState = AppSharedState()
 
     var body: some Scene {
-        MenuBarExtra("AgentLimits", systemImage: "gauge") {
+        MenuBarExtra("AgentLimits", image: .menuBarIcon) {
             MenuBarContentView()
                 .environmentObject(appState)
         }
         Window("AgentLimits", id: WindowId.settings) {
-            ContentView(viewModel: appState.viewModel, webViewPool: appState.webViewPool)
+            SettingsTabView(viewModel: appState.viewModel, webViewPool: appState.webViewPool)
         }
+        .windowToolbarStyle(.unified(showsTitle: true))
+        .windowResizability(.contentSize)
         .handlesExternalEvents(matching: [])
         .commandsRemoved()
     }
@@ -74,13 +76,17 @@ private struct MenuBarContentView: View {
     @Environment(\.openWindow) private var openWindow
     @EnvironmentObject private var appState: AppSharedState
     @ObservedObject private var languageManager = LanguageManager.shared
+    @ObservedObject private var loginItemManager = LoginItemManager.shared
 
     var body: some View {
-        Button("menu.openSettings".localized()) {
+        Button {
             openWindow(id: WindowId.settings)
             NSApp.activate(ignoringOtherApps: true)
+        } label: {
+            Label("menu.openSettings".localized(), systemImage: "gear")
         }
-        Menu("menu.displayMode".localized()) {
+        Divider() // ------------------------
+        Menu {
             Button {
                 displayMode = .used
             } label: {
@@ -99,8 +105,10 @@ private struct MenuBarContentView: View {
                     Text("menu.displayMode.remaining".localized())
                 }
             }
+        } label: {
+            Label("menu.displayMode".localized(), systemImage: "eye")
         }
-        Menu("menu.language".localized()) {
+        Menu {
             ForEach(AppLanguage.allCases) { language in
                 Button {
                     languageManager.setLanguage(language)
@@ -112,10 +120,35 @@ private struct MenuBarContentView: View {
                     }
                 }
             }
+        } label: {
+            Label("menu.language".localized(), systemImage: "globe")
         }
-        Divider()
-        Button("menu.quit".localized()) {
+        Menu {
+            ForEach(UsageProvider.allCases) { provider in
+                Button("\(provider.displayName) " + "menu.wakeUpNow".localized()) {
+                    Task {
+                        await WakeUpScheduler.shared.triggerWakeUp(for: provider)
+                    }
+                }
+            }
+        } label: {
+            Label("menu.wakeUp".localized(), systemImage: "alarm")
+        }
+        Divider() // ------------------------
+        Button {
+            loginItemManager.setEnabled(!loginItemManager.isEnabled)
+        } label: {
+            if loginItemManager.isEnabled {
+                Label("wakeUp.startAtLogin".localized(), systemImage: "checkmark")
+            } else {
+                Text("wakeUp.startAtLogin".localized())
+            }
+        }
+        Divider() // ------------------------
+        Button {
             NSApplication.shared.terminate(nil)
+        } label: {
+            Label("menu.quit".localized(), systemImage: "power")
         }
         .onChange(of: displayMode) {
             appState.viewModel.updateDisplayMode(displayMode)
@@ -123,6 +156,7 @@ private struct MenuBarContentView: View {
         .onAppear {
             appState.viewModel.updateDisplayMode(displayMode)
             appState.startBackgroundRefresh()
+            loginItemManager.updateStatus()
         }
     }
 }

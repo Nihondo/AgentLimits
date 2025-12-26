@@ -17,7 +17,7 @@ build/
 *.xccheckout
 *.xcodeproj/xcuserdata/
 *.xcodeproj/project.xcworkspace/xcuserdata/
-Configurations/DevelopmentTeam.xcconfig
+Configurations/DevelopmentTeam.local.xcconfig
 
 # Playgrounds
 timeline.xctimeline
@@ -52,3 +52,4 @@ fastlane/test_output
 *.tmp
 *~
 handoff.md
+docs/
