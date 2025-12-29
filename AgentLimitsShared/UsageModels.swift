@@ -13,6 +13,8 @@ enum AppGroupConfig {
     static let appLanguageKey = "app_language"
     static let snapshotKey = "UsageSnapshot"
     static let snapshotDirectory = "Library/Application Support/AgentLimit"
+    static let usageRefreshIntervalMinutesKey = "usage_refresh_interval_minutes"
+    static let tokenUsageRefreshIntervalMinutesKey = "token_usage_refresh_interval_minutes"
 }
 
 /// Localization configuration constants
@@ -23,8 +25,83 @@ enum LocalizationConfig {
 
 /// Auto-refresh interval configuration
 enum UsageRefreshConfig {
-    static let refreshIntervalSeconds: TimeInterval = 60
-    static let refreshIntervalDuration: Duration = .seconds(60)
+    static var refreshIntervalMinutes: Int {
+        UsageRefreshIntervalConfig.loadMinutes()
+    }
+
+    static var refreshIntervalSeconds: TimeInterval {
+        TimeInterval(refreshIntervalMinutes * 60)
+    }
+
+    static var refreshIntervalDuration: Duration {
+        .seconds(refreshIntervalMinutes * 60)
+    }
+}
+
+/// Auto-refresh interval settings shared via App Group
+enum RefreshIntervalConfig {
+    static let defaultMinutes = 1
+    static let minMinutes = 1
+    static let maxMinutes = 10
+
+    static var supportedMinutes: [Int] {
+        Array(minMinutes...maxMinutes)
+    }
+
+    static func normalizedMinutes(_ minutes: Int) -> Int {
+        min(max(minutes, minMinutes), maxMinutes)
+    }
+
+    static func loadMinutes(
+        from defaults: UserDefaults? = UserDefaults(suiteName: AppGroupConfig.groupId),
+        key: String
+    ) -> Int {
+        guard let defaults else { return defaultMinutes }
+        let stored = defaults.object(forKey: key) as? Int
+        return normalizedMinutes(stored ?? defaultMinutes)
+    }
+
+    static func saveMinutes(
+        _ minutes: Int,
+        to defaults: UserDefaults? = UserDefaults(suiteName: AppGroupConfig.groupId),
+        key: String
+    ) {
+        defaults?.set(normalizedMinutes(minutes), forKey: key)
+    }
+}
+
+/// Auto-refresh interval settings for usage limits
+enum UsageRefreshIntervalConfig {
+    static func loadMinutes(
+        from defaults: UserDefaults? = UserDefaults(suiteName: AppGroupConfig.groupId)
+    ) -> Int {
+        guard let defaults else { return RefreshIntervalConfig.defaultMinutes }
+        let stored = defaults.object(forKey: AppGroupConfig.usageRefreshIntervalMinutesKey) as? Int
+        return RefreshIntervalConfig.normalizedMinutes(stored ?? RefreshIntervalConfig.defaultMinutes)
+    }
+}
+
+/// Auto-refresh interval settings for ccusage token usage
+enum TokenUsageRefreshConfig {
+    static var refreshIntervalMinutes: Int {
+        loadMinutes()
+    }
+
+    static var refreshIntervalSeconds: TimeInterval {
+        TimeInterval(refreshIntervalMinutes * 60)
+    }
+
+    static var refreshIntervalDuration: Duration {
+        .seconds(refreshIntervalMinutes * 60)
+    }
+
+    static func loadMinutes(
+        from defaults: UserDefaults? = UserDefaults(suiteName: AppGroupConfig.groupId)
+    ) -> Int {
+        guard let defaults else { return RefreshIntervalConfig.defaultMinutes }
+        let stored = defaults.object(forKey: AppGroupConfig.tokenUsageRefreshIntervalMinutesKey) as? Int
+        return RefreshIntervalConfig.normalizedMinutes(stored ?? RefreshIntervalConfig.defaultMinutes)
+    }
 }
 
 /// Resolves language codes for localization

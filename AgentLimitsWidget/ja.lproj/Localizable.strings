@@ -15,3 +15,10 @@
 "time.minutesLater" = "%d分後";
 "time.hoursLater" = "%@時間後";
 "time.daysLater" = "%d日後";
+
+/* Token Usage Widget (ccusage) */
+"widget.tokenUsage.today" = "今日";
+"widget.tokenUsage.thisWeek" = "今週";
+"widget.tokenUsage.thisMonth" = "今月";
+"widget.tokenUsageDescription" = "トークン使用量とコストを表示します。";
+"widget.pleaseOpenApp" = "アプリを開いてください";

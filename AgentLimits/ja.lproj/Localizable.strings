@@ -17,7 +17,9 @@
 /* ContentView */
 "content.login" = "ログインして現在の使用量を取得";
 "content.usageLimit" = "使用制限";
-"content.autoRefresh" = "ログイン済みのサービスは1分ごとに自動更新されます。";
+"content.autoRefresh" = "ログイン済みのサービスは%d分ごとに自動更新されます。";
+"refreshInterval.label" = "更新間隔";
+"refreshInterval.minutesFormat" = "%d分";
 "content.refreshNow" = "今すぐ更新";
 "content.clearData" = "データを削除";
 "content.clearDataConfirmTitle" = "データ削除";
@@ -101,3 +103,27 @@
 "notification.alertTitle" = "%@ 使用量警告";
 "notification.alertBody5h" = "5時間の使用制限の%d%%に達しました";
 "notification.alertBodyWeek" = "週間の使用制限の%d%%に達しました";
+
+/* ccusage */
+"tab.ccusage" = "ccusage";
+"menu.ccusage" = "ccusage";
+"menu.ccusageSettings" = "ccusage 設定...";
+"ccusage.windowTitle" = "ccusage 設定";
+"ccusage.title" = "トークン使用量の取得(ccusage)";
+"ccusage.description" = "ccusage CLIを使用してトークン使用量とコストを取得します";
+"ccusage.enabled" = "定期取得を有効にする";
+"ccusage.command" = "実行コマンド";
+"ccusage.additionalArgs" = "追加引数";
+"ccusage.additionalArgsPlaceholder" = "例: --timezone <<timezone>>";
+"ccusage.testNow" = "今すぐテスト実行";
+"ccusage.status" = "ステータス";
+"ccusage.lastResult" = "最終結果:";
+"ccusage.success" = "成功";
+"tokenUsage.notFetched" = "未取得";
+"tokenUsage.updated" = "更新: ";
+"ccusage.provider" = "サービス";
+"ccusage.disabled" = "無効";
+"ccusage.credits.title" = "謝辞";
+"ccusage.credits.body" = "ccusage の作者 ryoppippi さんへの感謝を込めて。";
+"ccusage.credits.site" = "ccusage 公式サイト";
+"ccusage.credits.repo" = "GitHub: ryoppippi/ccusage";

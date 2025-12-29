@@ -82,7 +82,7 @@ final class UsageViewModel: ObservableObject {
 
     // MARK: - Auto Refresh
 
-    /// Starts the 60-second auto-refresh timer for eligible providers
+    /// Starts the auto-refresh timer for eligible providers
     func startAutoRefresh() {
         guard autoRefreshTask == nil else { return }
         autoRefreshTask = Task {
@@ -98,6 +98,12 @@ final class UsageViewModel: ObservableObject {
     func stopAutoRefresh() {
         autoRefreshTask?.cancel()
         autoRefreshTask = nil
+    }
+
+    /// Restarts the auto-refresh timer (useful when interval changes)
+    func restartAutoRefresh() {
+        stopAutoRefresh()
+        startAutoRefresh()
     }
 
     // MARK: - Manual Refresh

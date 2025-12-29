@@ -15,3 +15,10 @@
 "time.minutesLater" = "In %d min";
 "time.hoursLater" = "In %@ hours";
 "time.daysLater" = "In %d days";
+
+/* Token Usage Widget (ccusage) */
+"widget.tokenUsage.today" = "Today";
+"widget.tokenUsage.thisWeek" = "Weekly";
+"widget.tokenUsage.thisMonth" = "Monthly";
+"widget.tokenUsageDescription" = "Shows token usage and costs.";
+"widget.pleaseOpenApp" = "Please open the app";

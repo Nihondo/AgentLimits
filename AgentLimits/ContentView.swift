@@ -4,6 +4,7 @@
 
 import SwiftUI
 import WebKit
+import WidgetKit
 
 // MARK: - Main Content View
 
@@ -12,6 +13,10 @@ struct ContentView: View {
     @ObservedObject private var viewModel: UsageViewModel
     private let webViewPool: UsageWebViewPool
     @AppStorage(UserDefaultsKeys.displayMode) private var displayMode: UsageDisplayMode = .used
+    @AppStorage(
+        AppGroupConfig.usageRefreshIntervalMinutesKey,
+        store: UserDefaults(suiteName: AppGroupConfig.groupId)
+    ) private var refreshIntervalMinutes: Int = RefreshIntervalConfig.defaultMinutes
     @State private var isShowingClearDataConfirm = false
     @State private var isClearingData = false
     @State private var popupWebView: WKWebView?
@@ -27,7 +32,7 @@ struct ContentView: View {
             headerView
             Divider()
 
-            providerPicker
+            providerPickerRow
             UsageSummaryView(snapshot: viewModel.snapshot, displayMode: displayMode)
             controlView
             Divider()
@@ -50,6 +55,13 @@ struct ContentView: View {
             .cornerRadius(8)
         }
         .padding()
+        .onAppear {
+            refreshIntervalMinutes = RefreshIntervalConfig.normalizedMinutes(refreshIntervalMinutes)
+        }
+        .onChange(of: refreshIntervalMinutes) { _, _ in
+            viewModel.restartAutoRefresh()
+            WidgetCenter.shared.reloadAllTimelines()
+        }
         .confirmationDialog(
             "content.clearDataConfirmTitle".localized(),
             isPresented: $isShowingClearDataConfirm,
@@ -96,13 +108,21 @@ struct ContentView: View {
             Text("content.usageLimit".localized())
                 .font(.title2)
                 .bold()
-            Text("content.autoRefresh".localized())
+            Text("content.autoRefresh".localized(refreshIntervalMinutes))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
     }
 
     // MARK: - Provider Picker
+
+    private var providerPickerRow: some View {
+        HStack(spacing: 12) {
+            providerPicker
+            Spacer(minLength: 0)
+            refreshIntervalMenu
+        }
+    }
 
     private var providerPicker: some View {
         Picker("content.provider".localized(), selection: $viewModel.selectedProvider) {
@@ -113,6 +133,25 @@ struct ContentView: View {
         }
         .pickerStyle(.segmented)
         .frame(maxWidth: 260)
+    }
+
+    private var refreshIntervalMenu: some View {
+        HStack(spacing: 6) {
+            Text("refreshInterval.label".localized())
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+            Picker(
+                "refreshInterval.label".localized(),
+                selection: refreshIntervalBinding
+            ) {
+                ForEach(RefreshIntervalConfig.supportedMinutes, id: \.self) { minutes in
+                    Text("refreshInterval.minutesFormat".localized(minutes))
+                        .tag(minutes)
+                }
+            }
+            .labelsHidden()
+            .pickerStyle(.menu)
+        }
     }
 
     private var controlView: some View {
@@ -146,6 +185,15 @@ struct ContentView: View {
         .padding()
         .background(.thinMaterial)
         .cornerRadius(8)
+    }
+
+    private var refreshIntervalBinding: Binding<Int> {
+        Binding(
+            get: { RefreshIntervalConfig.normalizedMinutes(refreshIntervalMinutes) },
+            set: { newValue in
+                refreshIntervalMinutes = RefreshIntervalConfig.normalizedMinutes(newValue)
+            }
+        )
     }
 
 }

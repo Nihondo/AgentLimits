@@ -13,6 +13,7 @@ import Foundation
 final class AppSharedState: ObservableObject {
     let webViewPool: UsageWebViewPool
     let viewModel: UsageViewModel
+    let tokenUsageViewModel: TokenUsageViewModel
 
     private var isStarted = false
     private var cancellables: Set<AnyCancellable> = []
@@ -21,6 +22,7 @@ final class AppSharedState: ObservableObject {
         let pool = UsageWebViewPool()
         self.webViewPool = pool
         self.viewModel = UsageViewModel(webViewPool: pool)
+        self.tokenUsageViewModel = TokenUsageViewModel()
         observePageReadyChanges()
         observeCookieChanges()
         let storedMode = UserDefaults.standard.string(forKey: UserDefaultsKeys.displayMode)
@@ -38,6 +40,7 @@ final class AppSharedState: ObservableObject {
         isStarted = true
         loadWebViews()
         viewModel.startAutoRefresh()
+        tokenUsageViewModel.startAutoRefresh()
     }
 
     /// Preloads WebViews for all providers

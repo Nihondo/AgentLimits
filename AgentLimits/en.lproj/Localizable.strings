@@ -17,7 +17,9 @@
 /* ContentView */
 "content.login" = "Login to get current usage";
 "content.usageLimit" = "Usage Limit";
-"content.autoRefresh" = "Logged-in services auto-refresh every minute.";
+"content.autoRefresh" = "Logged-in services auto-refresh every %d min.";
+"refreshInterval.label" = "Refresh interval";
+"refreshInterval.minutesFormat" = "%d min";
 "content.refreshNow" = "Refresh Now";
 "content.clearData" = "Clear Data";
 "content.clearDataConfirmTitle" = "Clear Data";
@@ -101,3 +103,27 @@
 "notification.alertTitle" = "%@ Usage Warning";
 "notification.alertBody5h" = "5-hour usage limit has reached %d%%";
 "notification.alertBodyWeek" = "Weekly usage limit has reached %d%%";
+
+/* ccusage */
+"tab.ccusage" = "ccusage";
+"menu.ccusage" = "ccusage";
+"menu.ccusageSettings" = "ccusage Settings...";
+"ccusage.windowTitle" = "ccusage Settings";
+"ccusage.title" = "Token Usage Tracking(ccusage)";
+"ccusage.description" = "Fetch token usage and costs using ccusage CLI";
+"ccusage.enabled" = "Enable periodic fetch";
+"ccusage.command" = "Command";
+"ccusage.additionalArgs" = "Additional Arguments";
+"ccusage.additionalArgsPlaceholder" = "e.g. --timezone <<timezone>>";
+"ccusage.testNow" = "Test Now";
+"ccusage.status" = "Status";
+"ccusage.lastResult" = "Last result:";
+"ccusage.success" = "Success";
+"tokenUsage.notFetched" = "Not fetched";
+"tokenUsage.updated" = "Updated: ";
+"ccusage.provider" = "Service";
+"ccusage.disabled" = "Disabled";
+"ccusage.credits.title" = "Credits";
+"ccusage.credits.body" = "Special thanks to ryoppippi, the creator of ccusage.";
+"ccusage.credits.site" = "ccusage website";
+"ccusage.credits.repo" = "GitHub: ryoppippi/ccusage";

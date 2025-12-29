@@ -18,13 +18,25 @@ private enum DeepLinkHandler {
     /// Opens the usage settings page for the specified provider
     static func handleURL(_ url: URL) {
         guard url.scheme == "agentlimits",
-              url.host == "open-usage",
-              let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
-              let providerValue = components.queryItems?.first(where: { $0.name == "provider" })?.value,
-              let provider = UsageProvider(rawValue: providerValue) else {
+              let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
             return
         }
-        NSWorkspace.shared.open(provider.usageURL)
+
+        switch url.host {
+        case "open-usage":
+            // Existing usage limit widget
+            if let providerValue = components.queryItems?.first(where: { $0.name == "provider" })?.value,
+               let provider = UsageProvider(rawValue: providerValue) {
+                NSWorkspace.shared.open(provider.usageURL)
+            }
+        case "open-token-usage":
+            // Token usage widget (ccusage) - open ccusage site
+            if let url = URL(string: "https://ccusage.com/") {
+                NSWorkspace.shared.open(url)
+            }
+        default:
+            break
+        }
     }
 }
 
@@ -59,7 +71,11 @@ struct AgentLimitsApp: App {
                 .environmentObject(appState)
         }
         Window("AgentLimits", id: WindowId.settings) {
-            SettingsTabView(viewModel: appState.viewModel, webViewPool: appState.webViewPool)
+            SettingsTabView(
+                viewModel: appState.viewModel,
+                webViewPool: appState.webViewPool,
+                tokenUsageViewModel: appState.tokenUsageViewModel
+            )
         }
         .windowToolbarStyle(.unified(showsTitle: true))
         .windowResizability(.contentSize)
