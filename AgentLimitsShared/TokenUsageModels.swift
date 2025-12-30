@@ -6,14 +6,15 @@ import Foundation
 
 // MARK: - Token Usage Provider
 
-/// Provider identifier for ccusage CLI tools
-enum TokenUsageProvider: String, Codable, CaseIterable, Identifiable {
+/// Provider identifier for ccusage CLI tools.
+/// Uses `codex` and `claude` as rawValue for JSON compatibility.
+enum TokenUsageProvider: String, Codable, CaseIterable, Identifiable, SnapshotFileNaming, AIProviderProtocol {
     case codex       // @ccusage/codex (Codex)
     case claude      // ccusage (Claude Code)
 
     var id: String { rawValue }
 
-    /// Display name for UI
+    /// Display name for UI (implements AIProviderProtocol)
     var displayName: String {
         switch self {
         case .codex:
@@ -63,9 +64,26 @@ enum TokenUsageProvider: String, Codable, CaseIterable, Identifiable {
         }
     }
 
-    /// Deep link URL for widget tap action
+    /// Deep link URL for widget tap action.
+    /// Constructs a URL with the provider's rawValue as a query parameter.
     var widgetDeepLinkURL: URL {
-        URL(string: "agentlimits://open-token-usage?provider=\(rawValue)")!
+        guard let url = URL(string: "agentlimits://open-token-usage?provider=\(rawValue)") else {
+            preconditionFailure("Invalid deep link URL for token usage provider: \(rawValue)")
+        }
+        return url
+    }
+
+    // MARK: - Provider Conversion
+
+    /// Converts this TokenUsageProvider to its corresponding UsageProvider.
+    /// Useful when working with Usage Limits features for the same AI provider.
+    var usageProvider: UsageProvider {
+        switch self {
+        case .codex:
+            return .chatgptCodex
+        case .claude:
+            return .claudeCode
+        }
     }
 }
 
@@ -77,15 +95,12 @@ struct TokenUsagePeriod: Codable, Equatable {
     let costUSD: Double
     /// Total tokens used
     let totalTokens: Int
-
-    /// Zero usage period
-    static let zero = TokenUsagePeriod(costUSD: 0, totalTokens: 0)
 }
 
 // MARK: - Token Usage Snapshot
 
 /// Snapshot of token usage data fetched from ccusage CLI
-struct TokenUsageSnapshot: Codable {
+struct TokenUsageSnapshot: Codable, SnapshotData {
     let provider: TokenUsageProvider
     let fetchedAt: Date
     /// Today's usage
@@ -99,66 +114,50 @@ struct TokenUsageSnapshot: Codable {
 // MARK: - Token Usage Snapshot Store
 
 /// Persists and retrieves token usage snapshots via App Group shared container.
-final class TokenUsageSnapshotStore {
+/// Used by both the main app (for writing) and widgets (for reading).
+/// Inherits common functionality from AppGroupSnapshotStore.
+final class TokenUsageSnapshotStore: AppGroupSnapshotStore<TokenUsageProvider, TokenUsageSnapshot> {
+    /// Shared singleton instance for app-wide use
     static let shared = TokenUsageSnapshotStore()
-
-    private let fileManager: FileManager
-    private let encoder: JSONEncoder
-    private let decoder: JSONDecoder
-
-    init(fileManager: FileManager = .default) {
-        self.fileManager = fileManager
-        self.encoder = JSONEncoder()
-        self.decoder = JSONDecoder()
-        DateCodec.configureEncoder(encoder)
-        DateCodec.configureDecoder(decoder)
-    }
-
-    /// Loads a snapshot for the specified provider from disk
-    func loadSnapshot(for provider: TokenUsageProvider) -> TokenUsageSnapshot? {
-        guard let url = snapshotFileURL(for: provider) else { return nil }
-        return try? withSecurityScopedAccess(url) {
-            let data = try Data(contentsOf: url)
-            return try decoder.decode(TokenUsageSnapshot.self, from: data)
-        }
-    }
-
-    /// Saves a snapshot to disk for later retrieval by widgets
-    func saveSnapshot(_ snapshot: TokenUsageSnapshot) throws {
-        guard let url = snapshotFileURL(for: snapshot.provider, createDirectory: true) else {
-            throw UsageSnapshotStoreError.appGroupUnavailable
-        }
-        let data = try encoder.encode(snapshot)
-        try withSecurityScopedAccess(url) {
-            try data.write(to: url, options: .atomic)
-        }
-    }
-
-    private func snapshotFileURL(for provider: TokenUsageProvider, createDirectory: Bool = false) -> URL? {
-        guard let containerURL = fileManager.containerURL(
-            forSecurityApplicationGroupIdentifier: AppGroupConfig.groupId
-        ) else { return nil }
-        let directoryURL = containerURL.appendingPathComponent(
-            AppGroupConfig.snapshotDirectory, isDirectory: true
-        )
-        if createDirectory {
-            try? fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true)
-        }
-        return directoryURL.appendingPathComponent(provider.snapshotFileName)
-    }
-
-    private func withSecurityScopedAccess<T>(_ url: URL, _ action: () throws -> T) rethrows -> T {
-        let didStart = url.startAccessingSecurityScopedResource()
-        defer {
-            if didStart {
-                url.stopAccessingSecurityScopedResource()
-            }
-        }
-        return try action()
-    }
 }
 
 // MARK: - CCUsage Settings
+
+/// Resolves the current month's start date string for ccusage CLI commands.
+enum MonthStartDateResolver {
+    private static let formatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyyMMdd"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        return formatter
+    }()
+
+    /// Calculates the first day of the current month in YYYYMMDD format.
+    /// - Parameters:
+    ///   - now: The date to base the calculation on (default: current date)
+    ///   - calendar: The calendar used for component extraction (default: .current)
+    /// - Returns: Date string in compact format (e.g., "20251201")
+    static func calculateStartOfMonthString(
+        now: Date = Date(),
+        calendar: Calendar = .current
+    ) -> String {
+        // Extract year/month and rebuild the first day of the month.
+        let components = calendar.dateComponents([.year, .month], from: now)
+        guard let startOfMonth = calendar.date(from: components) else {
+            // Fallback to the provided date when calendar calculation fails.
+            return formatter.string(from: now)
+        }
+        return formatter.string(from: startOfMonth)
+    }
+}
+
+/// Pre-validated ccusage external link URLs.
+enum CCUsageLinks {
+    /// ccusage website URL
+    static let siteURL = URL(string: "https://ccusage.com/")
+    /// ccusage GitHub repository URL
+    static let repoURL = URL(string: "https://github.com/ryoppippi/ccusage")
+}
 
 /// Settings for ccusage CLI execution
 struct CCUsageSettings: Codable, Equatable {
@@ -168,6 +167,7 @@ struct CCUsageSettings: Codable, Equatable {
 
     /// Full CLI command with additional arguments
     var cliCommand: String {
+        // Append additional args only when provided by user.
         var cmd = provider.cliCommandBase
         if !additionalArgs.isEmpty {
             cmd += " " + additionalArgs
@@ -177,6 +177,7 @@ struct CCUsageSettings: Codable, Equatable {
 
     /// CLI command for display (includes -s startDate -j)
     var displayCommand: String {
+        // Include start date and JSON flag for UI display.
         var cmd = cliCommand
         cmd += " -s \(Self.currentStartOfMonth) -j"
         return cmd
@@ -184,15 +185,7 @@ struct CCUsageSettings: Codable, Equatable {
 
     /// Current month's start date in YYYYMMDD format
     private static var currentStartOfMonth: String {
-        let calendar = Calendar.current
-        let now = Date()
-        let components = calendar.dateComponents([.year, .month], from: now)
-        guard let startOfMonth = calendar.date(from: components) else {
-            return "20251201"
-        }
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyyMMdd"
-        return formatter.string(from: startOfMonth)
+        MonthStartDateResolver.calculateStartOfMonthString()
     }
 
     /// Default settings for a provider

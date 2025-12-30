@@ -34,6 +34,7 @@
 "content.notFetched" = "Not fetched. Please login below.";
 "content.reset" = "Reset:";
 "content.popupClose" = "Close";
+"settings.showInMenuBar" = "Show in Menu Bar";
 
 /* Display Mode */
 "displayMode.used" = "Usage";
@@ -50,6 +51,8 @@
 "error.loginNotLoaded" = "Login page not loaded.";
 "error.missingOrg" = "Could not get organization ID. Please reload the usage page.";
 "error.appGroupUnavailable" = "App Group unavailable. Check Signing & Capabilities.";
+"error.readFailed" = "Failed to read data";
+"error.decodeFailed" = "Failed to decode data";
 
 /* Relative Time */
 "time.withinMinute" = "Within 1 min";

@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import OSLog
 import ServiceManagement
 
 /// Manages app registration as a login item
@@ -34,9 +35,7 @@ final class LoginItemManager: ObservableObject {
             }
             updateStatus()
         } catch {
-            NSLog("LoginItemManager: Failed to %@ login item: %@",
-                  enabled ? "register" : "unregister",
-                  error.localizedDescription)
+            Logger.app.error("LoginItemManager: Failed to \(enabled ? "register" : "unregister") login item: \(error.localizedDescription)")
             statusMessage = error.localizedDescription
         }
     }

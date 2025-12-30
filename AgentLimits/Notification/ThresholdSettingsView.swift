@@ -146,6 +146,7 @@ private struct WindowThresholdView: View {
         Binding(
             get: { settings.isEnabled },
             set: { newValue in
+                // Propagate enabled toggle to the settings store.
                 var updated = settings
                 updated.isEnabled = newValue
                 onUpdate(updated)
@@ -157,6 +158,7 @@ private struct WindowThresholdView: View {
         Binding(
             get: { settings.thresholdPercent },
             set: { newValue in
+                // Persist updated threshold percent.
                 var updated = settings
                 updated.thresholdPercent = newValue
                 onUpdate(updated)

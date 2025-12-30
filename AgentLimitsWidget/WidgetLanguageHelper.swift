@@ -27,11 +27,28 @@ enum WidgetLanguageHelper {
         return .main
     }
 
+    /// Returns the effective language code (ja / en)
+    static var currentLanguageCode: String {
+        effectiveLanguageCode
+    }
+
+    /// Returns the locale aligned with widget language
+    static var localizedLocale: Locale {
+        Locale(identifier: localeIdentifier(for: effectiveLanguageCode))
+    }
+
     /// Returns the effective language code
     private static var effectiveLanguageCode: String {
         let sharedDefaults = UserDefaults(suiteName: groupId)
         let rawValue = sharedDefaults?.string(forKey: languageKey)
         return LanguageCodeResolver.effectiveLanguageCode(for: rawValue)
+    }
+
+    private static func localeIdentifier(for languageCode: String) -> String {
+        if languageCode.hasPrefix(LocalizationConfig.japaneseLanguageCode) {
+            return "ja_JP"
+        }
+        return "en_US"
     }
 
     /// Returns localized string for the given key

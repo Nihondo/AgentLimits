@@ -2,8 +2,8 @@
 // Central state management for usage data fetching and auto-refresh.
 // Coordinates WebView login detection, API fetching, and widget updates.
 
-import Foundation
 import Combine
+import Foundation
 import WebKit
 import WidgetKit
 
@@ -11,6 +11,7 @@ import WidgetKit
 
 /// Main view model managing usage data state, auto-refresh, and provider switching.
 /// Coordinates between WebViews, fetchers, and the snapshot store.
+/// Uses ProviderStateManager for per-provider state management.
 @MainActor
 final class UsageViewModel: ObservableObject {
     @Published var snapshot: UsageSnapshot?
@@ -22,22 +23,14 @@ final class UsageViewModel: ObservableObject {
         }
     }
 
-    /// Internal state for each provider (cached separately for switching)
-    private struct ProviderState {
-        var snapshot: UsageSnapshot?
-        var statusMessage: String
-        var isFetching: Bool
-        var isAutoRefreshEnabled: Bool?
-    }
-
     private let store: UsageSnapshotStore
     private let codexFetcher: CodexUsageFetcher
     private let claudeFetcher: ClaudeUsageFetcher
     private let webViewPool: UsageWebViewPool
     private let displayModeStore: UsageDisplayModeStore
-    private var autoRefreshTask: Task<Void, Never>?
+    private let stateManager: ProviderStateManager
+    private var autoRefreshCoordinator: AutoRefreshCoordinator?
     private var displayMode: UsageDisplayMode = .used
-    private var providerStates: [UsageProvider: ProviderState] = [:]
     private var manualRefreshRequests: Set<UsageProvider> = []
     private var lastLoginRedirectAt: [UsageProvider: Date] = [:]
 
@@ -47,57 +40,64 @@ final class UsageViewModel: ObservableObject {
         codexFetcher: CodexUsageFetcher? = nil,
         claudeFetcher: ClaudeUsageFetcher? = nil,
         displayModeStore: UsageDisplayModeStore? = nil,
+        stateManager: ProviderStateManager? = nil,
         selectedProvider: UsageProvider = .chatgptCodex
     ) {
         let useStore = store ?? UsageSnapshotStore.shared
         let useDisplayModeStore = displayModeStore ?? UsageDisplayModeStore()
         let useCodexFetcher = codexFetcher ?? CodexUsageFetcher()
         let useClaudeFetcher = claudeFetcher ?? ClaudeUsageFetcher()
+        let useStateManager = stateManager ?? ProviderStateManager()
         let cachedMode = useDisplayModeStore.loadCachedDisplayMode() ?? .used
 
-        var useProviderStates: [UsageProvider: ProviderState] = [:]
-        for provider in UsageProvider.allCases {
-            if let cachedSnapshot = useStore.loadSnapshot(for: provider) {
-                useProviderStates[provider] = Self.makeProviderState(
-                    snapshot: cachedSnapshot.makeSnapshot(from: cachedMode, to: .used)
-                )
-            } else {
-                useProviderStates[provider] = Self.makeProviderState(snapshot: nil)
-            }
-        }
+        // Load cached snapshots into state manager
+        useStateManager.loadCachedSnapshots(from: useStore, displayMode: cachedMode)
 
-        let useSelectedState = useProviderStates[selectedProvider] ?? Self.makeProviderState(snapshot: nil)
+        let selectedState = useStateManager.getState(for: selectedProvider)
 
         self.webViewPool = webViewPool
         self.store = useStore
         self.codexFetcher = useCodexFetcher
         self.claudeFetcher = useClaudeFetcher
         self.displayModeStore = useDisplayModeStore
+        self.stateManager = useStateManager
         self.selectedProvider = selectedProvider
-        self.providerStates = useProviderStates
-        self.snapshot = useSelectedState.snapshot
-        self.statusMessage = useSelectedState.statusMessage
-        self.isFetching = useSelectedState.isFetching
+        self.snapshot = selectedState.snapshot
+        self.statusMessage = selectedState.statusMessage
+        self.isFetching = selectedState.isFetching
+
+        // Set up state change callback for menu bar updates
+        useStateManager.onStateChange = { [weak self] in
+            self?.objectWillChange.send()
+        }
+    }
+
+    // MARK: - Public Accessors
+
+    /// Returns all provider snapshots for menu bar status display
+    var snapshots: [UsageProvider: UsageSnapshot] {
+        stateManager.allSnapshots
     }
 
     // MARK: - Auto Refresh
 
-    /// Starts the auto-refresh timer for eligible providers
+    /// Starts the auto-refresh timer for eligible providers.
+    /// Uses AutoRefreshCoordinator to manage timer lifecycle.
     func startAutoRefresh() {
-        guard autoRefreshTask == nil else { return }
-        autoRefreshTask = Task {
-            await refreshAutoEligibleProviders()
-            while !Task.isCancelled {
-                try? await Task.sleep(for: UsageRefreshConfig.refreshIntervalDuration)
-                await refreshAutoEligibleProviders()
+        guard autoRefreshCoordinator == nil else { return }
+        autoRefreshCoordinator = AutoRefreshCoordinator(
+            intervalProvider: { UsageRefreshConfig.refreshIntervalDuration },
+            refreshHandler: { [weak self] in
+                await self?.refreshAutoEligibleProviders()
             }
-        }
+        )
+        autoRefreshCoordinator?.start()
     }
 
     /// Stops the auto-refresh timer
     func stopAutoRefresh() {
-        autoRefreshTask?.cancel()
-        autoRefreshTask = nil
+        autoRefreshCoordinator?.stop()
+        autoRefreshCoordinator = nil
     }
 
     /// Restarts the auto-refresh timer (useful when interval changes)
@@ -111,14 +111,17 @@ final class UsageViewModel: ObservableObject {
     /// Triggers an immediate refresh for the current provider
     func fetchNow() {
         let provider = selectedProvider
+        // Record manual refresh intent to allow fetch on page-ready callback.
         manualRefreshRequests.insert(provider)
         let store = webViewPool.getWebViewStore(for: provider)
         if isUsageURL(store.webView.url, provider: provider) && store.isPageReady {
+            // If already on the usage page, proceed directly to fetch.
             _ = consumeManualRefreshRequest(for: provider)
             Task {
                 await handleLoginAndFetch(for: provider)
             }
         } else {
+            // Otherwise reload to reach the usage page (login flow).
             store.reloadFromOrigin()
         }
     }
@@ -128,8 +131,9 @@ final class UsageViewModel: ObservableObject {
     /// Updates published properties when provider selection changes
     func updateSelectedProviderState() {
         let provider = selectedProvider
-        let state = getProviderState(for: provider)
+        let state = stateManager.getState(for: provider)
         Task { @MainActor in
+            // Prevent stale updates when selection changed mid-task.
             guard provider == self.selectedProvider else { return }
             snapshot = state.snapshot
             statusMessage = state.statusMessage
@@ -139,6 +143,7 @@ final class UsageViewModel: ObservableObject {
 
     /// Updates display mode and persists to all snapshots
     func updateDisplayMode(_ displayMode: UsageDisplayMode) {
+        // Apply new mode, persist it, and refresh UI state.
         self.displayMode = displayMode
         displayModeStore.applyDisplayMode(displayMode)
         updateSelectedProviderState()
@@ -149,11 +154,13 @@ final class UsageViewModel: ObservableObject {
     /// Called when WebView page finishes loading; triggers fetch if logged in
     func handlePageReadyChange(for provider: UsageProvider, isReady: Bool) {
         guard isReady else { return }
+        // Manual refresh has priority; otherwise honor auto-refresh eligibility.
         let isManualRefresh = consumeManualRefreshRequest(for: provider)
+        let state = stateManager.getState(for: provider)
         if !isManualRefresh {
-            guard providerStates[provider]?.isAutoRefreshEnabled != true else { return }
+            guard state.isAutoRefreshEnabled != true else { return }
         }
-        guard providerStates[provider]?.isFetching != true else { return }
+        guard !state.isFetching else { return }
         Task {
             await handleLoginAndFetch(for: provider)
         }
@@ -164,6 +171,7 @@ final class UsageViewModel: ObservableObject {
         guard provider == .claudeCode else { return }
         let store = webViewPool.getWebViewStore(for: provider)
         Task {
+            // Only redirect when a valid session is detected and cooldown allows it.
             let isLoggedIn = await checkLoginStatus(for: provider, using: store.webView)
             guard isLoggedIn else { return }
             guard !isUsageURL(store.webView.url, provider: provider) else { return }
@@ -173,63 +181,79 @@ final class UsageViewModel: ObservableObject {
     }
 
     private func refreshAutoEligibleProviders() async {
-        for provider in UsageProvider.allCases {
-            let isEnabled = providerStates[provider]?.isAutoRefreshEnabled
-            let shouldRefresh = isEnabled == true || (isEnabled == nil && provider == selectedProvider)
-            guard shouldRefresh else { continue }
+        // Refresh providers that are enabled or selected.
+        let eligibleProviders = stateManager.autoRefreshEligibleProviders(selectedProvider: selectedProvider)
+        for provider in eligibleProviders {
             await refreshSnapshot(for: provider)
         }
     }
 
     private func refreshSnapshot(for provider: UsageProvider) async {
-        if providerStates[provider]?.isFetching == true {
-            return
-        }
+        let currentState = stateManager.getState(for: provider)
+        guard !currentState.isFetching else { return }
+
         let webViewStore = webViewPool.getWebViewStore(for: provider)
         guard webViewStore.isPageReady else {
-            updateStatusMessage("status.loadingLogin".localized(), for: provider)
+            // Update status while waiting for login page to load.
+            stateManager.setStatusMessage("status.loadingLogin".localized(), for: provider)
             return
         }
 
-        setFetching(true, for: provider)
-        defer { setFetching(false, for: provider) }
+        // Track fetching state for both per-provider and selected provider UI.
+        stateManager.setFetching(true, for: provider)
+        if provider == selectedProvider {
+            isFetching = true
+        }
+        defer {
+            stateManager.setFetching(false, for: provider)
+            if provider == selectedProvider {
+                isFetching = false
+            }
+        }
 
         do {
-            let snapshot = try await fetchSnapshot(for: provider, using: webViewStore.webView)
-            let snapshotToSave = snapshot.makeSnapshot(from: .used, to: displayMode)
+            // Fetch latest snapshot from provider and persist with display-mode conversion.
+            let fetchedSnapshot = try await fetchSnapshot(for: provider, using: webViewStore.webView)
+            let snapshotToSave = fetchedSnapshot.makeSnapshot(from: .used, to: displayMode)
             try store.saveSnapshot(snapshotToSave)
             displayModeStore.saveCachedDisplayMode(displayMode)
-            var state = getProviderState(for: provider)
-            state.snapshot = snapshot
-            state.isAutoRefreshEnabled = true
-            providerStates[provider] = state
-            updateStatusMessage("status.updated".localized(), for: provider)
+            stateManager.updateAfterSuccessfulFetch(snapshot: fetchedSnapshot, for: provider)
+            stateManager.setStatusMessage("status.updated".localized(), for: provider)
             if provider == selectedProvider {
-                self.snapshot = snapshot
+                self.snapshot = fetchedSnapshot
+                statusMessage = "status.updated".localized()
             }
-            WidgetCenter.shared.reloadTimelines(ofKind: snapshot.provider.widgetKind)
+            // Notify widgets to refresh their timelines.
+            WidgetCenter.shared.reloadTimelines(ofKind: fetchedSnapshot.provider.widgetKind)
 
             // Check thresholds and send notifications if needed
-            await ThresholdNotificationManager.shared.checkThresholdsIfNeeded(for: snapshot)
+            await ThresholdNotificationManager.shared.checkThresholdsIfNeeded(for: fetchedSnapshot)
         } catch {
+            // Disable auto-refresh on auth-related errors to prevent repeated failures.
             if shouldDisableAutoRefresh(for: provider, error: error) {
-                var state = getProviderState(for: provider)
-                state.isAutoRefreshEnabled = false
-                providerStates[provider] = state
+                stateManager.setAutoRefreshEnabled(false, for: provider)
             }
-            updateStatusMessage(error.localizedDescription, for: provider)
+            stateManager.setStatusMessage(error.localizedDescription, for: provider)
+            if provider == selectedProvider {
+                statusMessage = error.localizedDescription
+            }
         }
     }
 
     private func handleLoginAndFetch(for provider: UsageProvider) async {
         let store = webViewPool.getWebViewStore(for: provider)
+        // Verify login status before attempting API fetch.
         let isLoggedIn = await checkLoginStatus(for: provider, using: store.webView)
         guard isLoggedIn else {
-            updateStatusMessage("status.loadingLogin".localized(), for: provider)
+            stateManager.setStatusMessage("status.loadingLogin".localized(), for: provider)
+            if provider == selectedProvider {
+                statusMessage = "status.loadingLogin".localized()
+            }
             return
         }
 
         if !isUsageURL(store.webView.url, provider: provider) {
+            // Navigate to the usage page when logged in but not on target URL.
             store.reloadFromOrigin()
             return
         }
@@ -238,6 +262,7 @@ final class UsageViewModel: ObservableObject {
     }
 
     private func checkLoginStatus(for provider: UsageProvider, using webView: WKWebView) async -> Bool {
+        // Delegate to provider-specific fetchers.
         switch provider {
         case .chatgptCodex:
             return await codexFetcher.hasValidSession(using: webView)
@@ -247,6 +272,7 @@ final class UsageViewModel: ObservableObject {
     }
 
     private func isUsageURL(_ url: URL?, provider: UsageProvider) -> Bool {
+        // Compare scheme/host/path to avoid false positives.
         guard let url else { return false }
         let usageURL = provider.usageURL
         return url.scheme == usageURL.scheme
@@ -255,10 +281,12 @@ final class UsageViewModel: ObservableObject {
     }
 
     private func consumeManualRefreshRequest(for provider: UsageProvider) -> Bool {
+        // Consume and clear manual refresh flag for the provider.
         manualRefreshRequests.remove(provider) != nil
     }
 
     private func fetchSnapshot(for provider: UsageProvider, using webView: WKWebView) async throws -> UsageSnapshot {
+        // Delegate fetch to provider-specific fetchers.
         switch provider {
         case .chatgptCodex:
             return try await codexFetcher.fetchUsageSnapshot(using: webView)
@@ -267,38 +295,8 @@ final class UsageViewModel: ObservableObject {
         }
     }
 
-    private func setFetching(_ isFetching: Bool, for provider: UsageProvider) {
-        var state = getProviderState(for: provider)
-        state.isFetching = isFetching
-        providerStates[provider] = state
-        if provider == selectedProvider {
-            self.isFetching = isFetching
-        }
-    }
-
-    private func updateStatusMessage(_ message: String, for provider: UsageProvider) {
-        var state = getProviderState(for: provider)
-        state.statusMessage = message
-        providerStates[provider] = state
-        if provider == selectedProvider {
-            statusMessage = message
-        }
-    }
-
-    private static func makeProviderState(snapshot: UsageSnapshot?) -> ProviderState {
-        ProviderState(
-            snapshot: snapshot,
-            statusMessage: "status.notFetched".localized(),
-            isFetching: false,
-            isAutoRefreshEnabled: nil
-        )
-    }
-
-    private func getProviderState(for provider: UsageProvider) -> ProviderState {
-        providerStates[provider] ?? Self.makeProviderState(snapshot: nil)
-    }
-
     private func shouldDisableAutoRefresh(for provider: UsageProvider, error: Error) -> Bool {
+        // Disable auto-refresh only for authentication/organization issues.
         switch provider {
         case .chatgptCodex:
             guard let error = error as? CodexUsageFetcherError else { return false }
@@ -322,6 +320,7 @@ final class UsageViewModel: ObservableObject {
     }
 
     private func isLoginRequiredMessage(_ message: String) -> Bool {
+        // Normalize and check for common auth-related error markers.
         let normalized = message.lowercased()
         return normalized.contains("missing access token")
             || normalized.contains("missing organization")
@@ -331,6 +330,7 @@ final class UsageViewModel: ObservableObject {
     }
 
     private func canRedirectLogin(for provider: UsageProvider) -> Bool {
+        // Throttle redirects to avoid excessive reloads.
         let now = Date()
         let cooldown: TimeInterval = 5
         if let lastRedirectAt = lastLoginRedirectAt[provider],

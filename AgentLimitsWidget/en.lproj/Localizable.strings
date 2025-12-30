@@ -6,6 +6,9 @@
 "widget.weeklyLimit" = "Weekly Limit";
 "widget.reset" = "Resets at";
 "widget.updated" = "Updated:";
+"error.appGroupUnavailable" = "App Group unavailable. Check Signing & Capabilities.";
+"error.readFailed" = "Failed to read data";
+"error.decodeFailed" = "Failed to decode data";
 
 /* Relative Time */
 "time.withinMinute" = "Within 1 min";

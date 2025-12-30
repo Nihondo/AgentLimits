@@ -148,6 +148,7 @@ struct WakeUpSettingsView: View {
     // MARK: - Helpers
 
     private func statusColor(for provider: UsageProvider) -> Color {
+        // Gray when disabled/no hours, green when installed, orange when pending install.
         guard let schedule = scheduler.schedules[provider],
               schedule.isEnabled,
               !schedule.enabledHours.isEmpty else {
@@ -159,8 +160,10 @@ struct WakeUpSettingsView: View {
     private func scheduleText(for schedule: WakeUpSchedule) -> String {
         let hours = schedule.enabledHours.sorted()
         if hours.count <= 3 {
+            // Show explicit hour list for small selections.
             return hours.map { "\($0):00" }.joined(separator: ", ")
         } else {
+            // Fall back to count summary for large selections.
             return "\(hours.count) " + "wakeUp.hoursSelected".localized()
         }
     }

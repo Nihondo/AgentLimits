@@ -6,23 +6,28 @@ import WidgetKit
 
 // MARK: - Timeline Provider
 
+/// Timeline provider that loads ccusage snapshots from App Group storage.
 struct TokenUsageTimelineProvider: TimelineProvider {
     let provider: TokenUsageProvider
 
     func placeholder(in context: Context) -> TokenUsageEntry {
+        // Use placeholder snapshot for gallery preview.
         TokenUsageEntry(date: Date(), snapshot: placeholderSnapshot, provider: provider)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (TokenUsageEntry) -> Void) {
         if context.isPreview {
+            // Preview mode uses placeholder data for fast rendering.
             completion(TokenUsageEntry(date: Date(), snapshot: placeholderSnapshot, provider: provider))
             return
         }
+        // Load latest snapshot from App Group storage.
         let snapshot = TokenUsageSnapshotStore.shared.loadSnapshot(for: provider)
         completion(TokenUsageEntry(date: Date(), snapshot: snapshot, provider: provider))
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<TokenUsageEntry>) -> Void) {
+        // Read snapshot and schedule the next refresh based on shared interval.
         let snapshot = TokenUsageSnapshotStore.shared.loadSnapshot(for: provider)
         let entry = TokenUsageEntry(date: Date(), snapshot: snapshot, provider: provider)
         let nextUpdate = Date().addingTimeInterval(TokenUsageRefreshConfig.refreshIntervalSeconds)
@@ -42,6 +47,7 @@ struct TokenUsageTimelineProvider: TimelineProvider {
 
 // MARK: - Timeline Entry
 
+/// Timeline entry containing the latest token usage snapshot.
 struct TokenUsageEntry: TimelineEntry {
     let date: Date
     let snapshot: TokenUsageSnapshot?
@@ -50,6 +56,7 @@ struct TokenUsageEntry: TimelineEntry {
 
 // MARK: - Widget Entry View
 
+/// Widget entry view for ccusage token usage.
 struct TokenUsageWidgetEntryView: View {
     var entry: TokenUsageEntry
     @Environment(\.widgetFamily) private var family
@@ -88,7 +95,7 @@ struct TokenUsageWidgetEntryView: View {
                     // Last updated
                     HStack(spacing: 2) {
                         Text("widget.updated".widgetLocalized())
-                        Text(relativeUpdatedText(snapshot.fetchedAt))
+                        Text(WidgetRelativeTimeFormatter.makeRelativeUpdatedText(since: snapshot.fetchedAt))
                     }
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -119,14 +126,14 @@ struct TokenUsageWidgetEntryView: View {
                     .font(.body)
                     .padding(.leading, 8)
                 Spacer()
-                Text(formatCost(period.costUSD))
+                Text(TokenUsageFormatter.formatCost(period.costUSD))
                     .font(.body)
                     .fontWeight(.semibold)
                     .monospacedDigit()
             }
             HStack {
                 Spacer()
-                Text(formatTokens(period.totalTokens))
+                Text(TokenUsageFormatter.formatTokens(period.totalTokens))
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .monospacedDigit()
@@ -136,33 +143,6 @@ struct TokenUsageWidgetEntryView: View {
 
     // MARK: - Formatting
 
-    private func formatCost(_ cost: Double) -> String {
-        String(format: "$ %.2f", cost)
-    }
-
-    private func formatTokens(_ tokens: Int) -> String {
-        let kTokens = Double(tokens) / 1000.0
-        if kTokens >= 1000 {
-            return String(format: "%.1fM Tokens", kTokens / 1000.0)
-        } else if kTokens >= 1 {
-            return String(format: "%.0fK Tokens", kTokens)
-        } else {
-            return "\(tokens) Tokens"
-        }
-    }
-
-    private func relativeUpdatedText(_ date: Date) -> String {
-        let seconds = max(0, Date().timeIntervalSince(date))
-        if seconds < 60 {
-            return "time.withinMinute".widgetLocalized()
-        }
-        let minutes = Int(seconds / 60)
-        if minutes < 60 {
-            return String(format: "time.minutesAgo".widgetLocalized(), minutes)
-        }
-        let hours = minutes / 60
-        return String(format: "time.hoursAgo".widgetLocalized(), hours)
-    }
 }
 
 // MARK: - Widget Definitions

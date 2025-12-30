@@ -24,17 +24,22 @@ struct ClaudeUsageResponse: Codable {
 }
 
 extension ClaudeUsageResponse {
+    /// Converts API response to a UsageSnapshot for persistence and display.
+    /// - Parameters:
+    ///   - fetchedAt: The timestamp when this data was fetched
+    ///   - parseResetDate: Function to parse ISO8601 date strings from the API
+    /// - Returns: A UsageSnapshot containing primary (5h) and secondary (7d) windows
     func toSnapshot(fetchedAt: Date, parseResetDate: (String) -> Date?) -> UsageSnapshot {
         let primary = makeWindow(
             kind: .primary,
             source: five_hour,
-            limitSeconds: 60 * 60 * 5,
+            limitSeconds: UsageLimitDuration.fiveHours,
             parseResetDate: parseResetDate
         )
         let secondary = makeWindow(
             kind: .secondary,
             source: seven_day,
-            limitSeconds: 60 * 60 * 24 * 7,
+            limitSeconds: UsageLimitDuration.sevenDays,
             parseResetDate: parseResetDate
         )
         return UsageSnapshot(
@@ -124,6 +129,7 @@ final class ClaudeUsageFetcher {
         return await withCheckedContinuation { continuation in
             cookieStore.getAllCookies { cookies in
                 let now = Date()
+                // Look for a valid Claude session cookie scoped to claude.ai.
                 let isValid = cookies.contains { cookie in
                     guard cookie.name == "sessionKey" else { return false }
                     guard cookie.domain.hasSuffix("claude.ai") else { return false }
@@ -138,6 +144,7 @@ final class ClaudeUsageFetcher {
     }
 
     private func mapScriptError(_ error: WebViewScriptRunnerError) -> ClaudeUsageFetcherError {
+        // Map script errors to user-facing domain errors.
         switch error {
         case .invalidResponse:
             return .invalidResponse
@@ -153,12 +160,15 @@ final class ClaudeUsageFetcher {
 
     /// Parses ISO8601 date string with various fractional second formats
     private func parseResetDate(_ value: String) -> Date? {
+        // Try full ISO8601 with fractional seconds first.
         if let date = Self.formatterWithFractionalSeconds.date(from: value) {
             return date
         }
+        // Fallback to ISO8601 without fractional seconds.
         if let date = Self.formatterWithoutFractionalSeconds.date(from: value) {
             return date
         }
+        // Normalize long fractional precision to milliseconds if needed.
         if let trimmed = trimFractionalSeconds(value),
            let date = Self.formatterWithFractionalSeconds.date(from: trimmed) {
             return date
@@ -176,6 +186,7 @@ final class ClaudeUsageFetcher {
         if fraction.count <= 3 {
             return value
         }
+        // Truncate to milliseconds precision.
         let trimmedFraction = fraction.prefix(3)
         return String(value[..<fractionStart]) + trimmedFraction + value[suffixStart...]
     }
@@ -246,36 +257,4 @@ final class ClaudeUsageFetcher {
     })();
     """
 
-    /// Script to check login status via organization cookie or API call
-    private static let loginCheckScript = """
-    return (async () => {
-      try {
-        function readCookieValue(name) {
-          const pattern = new RegExp("(?:^|; )" + name + "=([^;]*)");
-          const match = document.cookie.match(pattern);
-          return match ? decodeURIComponent(match[1]) : null;
-        }
-
-        const orgId = readCookieValue("lastActiveOrg");
-        if (orgId) {
-          return true;
-        }
-
-        const response = await fetch("/api/organizations", {
-          method: "GET",
-          credentials: "include"
-        });
-        if (!response.ok) {
-          return false;
-        }
-        const data = await response.json();
-        if (data && Array.isArray(data.organizations)) {
-          return data.organizations.length > 0;
-        }
-        return true;
-      } catch (error) {
-        return false;
-      }
-    })();
-    """
 }

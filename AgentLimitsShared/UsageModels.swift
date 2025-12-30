@@ -11,10 +11,21 @@ import Foundation
 enum AppGroupConfig {
     static let groupId = "group.com.dmng.agentlimit"
     static let appLanguageKey = "app_language"
-    static let snapshotKey = "UsageSnapshot"
     static let snapshotDirectory = "Library/Application Support/AgentLimit"
     static let usageRefreshIntervalMinutesKey = "usage_refresh_interval_minutes"
     static let tokenUsageRefreshIntervalMinutesKey = "token_usage_refresh_interval_minutes"
+}
+
+/// Shared UserDefaults keys used by app + widget
+enum SharedUserDefaultsKeys {
+    static let displayMode = "usage_display_mode"
+    static let cachedDisplayMode = "usage_display_mode_cached"
+}
+
+/// Raw display mode values persisted to shared UserDefaults.
+enum UsageDisplayModeRaw: String {
+    case used
+    case remaining
 }
 
 /// Localization configuration constants
@@ -23,91 +34,164 @@ enum LocalizationConfig {
     static let englishLanguageCode = "en"
 }
 
-/// Auto-refresh interval configuration
-enum UsageRefreshConfig {
-    static var refreshIntervalMinutes: Int {
-        UsageRefreshIntervalConfig.loadMinutes()
-    }
+// MARK: - Usage Status Levels
 
-    static var refreshIntervalSeconds: TimeInterval {
-        TimeInterval(refreshIntervalMinutes * 60)
-    }
+/// Usage status level derived from usage percentage.
+enum UsageStatusLevel {
+    case green
+    case orange
+    case red
+}
 
-    static var refreshIntervalDuration: Duration {
-        .seconds(refreshIntervalMinutes * 60)
+/// Resolves usage status level based on percent and display mode.
+enum UsageStatusLevelResolver {
+    /// Returns the status level for a percentage in the current display mode.
+    /// - Parameters:
+    ///   - percent: Percent value in the current display mode.
+    ///   - isRemainingMode: Whether the display mode is "remaining".
+    static func level(for percent: Double, isRemainingMode: Bool) -> UsageStatusLevel {
+        // Normalize input to a 0-100 range before threshold evaluation.
+        let clamped = max(0, min(100, percent))
+        // Remaining-mode thresholds invert the semantics (low remaining => warning).
+        if isRemainingMode {
+            if clamped <= 10 { return .red }
+            if clamped <= 30 { return .orange }
+            return .green
+        }
+        // Used-mode thresholds (high usage => warning).
+        if clamped >= 90 { return .red }
+        if clamped >= 70 { return .orange }
+        return .green
     }
 }
 
-/// Auto-refresh interval settings shared via App Group
+// MARK: - Usage Percent Formatting
+
+/// Formats usage percentage text for UI display.
+enum UsagePercentFormatter {
+    /// Returns a percent string for display (e.g. "75%").
+    /// - Parameters:
+    ///   - percent: Percent value already converted to the display mode.
+    ///   - placeholder: Placeholder used when percent is nil.
+    static func formatPercentText(_ percent: Double?, placeholder: String = "--%") -> String {
+        // Use placeholder when no value is available.
+        guard let percent else { return placeholder }
+        // Clamp to a valid range before formatting.
+        let clamped = max(0, min(100, percent))
+        return String(format: "%.0f%%", clamped)
+    }
+}
+
+// MARK: - Refresh Interval Configuration
+
+/// Auto-refresh interval settings shared via App Group.
+/// Provides common constants and utility methods for interval configuration.
 enum RefreshIntervalConfig {
+    /// Default refresh interval in minutes
     static let defaultMinutes = 1
+    /// Minimum allowed refresh interval in minutes
     static let minMinutes = 1
+    /// Maximum allowed refresh interval in minutes
     static let maxMinutes = 10
 
+    /// Array of all supported interval values for UI picker
     static var supportedMinutes: [Int] {
         Array(minMinutes...maxMinutes)
     }
 
+    /// Clamps the given minutes value to the valid range [minMinutes, maxMinutes]
+    /// - Parameter minutes: The raw minutes value to normalize
+    /// - Returns: The clamped value within valid bounds
     static func normalizedMinutes(_ minutes: Int) -> Int {
+        // Clamp to the supported range to avoid invalid settings.
         min(max(minutes, minMinutes), maxMinutes)
     }
 
+    /// Loads the refresh interval from UserDefaults for a given key.
+    /// - Parameters:
+    ///   - defaults: The UserDefaults instance to read from (defaults to App Group)
+    ///   - key: The UserDefaults key for the interval setting
+    /// - Returns: The stored interval, or defaultMinutes if not set
     static func loadMinutes(
         from defaults: UserDefaults? = UserDefaults(suiteName: AppGroupConfig.groupId),
         key: String
     ) -> Int {
+        // Fall back to defaults when shared defaults are unavailable.
         guard let defaults else { return defaultMinutes }
+        // Read and normalize the stored value.
         let stored = defaults.object(forKey: key) as? Int
         return normalizedMinutes(stored ?? defaultMinutes)
     }
-
-    static func saveMinutes(
-        _ minutes: Int,
-        to defaults: UserDefaults? = UserDefaults(suiteName: AppGroupConfig.groupId),
-        key: String
-    ) {
-        defaults?.set(normalizedMinutes(minutes), forKey: key)
-    }
 }
 
-/// Auto-refresh interval settings for usage limits
-enum UsageRefreshIntervalConfig {
-    static func loadMinutes(
-        from defaults: UserDefaults? = UserDefaults(suiteName: AppGroupConfig.groupId)
-    ) -> Int {
-        guard let defaults else { return RefreshIntervalConfig.defaultMinutes }
-        let stored = defaults.object(forKey: AppGroupConfig.usageRefreshIntervalMinutesKey) as? Int
-        return RefreshIntervalConfig.normalizedMinutes(stored ?? RefreshIntervalConfig.defaultMinutes)
-    }
-}
+/// Provides convenient access to refresh interval settings for a specific feature.
+/// Encapsulates the UserDefaults key and provides computed properties for different time units.
+struct RefreshIntervalAccessor {
+    /// The UserDefaults key for this feature's refresh interval
+    private let key: String
 
-/// Auto-refresh interval settings for ccusage token usage
-enum TokenUsageRefreshConfig {
-    static var refreshIntervalMinutes: Int {
-        loadMinutes()
+    /// Creates an accessor for the specified UserDefaults key
+    /// - Parameter key: The key to read the interval from
+    init(key: String) {
+        self.key = key
     }
 
-    static var refreshIntervalSeconds: TimeInterval {
+    /// The refresh interval in minutes
+    var refreshIntervalMinutes: Int {
+        RefreshIntervalConfig.loadMinutes(
+            from: UserDefaults(suiteName: AppGroupConfig.groupId),
+            key: key
+        )
+    }
+
+    /// The refresh interval in seconds (for TimeInterval-based APIs)
+    var refreshIntervalSeconds: TimeInterval {
         TimeInterval(refreshIntervalMinutes * 60)
     }
 
-    static var refreshIntervalDuration: Duration {
+    /// The refresh interval as Duration (for Swift Concurrency sleep)
+    var refreshIntervalDuration: Duration {
         .seconds(refreshIntervalMinutes * 60)
     }
+}
 
-    static func loadMinutes(
-        from defaults: UserDefaults? = UserDefaults(suiteName: AppGroupConfig.groupId)
-    ) -> Int {
-        guard let defaults else { return RefreshIntervalConfig.defaultMinutes }
-        let stored = defaults.object(forKey: AppGroupConfig.tokenUsageRefreshIntervalMinutesKey) as? Int
-        return RefreshIntervalConfig.normalizedMinutes(stored ?? RefreshIntervalConfig.defaultMinutes)
-    }
+/// Auto-refresh interval configuration for usage limits (Codex/Claude).
+/// Provides static accessors for the usage limits refresh interval.
+enum UsageRefreshConfig {
+    /// Shared accessor instance for usage limits interval
+    private static let accessor = RefreshIntervalAccessor(
+        key: AppGroupConfig.usageRefreshIntervalMinutesKey
+    )
+
+    /// The refresh interval in minutes
+    static var refreshIntervalMinutes: Int { accessor.refreshIntervalMinutes }
+    /// The refresh interval in seconds
+    static var refreshIntervalSeconds: TimeInterval { accessor.refreshIntervalSeconds }
+    /// The refresh interval as Duration
+    static var refreshIntervalDuration: Duration { accessor.refreshIntervalDuration }
+}
+
+/// Auto-refresh interval configuration for ccusage token usage.
+/// Provides static accessors for the token usage refresh interval.
+enum TokenUsageRefreshConfig {
+    /// Shared accessor instance for token usage interval
+    private static let accessor = RefreshIntervalAccessor(
+        key: AppGroupConfig.tokenUsageRefreshIntervalMinutesKey
+    )
+
+    /// The refresh interval in minutes
+    static var refreshIntervalMinutes: Int { accessor.refreshIntervalMinutes }
+    /// The refresh interval in seconds
+    static var refreshIntervalSeconds: TimeInterval { accessor.refreshIntervalSeconds }
+    /// The refresh interval as Duration
+    static var refreshIntervalDuration: Duration { accessor.refreshIntervalDuration }
 }
 
 /// Resolves language codes for localization
 enum LanguageCodeResolver {
     /// Returns the system's preferred language code (ja or en)
     static func systemLanguageCode(preferredLanguages: [String] = Locale.preferredLanguages) -> String {
+        // Pick the first preferred language and normalize to supported codes.
         let preferredLanguage = preferredLanguages.first ?? LocalizationConfig.englishLanguageCode
         if preferredLanguage.hasPrefix(LocalizationConfig.japaneseLanguageCode) {
             return LocalizationConfig.japaneseLanguageCode
@@ -117,6 +201,7 @@ enum LanguageCodeResolver {
 
     /// Returns the effective language code for a given raw value, falling back to system language
     static func effectiveLanguageCode(for rawValue: String?) -> String {
+        // Respect explicit selection when available; otherwise use system setting.
         switch rawValue {
         case LocalizationConfig.japaneseLanguageCode:
             return LocalizationConfig.japaneseLanguageCode
@@ -145,6 +230,7 @@ enum DateCodec {
     /// Configures a JSONEncoder with ISO8601 date formatting
     static func configureEncoder(_ encoder: JSONEncoder) {
         encoder.dateEncodingStrategy = .custom { date, encoder in
+            // Encode using fractional seconds for higher precision.
             var container = encoder.singleValueContainer()
             try container.encode(formatterWithFractionalSeconds.string(from: date))
         }
@@ -153,6 +239,7 @@ enum DateCodec {
     /// Configures a JSONDecoder with ISO8601 date parsing (with/without fractional seconds)
     static func configureDecoder(_ decoder: JSONDecoder) {
         decoder.dateDecodingStrategy = .custom { decoder in
+            // Attempt parsing with fractional seconds, then without as fallback.
             let container = try decoder.singleValueContainer()
             let value = try container.decode(String.self)
             if let date = formatterWithFractionalSeconds.date(from: value) {
@@ -166,14 +253,36 @@ enum DateCodec {
     }
 }
 
+// MARK: - Common AI Provider Protocol
+
+/// Common protocol for AI code assistant provider types.
+/// Provides shared properties for display and identification.
+/// Both `UsageProvider` and `TokenUsageProvider` conform to this protocol.
+protocol AIProviderProtocol: Hashable, CaseIterable, Identifiable where ID == String {
+    /// Human-readable name for display in UI
+    var displayName: String { get }
+}
+
 // MARK: - Data Models
 
-/// Supported AI code assistant providers
-enum UsageProvider: String, Codable, CaseIterable, Identifiable {
+/// Supported AI code assistant providers for Usage Limits tracking.
+/// Uses `chatgptCodex` and `claudeCode` as rawValue for JSON compatibility.
+enum UsageProvider: String, Codable, CaseIterable, Identifiable, SnapshotFileNaming, AIProviderProtocol {
     case chatgptCodex
     case claudeCode
 
     var id: String { rawValue }
+
+    // MARK: - Static URL Constants
+    // Pre-validated URL constants to avoid force unwrapping at runtime.
+    // These are defined as static properties to ensure they are only created once.
+
+    /// Codex usage settings page URL
+    private static let codexUsageURL = URL(string: "https://chatgpt.com/codex/settings/usage")
+    /// Claude usage settings page URL
+    private static let claudeUsageURL = URL(string: "https://claude.ai/settings/usage")
+
+    // MARK: - Instance Properties
 
     /// Human-readable name for display in UI
     var displayName: String {
@@ -185,13 +294,20 @@ enum UsageProvider: String, Codable, CaseIterable, Identifiable {
         }
     }
 
-    /// URL for the usage settings page of each provider
+    /// URL for the usage settings page of each provider.
+    /// Returns a pre-validated static URL constant.
     var usageURL: URL {
         switch self {
         case .chatgptCodex:
-            return URL(string: "https://chatgpt.com/codex/settings/usage")!
+            guard let url = Self.codexUsageURL else {
+                preconditionFailure("Invalid static URL: codexUsageURL")
+            }
+            return url
         case .claudeCode:
-            return URL(string: "https://claude.ai/settings/usage")!
+            guard let url = Self.claudeUsageURL else {
+                preconditionFailure("Invalid static URL: claudeUsageURL")
+            }
+            return url
         }
     }
 
@@ -225,9 +341,26 @@ enum UsageProvider: String, Codable, CaseIterable, Identifiable {
         }
     }
 
-    /// Deep link URL for widget tap action
+    /// Deep link URL for widget tap action.
+    /// Constructs a URL with the provider's rawValue as a query parameter.
     var widgetDeepLinkURL: URL {
-        URL(string: "agentlimits://open-usage?provider=\(rawValue)")!
+        guard let url = URL(string: "agentlimits://open-usage?provider=\(rawValue)") else {
+            preconditionFailure("Invalid deep link URL for provider: \(rawValue)")
+        }
+        return url
+    }
+
+    // MARK: - Provider Conversion
+
+    /// Converts this UsageProvider to its corresponding TokenUsageProvider.
+    /// Useful when working with ccusage CLI features for the same AI provider.
+    var tokenUsageProvider: TokenUsageProvider {
+        switch self {
+        case .chatgptCodex:
+            return .codex
+        case .claudeCode:
+            return .claude
+        }
     }
 }
 
@@ -237,6 +370,15 @@ enum UsageWindowKind: String, Codable {
     case primary
     /// Long-term usage window (7 days)
     case secondary
+}
+
+/// Standard usage limit durations in seconds.
+/// These values represent the time windows used by AI providers for rate limiting.
+enum UsageLimitDuration {
+    /// 5-hour window duration in seconds (5 * 60 * 60 = 18,000)
+    static let fiveHours: TimeInterval = 5 * 60 * 60
+    /// 7-day window duration in seconds (7 * 24 * 60 * 60 = 604,800)
+    static let sevenDays: TimeInterval = 7 * 24 * 60 * 60
 }
 
 /// Represents a single usage limit window with percentage and reset time
@@ -251,7 +393,7 @@ struct UsageWindow: Codable {
 }
 
 /// A snapshot of usage data for a provider at a specific point in time
-struct UsageSnapshot: Codable {
+struct UsageSnapshot: Codable, SnapshotData {
     let provider: UsageProvider
     /// When this snapshot was fetched
     let fetchedAt: Date
@@ -261,23 +403,99 @@ struct UsageSnapshot: Codable {
     let secondaryWindow: UsageWindow?
 }
 
-// MARK: - Storage
+// MARK: - Storage Protocols
+
+/// Protocol for types that can provide a snapshot filename.
+/// Implemented by provider enums (UsageProvider, TokenUsageProvider) to determine storage paths.
+protocol SnapshotFileNaming {
+    /// The filename used for storing snapshots of this provider
+    var snapshotFileName: String { get }
+}
+
+/// Protocol for snapshot data types that have an associated provider.
+/// Implemented by snapshot structs (UsageSnapshot, TokenUsageSnapshot).
+protocol SnapshotData: Codable {
+    /// The provider type for this snapshot
+    associatedtype Provider: SnapshotFileNaming
+    /// The provider this snapshot belongs to
+    var provider: Provider { get }
+}
+
+// MARK: - Storage Errors
 
 /// Errors that can occur when accessing the snapshot store
 enum UsageSnapshotStoreError: Error {
     /// App Group container is not accessible
     case appGroupUnavailable
+    /// Failed to read snapshot file
+    case readFailed(underlying: Error)
+    /// Failed to decode snapshot data
+    case decodeFailed(underlying: Error)
 }
 
-/// Persists and retrieves usage snapshots via App Group shared container.
-/// Used by both the main app (for writing) and widgets (for reading).
-final class UsageSnapshotStore {
-    static let shared = UsageSnapshotStore()
+/// Resolves localized error messages for usage snapshot store errors.
+enum UsageSnapshotStoreErrorMessageResolver {
+    /// Returns a localized message for the given error.
+    /// - Parameters:
+    ///   - error: The error to describe.
+    ///   - localize: Function that resolves a localization key.
+    ///   - includeUnderlying: Whether to include underlying error details.
+    static func resolveMessage(
+        for error: UsageSnapshotStoreError,
+        localize: (String) -> String,
+        includeUnderlying: Bool
+    ) -> String {
+        // Choose the base localized message and optionally append underlying error details.
+        switch error {
+        case .appGroupUnavailable:
+            return localize("error.appGroupUnavailable")
+        case .readFailed(let underlying):
+            return resolveMessageWithUnderlying(
+                baseKey: "error.readFailed",
+                localize: localize,
+                underlying: underlying,
+                includeUnderlying: includeUnderlying
+            )
+        case .decodeFailed(let underlying):
+            return resolveMessageWithUnderlying(
+                baseKey: "error.decodeFailed",
+                localize: localize,
+                underlying: underlying,
+                includeUnderlying: includeUnderlying
+            )
+        }
+    }
+
+    private static func resolveMessageWithUnderlying(
+        baseKey: String,
+        localize: (String) -> String,
+        underlying: Error,
+        includeUnderlying: Bool
+    ) -> String {
+        // Attach underlying description only when requested.
+        let baseMessage = localize(baseKey)
+        guard includeUnderlying else { return baseMessage }
+        return baseMessage + " (\(underlying.localizedDescription))"
+    }
+}
+
+// MARK: - Generic Snapshot Store
+
+/// Generic snapshot store for persisting data via App Group shared container.
+/// Provides common load/save functionality for any snapshot type.
+/// Used as the base implementation for UsageSnapshotStore and TokenUsageSnapshotStore.
+class AppGroupSnapshotStore<Provider: SnapshotFileNaming, Snapshot: SnapshotData>
+    where Snapshot.Provider == Provider {
 
     private let fileManager: FileManager
     private let encoder: JSONEncoder
     private let decoder: JSONDecoder
 
+    /// Creates a new snapshot store with the specified configuration.
+    /// - Parameters:
+    ///   - fileManager: File manager for disk operations (default: .default)
+    ///   - encoder: JSON encoder for serialization (default: new encoder with date configuration)
+    ///   - decoder: JSON decoder for deserialization (default: new decoder with date configuration)
     init(
         fileManager: FileManager = .default,
         encoder: JSONEncoder = JSONEncoder(),
@@ -286,6 +504,7 @@ final class UsageSnapshotStore {
         self.fileManager = fileManager
         self.encoder = encoder
         self.decoder = decoder
+        // Use consistent ISO8601 encoding/decoding across all snapshots.
         DateCodec.configureEncoder(self.encoder)
         DateCodec.configureDecoder(self.decoder)
     }
@@ -295,40 +514,84 @@ final class UsageSnapshotStore {
         fileManager.containerURL(forSecurityApplicationGroupIdentifier: AppGroupConfig.groupId) != nil
     }
 
-    /// Loads a snapshot for the specified provider from disk
-    func loadSnapshot(for provider: UsageProvider) -> UsageSnapshot? {
+    /// Loads a snapshot for the specified provider from disk.
+    /// Returns nil if loading fails for any reason.
+    /// - Parameter provider: The provider to load snapshot for
+    /// - Returns: The loaded snapshot, or nil if not found or failed to load
+    func loadSnapshot(for provider: Provider) -> Snapshot? {
+        // Ignore errors for a non-throwing convenience path.
+        try? tryLoadSnapshot(for: provider)
+    }
+
+    /// Loads a snapshot for the specified provider from disk with detailed error information.
+    /// Use this method when you need to handle specific error cases.
+    /// - Parameter provider: The provider to load snapshot for
+    /// - Returns: The loaded snapshot
+    /// - Throws: `UsageSnapshotStoreError` if loading fails
+    func tryLoadSnapshot(for provider: Provider) throws -> Snapshot {
+        // Resolve the storage path in the App Group container.
         guard let url = snapshotFileURL(for: provider) else {
-            return nil
+            throw UsageSnapshotStoreError.appGroupUnavailable
         }
-        return try? withSecurityScopedAccess(url) {
-            let data = try Data(contentsOf: url)
-            return try decoder.decode(UsageSnapshot.self, from: data)
+        // Read and decode the snapshot from disk.
+        return try withSecurityScopedAccess(url) {
+            let data: Data
+            do {
+                data = try Data(contentsOf: url)
+            } catch {
+                throw UsageSnapshotStoreError.readFailed(underlying: error)
+            }
+            do {
+                return try decoder.decode(Snapshot.self, from: data)
+            } catch {
+                throw UsageSnapshotStoreError.decodeFailed(underlying: error)
+            }
         }
     }
 
     /// Saves a snapshot to disk for later retrieval by widgets
-    func saveSnapshot(_ snapshot: UsageSnapshot) throws {
+    /// - Parameter snapshot: The snapshot to save
+    /// - Throws: `UsageSnapshotStoreError` if saving fails
+    func saveSnapshot(_ snapshot: Snapshot) throws {
+        // Resolve the storage path and ensure the directory exists.
         guard let url = snapshotFileURL(for: snapshot.provider, createDirectory: true) else {
             throw UsageSnapshotStoreError.appGroupUnavailable
         }
+        // Encode then persist atomically to avoid partial writes.
         let data = try encoder.encode(snapshot)
         try withSecurityScopedAccess(url) {
             try data.write(to: url, options: .atomic)
         }
     }
 
-    private func snapshotFileURL(for provider: UsageProvider, createDirectory: Bool = false) -> URL? {
-        guard let containerURL = fileManager.containerURL(forSecurityApplicationGroupIdentifier: AppGroupConfig.groupId) else {
-            return nil
-        }
-        let directoryURL = containerURL.appendingPathComponent(AppGroupConfig.snapshotDirectory, isDirectory: true)
+    /// Returns the file URL for the snapshot of the given provider.
+    /// - Parameters:
+    ///   - provider: The provider whose snapshot URL to return
+    ///   - createDirectory: Whether to create the directory if it doesn't exist
+    /// - Returns: The file URL, or nil if App Group is unavailable
+    private func snapshotFileURL(for provider: Provider, createDirectory: Bool = false) -> URL? {
+        // Locate the App Group container directory.
+        guard let containerURL = fileManager.containerURL(
+            forSecurityApplicationGroupIdentifier: AppGroupConfig.groupId
+        ) else { return nil }
+        let directoryURL = containerURL.appendingPathComponent(
+            AppGroupConfig.snapshotDirectory, isDirectory: true
+        )
+        // Create the snapshots directory on demand for write operations.
         if createDirectory {
             try? fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true)
         }
         return directoryURL.appendingPathComponent(provider.snapshotFileName)
     }
 
+    /// Executes an action with security-scoped resource access.
+    /// Required for sandboxed apps accessing App Group containers.
+    /// - Parameters:
+    ///   - url: The URL to access
+    ///   - action: The action to perform with access
+    /// - Returns: The result of the action
     private func withSecurityScopedAccess<T>(_ url: URL, _ action: () throws -> T) rethrows -> T {
+        // Temporarily access security-scoped resources for sandboxed App Group access.
         let didStart = url.startAccessingSecurityScopedResource()
         defer {
             if didStart {
@@ -337,4 +600,12 @@ final class UsageSnapshotStore {
         }
         return try action()
     }
+}
+
+/// Persists and retrieves usage snapshots via App Group shared container.
+/// Used by both the main app (for writing) and widgets (for reading).
+/// Inherits common functionality from AppGroupSnapshotStore.
+final class UsageSnapshotStore: AppGroupSnapshotStore<UsageProvider, UsageSnapshot> {
+    /// Shared singleton instance for app-wide use
+    static let shared = UsageSnapshotStore()
 }

@@ -34,6 +34,7 @@
 "content.notFetched" = "未取得です。下部でログインしてください。";
 "content.reset" = "リセット:";
 "content.popupClose" = "閉じる";
+"settings.showInMenuBar" = "メニューバーに表示";
 
 /* Display Mode */
 "displayMode.used" = "使用量";
@@ -50,6 +51,8 @@
 "error.loginNotLoaded" = "ログイン画面の読み込みが完了していません。";
 "error.missingOrg" = "組織IDを取得できませんでした。利用状況ページを開き直してください。";
 "error.appGroupUnavailable" = "App Group が利用できません。Signing & Capabilities を確認してください。";
+"error.readFailed" = "データの読み込みに失敗しました";
+"error.decodeFailed" = "データの解析に失敗しました";
 
 /* Relative Time */
 "time.withinMinute" = "1分以内";

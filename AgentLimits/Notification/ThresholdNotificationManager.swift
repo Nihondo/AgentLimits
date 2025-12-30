@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import OSLog
 import UserNotifications
 
 // MARK: - Notification Identifiers
@@ -60,7 +61,7 @@ final class ThresholdNotificationManager: ObservableObject {
             isNotificationAuthorized = granted
             return granted
         } catch {
-            NSLog("ThresholdNotificationManager: Authorization request failed: %@", error.localizedDescription)
+            Logger.notification.error("ThresholdNotificationManager: Authorization request failed: \(error.localizedDescription)")
             isNotificationAuthorized = false
             return false
         }
@@ -141,17 +142,13 @@ final class ThresholdNotificationManager: ObservableObject {
             let lastNotifiedSeconds = Int(lastNotified.timeIntervalSince1970)
             let resetAtSeconds = Int(resetAt.timeIntervalSince1970)
             let diff = abs(lastNotifiedSeconds - resetAtSeconds)
-            NSLog("ThresholdNotificationManager: %@ %@ lastNotified=%d resetAt=%d diff=%d",
-                  provider.displayName, window.kind.rawValue, lastNotifiedSeconds, resetAtSeconds, diff)
+            Logger.notification.debug("ThresholdNotificationManager: \(provider.displayName) \(window.kind.rawValue) lastNotified=\(lastNotifiedSeconds) resetAt=\(resetAtSeconds) diff=\(diff)")
             if diff <= 10 {
-                NSLog("ThresholdNotificationManager: Skipping duplicate notification (within 10s tolerance)")
+                Logger.notification.debug("ThresholdNotificationManager: Skipping duplicate notification (within 10s tolerance)")
                 return
             }
         } else {
-            NSLog("ThresholdNotificationManager: %@ %@ lastNotified=%@ resetAt=%@",
-                  provider.displayName, window.kind.rawValue,
-                  windowSettings.lastNotifiedResetAt?.description ?? "nil",
-                  window.resetAt?.description ?? "nil")
+            Logger.notification.debug("ThresholdNotificationManager: \(provider.displayName) \(window.kind.rawValue) lastNotified=\(windowSettings.lastNotifiedResetAt?.description ?? "nil") resetAt=\(window.resetAt?.description ?? "nil")")
         }
 
         // Send notification
@@ -204,17 +201,9 @@ final class ThresholdNotificationManager: ObservableObject {
 
         do {
             try await notificationCenter.add(request)
-            NSLog(
-                "ThresholdNotificationManager: Sent notification for %@ %@ at %d%%",
-                provider.displayName,
-                windowKind.rawValue,
-                usedPercent
-            )
+            Logger.notification.info("ThresholdNotificationManager: Sent notification for \(provider.displayName) \(windowKind.rawValue) at \(usedPercent)%")
         } catch {
-            NSLog(
-                "ThresholdNotificationManager: Failed to send notification: %@",
-                error.localizedDescription
-            )
+            Logger.notification.error("ThresholdNotificationManager: Failed to send notification: \(error.localizedDescription)")
         }
     }
 

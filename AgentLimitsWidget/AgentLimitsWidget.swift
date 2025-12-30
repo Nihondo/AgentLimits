@@ -11,21 +11,25 @@ struct UsageTimelineProvider: TimelineProvider {
 
     /// Lightweight placeholder used in widget gallery
     func placeholder(in context: Context) -> UsageEntry {
+        // Use placeholder snapshot to render gallery preview.
         UsageEntry(date: Date(), snapshot: placeholderSnapshot, provider: provider)
     }
 
     /// Provides a current snapshot for widget previews or the widget itself
     func getSnapshot(in context: Context, completion: @escaping (UsageEntry) -> Void) {
         if context.isPreview {
+            // Preview mode uses placeholder data for fast rendering.
             completion(UsageEntry(date: Date(), snapshot: placeholderSnapshot, provider: provider))
             return
         }
+        // Load latest snapshot from App Group storage.
         let snapshot = UsageSnapshotStore.shared.loadSnapshot(for: provider)
         completion(UsageEntry(date: Date(), snapshot: snapshot, provider: provider))
     }
 
     /// Builds a timeline refreshing every minute, matching app auto-refresh
     func getTimeline(in context: Context, completion: @escaping (Timeline<UsageEntry>) -> Void) {
+        // Read snapshot and schedule the next refresh based on shared interval.
         let snapshot = UsageSnapshotStore.shared.loadSnapshot(for: provider)
         let entry = UsageEntry(date: Date(), snapshot: snapshot, provider: provider)
         let nextUpdate = Date().addingTimeInterval(UsageRefreshConfig.refreshIntervalSeconds)
@@ -138,7 +142,7 @@ struct AgentLimitsWidgetEntryView: View {
                 }
                 HStack(spacing: 6) {
                     Text("widget.updated".widgetLocalized())
-                    Text(relativeUpdatedText(snapshot.fetchedAt))
+                    Text(WidgetRelativeTimeFormatter.makeRelativeUpdatedText(since: snapshot.fetchedAt))
                 }
                 .font(.caption2)
                 .foregroundStyle(.secondary)
@@ -156,22 +160,6 @@ struct AgentLimitsWidgetEntryView: View {
         .widgetURL(entry.provider.widgetDeepLinkURL)
     }
 
-    private func relativeUpdatedText(_ date: Date) -> String {
-        let seconds = max(0, Date().timeIntervalSince(date))
-        if seconds < 60 {
-            return "time.withinMinute".widgetLocalized()
-        }
-        let minutes = Int(seconds / 60)
-        if minutes < 60 {
-            return "time.minutesAgo".widgetLocalized(minutes)
-        }
-        let hours = minutes / 60
-        if hours < 24 {
-            return "time.hoursAgo".widgetLocalized(hours)
-        }
-        let days = hours / 24
-        return "time.daysAgo".widgetLocalized(days)
-    }
 }
 
 private func usageConfiguration(for provider: UsageProvider) -> some WidgetConfiguration {
@@ -234,13 +222,17 @@ private struct UsageDonutColumnView: View {
                 .font(.title3)
                 .fontWeight(.bold)
                 .monospacedDigit()
+                .foregroundColor(statusColor)
         }
         .frame(height: columnHeight, alignment: .center)
     }
 
     private var percentText: String {
-        guard let window else { return "--%" }
-        return String(format: "%.0f%%", window.usedPercent)
+        return UsagePercentFormatter.formatPercentText(window?.usedPercent)
+    }
+
+    private var statusColor: Color {
+        WidgetUsageColorResolver.statusColor(for: window)
     }
 }
 
@@ -269,7 +261,7 @@ private struct UsageDonutView: View {
         }
         .frame(width: size, height: size)
         .accessibilityLabel(centerLabel)
-        .accessibilityValue(String(format: "%.0f%%", usedPercent ?? 0))
+        .accessibilityValue(UsagePercentFormatter.formatPercentText(usedPercent, placeholder: "0%"))
     }
 }
 
@@ -355,23 +347,22 @@ private struct UsageDetailSectionView: View {
 }
 
 private enum DateFormatters {
-    static let timeOnly: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ja_JP")
-        formatter.calendar = Calendar(identifier: .gregorian)
-        formatter.timeZone = .current
-        formatter.dateFormat = "HH:mm"
-        return formatter
-    }()
+    static var timeOnly: DateFormatter {
+        makeFormatter(dateFormat: "HH:mm")
+    }
 
-    static let dateTime: DateFormatter = {
+    static var dateTime: DateFormatter {
+        makeFormatter(dateFormat: "yyyy/MM/dd HH:mm")
+    }
+
+    private static func makeFormatter(dateFormat: String) -> DateFormatter {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ja_JP")
+        formatter.locale = WidgetLanguageHelper.localizedLocale
         formatter.calendar = Calendar(identifier: .gregorian)
         formatter.timeZone = .current
-        formatter.dateFormat = "yyyy/MM/dd HH:mm"
+        formatter.dateFormat = dateFormat
         return formatter
-    }()
+    }
 }
 
 #Preview(as: .systemSmall) {
@@ -379,3 +370,37 @@ private enum DateFormatters {
 } timeline: {
     UsageEntry(date: Date(), snapshot: nil, provider: .chatgptCodex)
 }
+
+private enum WidgetUsageColorResolver {
+    static func statusColor(for window: UsageWindow?) -> Color {
+        guard let window else { return .secondary }
+        let level = UsageStatusLevelResolver.level(
+            for: window.usedPercent,
+            isRemainingMode: WidgetDisplayModeResolver.isRemainingMode
+        )
+        switch level {
+        case .green:
+            return .green
+        case .orange:
+            return .orange
+        case .red:
+            return .red
+        }
+    }
+}
+
+private enum WidgetDisplayModeResolver {
+    static var isRemainingMode: Bool {
+        // Compare cached display mode to determine remaining/used behavior.
+        loadRawValue() == UsageDisplayModeRaw.remaining.rawValue
+    }
+
+    private static func loadRawValue() -> String {
+        // Read cached mode from App Group defaults for widget rendering.
+        let defaults = UserDefaults(suiteName: AppGroupConfig.groupId)
+        return defaults?.string(forKey: SharedUserDefaultsKeys.cachedDisplayMode)
+            ?? UsageDisplayModeRaw.used.rawValue
+    }
+}
+
+// UsageDisplayModeRaw is shared in AgentLimitsShared.

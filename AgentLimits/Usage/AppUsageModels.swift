@@ -7,8 +7,10 @@ import Foundation
 
 /// Keys used for persisting small app preferences in UserDefaults
 enum UserDefaultsKeys {
-    static let displayMode = "usage_display_mode"
-    static let cachedDisplayMode = "usage_display_mode_cached"
+    static let displayMode = SharedUserDefaultsKeys.displayMode
+    static let cachedDisplayMode = SharedUserDefaultsKeys.cachedDisplayMode
+    static let menuBarStatusCodexEnabled = "menu_bar_status_codex_enabled"
+    static let menuBarStatusClaudeEnabled = "menu_bar_status_claude_enabled"
 }
 
 /// Display mode for usage percent: used vs remaining
@@ -17,16 +19,6 @@ enum UsageDisplayMode: String, Codable, CaseIterable, Identifiable {
     case remaining
 
     var id: String { rawValue }
-
-    /// Short display name (Japanese for in-app picker)
-    var displayName: String {
-        switch self {
-        case .used:
-            return "使用"
-        case .remaining:
-            return "残り"
-        }
-    }
 
     /// Localized display name resolved via `Localizable.strings`
     var localizedDisplayName: String {
@@ -91,11 +83,13 @@ extension UsageSnapshot {
 }
 
 extension UsageSnapshotStoreError: LocalizedError {
-    /// User-friendly localized description for snapshot store errors
+    /// User-friendly localized description for snapshot store errors.
+    /// Provides localized error messages for app display.
     var errorDescription: String? {
-        switch self {
-        case .appGroupUnavailable:
-            return "error.appGroupUnavailable".localized()
-        }
+        UsageSnapshotStoreErrorMessageResolver.resolveMessage(
+            for: self,
+            localize: { $0.localized() },
+            includeUnderlying: true
+        )
     }
 }

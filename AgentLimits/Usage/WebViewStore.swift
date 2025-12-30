@@ -52,12 +52,14 @@ final class WebViewStore: ObservableObject {
     /// Loads the usage URL if not already loaded
     func loadIfNeeded() {
         if webView.url == nil {
+            // Initial navigation to provider usage page.
             webView.load(URLRequest(url: usageURL))
         }
     }
 
     /// Reloads the usage URL, ignoring cache
     func reloadFromOrigin() {
+        // Reset readiness and force a fresh load.
         isPageReady = false
         let request = URLRequest(
             url: usageURL,
@@ -69,6 +71,7 @@ final class WebViewStore: ObservableObject {
 
     /// Closes any open popup WebView
     func closePopupWebView() {
+        // Stop any popup loading and release the reference.
         popupWebView?.stopLoading()
         popupWebView = nil
     }
@@ -82,6 +85,7 @@ final class WebViewStore: ObservableObject {
 
         func cookiesDidChange(in cookieStore: WKHTTPCookieStore) {
             Task { @MainActor in
+                // Bump token to signal cookie changes to observers.
                 store?.cookieChangeToken = UUID()
             }
         }

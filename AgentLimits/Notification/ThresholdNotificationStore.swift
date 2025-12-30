@@ -3,6 +3,7 @@
 // Follows the same pattern as WakeUpScheduleStore.
 
 import Foundation
+import OSLog
 
 // MARK: - Threshold Notification Store
 
@@ -25,7 +26,7 @@ final class ThresholdNotificationStore: @unchecked Sendable {
     func loadSettings() -> [UsageProvider: ProviderThresholdSettings] {
         guard let data = userDefaults.data(forKey: key),
               let settings = try? decoder.decode([ProviderThresholdSettings].self, from: data) else {
-            NSLog("ThresholdNotificationStore: No saved settings, returning defaults")
+            Logger.notification.info("ThresholdNotificationStore: No saved settings, returning defaults")
             return makeDefaultSettings()
         }
         let result = Dictionary(uniqueKeysWithValues: settings.map { ($0.provider, $0) })
@@ -34,8 +35,7 @@ final class ThresholdNotificationStore: @unchecked Sendable {
                 .map { Int($0.timeIntervalSince1970) } ?? -1
             let secondaryLastNotified = providerSettings.secondaryWindow.lastNotifiedResetAt
                 .map { Int($0.timeIntervalSince1970) } ?? -1
-            NSLog("ThresholdNotificationStore: Loaded %@ primary.lastNotified=%d secondary.lastNotified=%d",
-                  provider.rawValue, primaryLastNotified, secondaryLastNotified)
+            Logger.notification.debug("ThresholdNotificationStore: Loaded \(provider.rawValue) primary.lastNotified=\(primaryLastNotified) secondary.lastNotified=\(secondaryLastNotified)")
         }
         return result
     }
@@ -56,7 +56,7 @@ final class ThresholdNotificationStore: @unchecked Sendable {
     ) {
         var settings = loadSettings()
         guard var providerSettings = settings[provider] else {
-            NSLog("ThresholdNotificationStore: Provider settings not found for %@", provider.rawValue)
+            Logger.notification.warning("ThresholdNotificationStore: Provider settings not found for \(provider.rawValue)")
             return
         }
 
@@ -69,8 +69,7 @@ final class ThresholdNotificationStore: @unchecked Sendable {
 
         settings[provider] = providerSettings
         saveSettings(settings)
-        NSLog("ThresholdNotificationStore: Saved lastNotifiedResetAt=%d for %@ %@",
-              Int(resetAt.timeIntervalSince1970), provider.rawValue, windowKind.rawValue)
+        Logger.notification.debug("ThresholdNotificationStore: Saved lastNotifiedResetAt=\(Int(resetAt.timeIntervalSince1970)) for \(provider.rawValue) \(windowKind.rawValue)")
     }
 
     /// Creates default settings for all providers

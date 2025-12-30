@@ -11,6 +11,18 @@ Please download the latest version from here: [Download](https://github.com/Niho
 
 ## Features
 
+### Menu Bar Status Display
+- Real-time usage percentage display directly in the menu bar
+- Shows 5h/weekly usage for each enabled provider (Codex/Claude) in two lines
+  - Line 1: provider name
+  - Line 2: `X% / Y%` (primary / weekly)
+- Color-coded status:
+  - Used mode: green (<70%), orange (70-89%), red (≥90%)
+  - Remaining mode: green (>=31%), orange (11-30%), red (<=10%)
+- Enable/disable per provider in the Usage settings tab (toggle under the provider selector)
+- Responds to display mode changes (used/remaining)
+- Uses `ImageRenderer` to render dynamic label content in the menu bar
+
 ### Usage Monitoring (Codex / Claude)
 - Sign in to each service in the in-app WKWebView (switch between Codex/Claude)
 - Fetch usage data from internal APIs:
@@ -20,6 +32,7 @@ Please download the latest version from here: [Download](https://github.com/Niho
 - Separate widgets for Codex and Claude
 - Auto refresh: configurable 1-10 minutes (menu next to provider selector)
 - Display mode (used/remaining) is switched from the menu bar
+- Color-coded percentage display in widgets based on usage level and display mode
 
 ### ccusage Token Usage
 - Fetch via CLI and store snapshots
@@ -31,10 +44,12 @@ Please download the latest version from here: [Download](https://github.com/Niho
 - Widget tap opens `https://ccusage.com/`
 
 ### Wake Up (CLI Scheduler)
-- Automatically run CLI commands (`codex exec "Hello"` / `claude -p "Hello"`) at scheduled hours
+- Automatically run CLI commands (`codex exec --skip-git-repo-check "hello"` / `claude -p "hello"`) at scheduled hours
 - Implemented via LaunchAgent (macOS standard scheduled execution)
 - Per-provider schedule configuration
 - Supports additional arguments (e.g., `--model="haiku"`)
+- LaunchAgent plists: `~/Library/LaunchAgents/com.dmng.agentlimit.wakeup-*.plist`
+- Logs: `/tmp/agentlimit-wakeup-*.log`
 - **What is this feature for?** Often, a session starts at 9 AM, is used up by 12 PM, leaving the user unable to do anything until 2 PM. In such cases, if the session starts at 7 AM, it will be reset by 12 PM, allowing it to be used again.
 
 ### Threshold Notification
@@ -53,6 +68,11 @@ Please download the latest version from here: [Download](https://github.com/Niho
 6. Log in to each service in the WebView at the bottom.
 7. Use the menu bar "Display Mode" to switch used/remaining.
 8. "Refresh Now" updates only the currently selected service.
+
+### Menu Bar Status Settings
+1. Open the Usage settings tab.
+2. Toggle "Show in menu bar" for each provider (Codex/Claude).
+3. The menu bar will display real-time usage percentages for enabled providers.
 
 ### ccusage Settings
 1. Select "ccusage Settings..." from the menu bar.
@@ -79,10 +99,14 @@ Please download the latest version from here: [Download](https://github.com/Niho
   - 5-hour usage (%) or remaining (%)
   - Weekly usage (%) or remaining (%)
   - Last updated (relative time)
+  - Color-coded percentage based on usage level
 - ccusage widgets:
   - Today/this week/this month cost (USD)
   - Today/this week/this month tokens
   - Last updated (relative time)
+- Menu bar:
+  - Provider name (Codex/Claude) on line 1
+  - `X% / Y%` on line 2 with color coding
 
 ## Notes
 - Fetching depends on internal APIs and may break if they change.

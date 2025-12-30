@@ -26,6 +26,7 @@ final class UsageWebViewPool: ObservableObject {
         if let existingStore = webViewStoreByProvider[provider] {
             return existingStore
         }
+        // Lazily create a WebViewStore when requested.
         let newStore = WebViewStore(initialProvider: provider)
         webViewStoreByProvider[provider] = newStore
         return newStore
@@ -33,6 +34,7 @@ final class UsageWebViewPool: ObservableObject {
 
     /// Clears all website data (cookies, cache) and reloads all WebViews
     func clearWebsiteData() async {
+        // Remove cookies/cache and refresh all web views.
         let dataStore = WKWebsiteDataStore.default()
         let dataTypes = WKWebsiteDataStore.allWebsiteDataTypes()
         await withCheckedContinuation { continuation in
@@ -47,6 +49,7 @@ final class UsageWebViewPool: ObservableObject {
     private func clearHttpCookies(in dataStore: WKWebsiteDataStore) async {
         await withCheckedContinuation { continuation in
             dataStore.httpCookieStore.getAllCookies { cookies in
+                // Explicitly delete cookies after data removal.
                 for cookie in cookies {
                     dataStore.httpCookieStore.delete(cookie)
                 }

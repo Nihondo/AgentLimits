@@ -6,6 +6,9 @@
 "widget.weeklyLimit" = "週間の使用制限";
 "widget.reset" = "リセット時間";
 "widget.updated" = "更新:";
+"error.appGroupUnavailable" = "App Group が利用できません。Signing & Capabilities を確認してください。";
+"error.readFailed" = "データの読み込みに失敗しました";
+"error.decodeFailed" = "データの解析に失敗しました";
 
 /* Relative Time */
 "time.withinMinute" = "1分以内";

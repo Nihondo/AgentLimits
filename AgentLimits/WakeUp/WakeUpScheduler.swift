@@ -4,6 +4,7 @@
 
 import Combine
 @preconcurrency import Foundation
+import OSLog
 
 // MARK: - Configuration
 
@@ -149,38 +150,40 @@ final class LaunchAgentManager {
     /// Installs or updates a LaunchAgent for the given schedule
     func install(schedule: WakeUpSchedule) throws {
         guard let url = plistURL(for: schedule) else {
-            NSLog("LaunchAgentManager: homeDirectoryNotFound")
+            Logger.wakeup.error("LaunchAgentManager: homeDirectoryNotFound")
             throw WakeUpError.homeDirectoryNotFound
         }
 
-        NSLog("LaunchAgentManager: Installing plist at %@", url.path)
+        Logger.wakeup.info("LaunchAgentManager: Installing plist at \(url.path)")
 
         // Unload existing agent if present
         if isInstalled(for: schedule) {
-            NSLog("LaunchAgentManager: Unloading existing agent")
+            Logger.wakeup.info("LaunchAgentManager: Unloading existing agent")
             unload(schedule: schedule)
         }
 
         // Generate plist content
         let plistData = try generatePlist(for: schedule)
-        NSLog("LaunchAgentManager: Generated plist data (%d bytes)", plistData.count)
+        Logger.wakeup.info("LaunchAgentManager: Generated plist data (\(plistData.count) bytes)")
 
         // Ensure directory exists
         if let directory = launchAgentsURL {
             do {
+                // Create LaunchAgents directory if needed.
                 try fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
-                NSLog("LaunchAgentManager: Directory ensured at %@", directory.path)
+                Logger.wakeup.info("LaunchAgentManager: Directory ensured at \(directory.path)")
             } catch {
-                NSLog("LaunchAgentManager: Failed to create directory: %@", error.localizedDescription)
+                Logger.wakeup.error("LaunchAgentManager: Failed to create directory: \(error.localizedDescription)")
             }
         }
 
         // Write plist file
         do {
+            // Persist plist atomically to avoid partial writes.
             try plistData.write(to: url, options: .atomic)
-            NSLog("LaunchAgentManager: Plist written successfully")
+            Logger.wakeup.info("LaunchAgentManager: Plist written successfully")
         } catch {
-            NSLog("LaunchAgentManager: Failed to write plist: %@", error.localizedDescription)
+            Logger.wakeup.error("LaunchAgentManager: Failed to write plist: \(error.localizedDescription)")
             throw WakeUpError.launchAgentWriteFailed(error)
         }
 
@@ -209,11 +212,12 @@ final class LaunchAgentManager {
         process.arguments = ["bootstrap", "gui/\(getuid())", url.path]
 
         do {
+            // Run launchctl and wait for completion.
             try process.run()
             process.waitUntilExit()
             // Exit code 37 means "already loaded", which is fine
             if process.terminationStatus != 0 && process.terminationStatus != 37 {
-                NSLog("LaunchAgent load warning: exit code %d", process.terminationStatus)
+                Logger.wakeup.warning("LaunchAgent load warning: exit code \(process.terminationStatus)")
             }
         } catch {
             throw WakeUpError.launchAgentLoadFailed(error)
@@ -227,6 +231,7 @@ final class LaunchAgentManager {
         process.executableURL = URL(fileURLWithPath: "/bin/launchctl")
         process.arguments = ["bootout", "gui/\(getuid())/\(schedule.launchAgentLabel)"]
 
+        // Best-effort unload; ignore errors if not loaded.
         try? process.run()
         process.waitUntilExit()
         // Ignore errors - service may not be loaded
@@ -246,6 +251,7 @@ final class LaunchAgentManager {
             ])
         }
 
+        // Compose LaunchAgent plist payload.
         let plist: [String: Any] = [
             "Label": schedule.launchAgentLabel,
             "ProgramArguments": [
@@ -270,68 +276,46 @@ final class LaunchAgentManager {
 
 // MARK: - CLI Executor
 
-/// Executes CLI commands for manual wake-up testing
+/// Executes CLI commands for manual wake-up testing.
+/// Uses ShellExecutor for command execution with timeout support.
 final class CLIExecutor {
-    private let timeout: TimeInterval
+    private let shellExecutor: ShellExecutor
 
+    /// Creates a new CLI executor with the specified timeout.
+    /// - Parameter timeout: Maximum time to wait for command completion (default: 30 seconds)
     init(timeout: TimeInterval = 30) {
-        self.timeout = timeout
+        self.shellExecutor = ShellExecutor(timeout: timeout)
     }
 
-    /// Executes a CLI command and returns the result
+    /// Executes a CLI command for the given schedule and returns the output.
+    /// Logs execution to the schedule's log file with a [TEST] marker.
+    /// - Parameter schedule: The wake-up schedule containing the command to execute
+    /// - Returns: The command output as a string
+    /// - Throws: `WakeUpError` if execution fails
     func execute(for schedule: WakeUpSchedule) async throws -> String {
         // Build command with logging (same format as LaunchAgent, with [TEST] marker)
         let command = "{ echo \"=== $(date) [TEST] ===\" && echo \"Command: \(schedule.cliCommand)\" && mkdir -p ~/.agentlimits && cd ~/.agentlimits && \(schedule.cliCommand); } 2>&1 | tee -a \"\(schedule.logPath)\""
 
-        let process = Process()
-        let stdout = Pipe()
-        let stderr = Pipe()
+        do {
+            return try await shellExecutor.executeString(command: command)
+        } catch let error as ShellExecutorError {
+            throw mapShellError(error, schedule: schedule)
+        }
+    }
 
-        process.executableURL = URL(fileURLWithPath: "/bin/zsh")
-        process.arguments = ["-l", "-c", command]
-        process.standardOutput = stdout
-        process.standardError = stderr
-        process.currentDirectoryURL = FileManager.default.homeDirectoryForCurrentUser
-
-        return try await withCheckedThrowingContinuation { continuation in
-            do {
-                try process.run()
-            } catch {
-                continuation.resume(throwing: WakeUpError.cliNotFound(command: schedule.cliCommand))
-                return
-            }
-
-            let timeoutWorkItem = DispatchWorkItem {
-                if process.isRunning {
-                    process.terminate()
-                }
-            }
-            DispatchQueue.global().asyncAfter(
-                deadline: .now() + timeout,
-                execute: timeoutWorkItem
-            )
-
-            process.terminationHandler = { proc in
-                timeoutWorkItem.cancel()
-
-                let outputData = stdout.fileHandleForReading.readDataToEndOfFile()
-                let errorData = stderr.fileHandleForReading.readDataToEndOfFile()
-                let output = String(data: outputData, encoding: .utf8) ?? ""
-                let errorOutput = String(data: errorData, encoding: .utf8) ?? ""
-
-                if proc.terminationStatus == 0 {
-                    continuation.resume(returning: output)
-                } else if proc.terminationReason == .uncaughtSignal {
-                    continuation.resume(throwing: WakeUpError.timeout)
-                } else {
-                    continuation.resume(
-                        throwing: WakeUpError.executionFailed(
-                            exitCode: proc.terminationStatus,
-                            stderr: errorOutput
-                        )
-                    )
-                }
-            }
+    /// Maps ShellExecutorError to WakeUpError for domain-specific error messages.
+    /// - Parameters:
+    ///   - error: The shell execution error
+    ///   - schedule: The schedule that was being executed (for error context)
+    /// - Returns: A WakeUpError with appropriate message
+    private func mapShellError(_ error: ShellExecutorError, schedule: WakeUpSchedule) -> WakeUpError {
+        switch error {
+        case .launchFailed:
+            return .cliNotFound(command: schedule.cliCommand)
+        case .timeout:
+            return .timeout
+        case .executionFailed(let exitCode, let stderr):
+            return .executionFailed(exitCode: exitCode, stderr: stderr)
         }
     }
 }
@@ -410,10 +394,7 @@ final class WakeUpScheduler: ObservableObject {
 
     /// Updates schedule for a provider and syncs LaunchAgent
     func updateSchedule(_ schedule: WakeUpSchedule) {
-        NSLog("WakeUpScheduler: updateSchedule provider=%@ isEnabled=%d hours=%d",
-              schedule.provider.rawValue,
-              schedule.isEnabled ? 1 : 0,
-              schedule.enabledHours.count)
+        Logger.wakeup.debug("WakeUpScheduler: updateSchedule provider=\(schedule.provider.rawValue) isEnabled=\(schedule.isEnabled) hours=\(schedule.enabledHours.count)")
         schedules[schedule.provider] = schedule
         store.saveSchedules(schedules)
 
@@ -421,7 +402,7 @@ final class WakeUpScheduler: ObservableObject {
             do {
                 try launchAgentManager.install(schedule: schedule)
             } catch {
-                NSLog("WakeUpScheduler: Failed to install LaunchAgent: %@", error.localizedDescription)
+                Logger.wakeup.error("WakeUpScheduler: Failed to install LaunchAgent: \(error.localizedDescription)")
             }
         } else {
             launchAgentManager.uninstall(schedule: schedule)
@@ -438,14 +419,14 @@ final class WakeUpScheduler: ObservableObject {
         do {
             let output = try await executor.execute(for: schedule)
             lastWakeUpResults[provider] = .success(output: output)
-            NSLog("WakeUpScheduler: Successfully tested %@", provider.displayName)
+            Logger.wakeup.info("WakeUpScheduler: Successfully tested \(provider.displayName)")
         } catch let error as WakeUpError {
             lastWakeUpResults[provider] = .failure(error: error)
-            NSLog("WakeUpScheduler: Test failed for %@: %@", provider.displayName, error.localizedDescription)
+            Logger.wakeup.error("WakeUpScheduler: Test failed for \(provider.displayName): \(error.localizedDescription)")
         } catch {
             let wakeUpError = WakeUpError.executionFailed(exitCode: -1, stderr: error.localizedDescription)
             lastWakeUpResults[provider] = .failure(error: wakeUpError)
-            NSLog("WakeUpScheduler: Test failed for %@: %@", provider.displayName, error.localizedDescription)
+            Logger.wakeup.error("WakeUpScheduler: Test failed for \(provider.displayName): \(error.localizedDescription)")
         }
     }
 
@@ -458,8 +439,7 @@ final class WakeUpScheduler: ObservableObject {
                 do {
                     try launchAgentManager.install(schedule: schedule)
                 } catch {
-                    NSLog("WakeUpScheduler: Failed to sync LaunchAgent for %@: %@",
-                          provider.displayName, error.localizedDescription)
+                    Logger.wakeup.error("WakeUpScheduler: Failed to sync LaunchAgent for \(provider.displayName): \(error.localizedDescription)")
                 }
             } else {
                 launchAgentManager.uninstall(schedule: schedule)

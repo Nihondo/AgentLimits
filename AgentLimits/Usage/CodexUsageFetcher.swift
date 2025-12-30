@@ -101,12 +101,14 @@ final class CodexUsageFetcher {
     func fetchUsageSnapshot(using webView: WKWebView) async throws -> UsageSnapshot {
         let response: CodexUsageResponse
         do {
+            // Execute usage API script and decode JSON response.
             response = try await scriptRunner.decodeJSONScript(
                 CodexUsageResponse.self,
                 script: Self.usageScript,
                 webView: webView
             )
         } catch let error as WebViewScriptRunnerError {
+            // Map script runner errors to domain errors.
             throw mapScriptError(error)
         }
         return response.toSnapshot(fetchedAt: Date())
@@ -116,6 +118,7 @@ final class CodexUsageFetcher {
     @MainActor
     func hasValidSession(using webView: WKWebView) async -> Bool {
         do {
+            // Check if session token is present in web context.
             return try await scriptRunner.runBooleanScript(Self.loginCheckScript, webView: webView)
         } catch {
             return false
@@ -123,6 +126,7 @@ final class CodexUsageFetcher {
     }
 
     private func mapScriptError(_ error: WebViewScriptRunnerError) -> CodexUsageFetcherError {
+        // Translate script errors into user-facing fetcher errors.
         switch error {
         case .invalidResponse:
             return .invalidResponse
@@ -133,10 +137,10 @@ final class CodexUsageFetcher {
 
     // MARK: - JavaScript Scripts
 
-    /// Script to fetch usage data: gets session token, then calls usage API
-    private static let usageScript = """
-    return (async () => {
-      try {
+    /// Shared JavaScript function to fetch session from ChatGPT API.
+    /// Tries both `/api/auth/session` and `/backend-api/auth/session` endpoints.
+    /// Returns the session object containing the access token, or null if not authenticated.
+    private static let fetchSessionScript = """
         async function fetchSession() {
           let response = await fetch("/api/auth/session", { credentials: "include" });
           if (response.ok) {
@@ -148,6 +152,14 @@ final class CodexUsageFetcher {
           }
           return null;
         }
+    """
+
+    /// Script to fetch usage data: gets session token, then calls usage API.
+    /// Uses the shared fetchSession function to obtain authentication credentials.
+    private static let usageScript = """
+    return (async () => {
+      try {
+        \(fetchSessionScript)
 
         const session = await fetchSession();
         const accessToken = session && (session.accessToken || session.access_token);
@@ -175,21 +187,12 @@ final class CodexUsageFetcher {
     })();
     """
 
-    /// Script to check login status by verifying access token exists
+    /// Script to check login status by verifying access token exists.
+    /// Uses the shared fetchSession function to check authentication state.
     private static let loginCheckScript = """
     return (async () => {
       try {
-        async function fetchSession() {
-          let response = await fetch("/api/auth/session", { credentials: "include" });
-          if (response.ok) {
-            return await response.json();
-          }
-          response = await fetch("/backend-api/auth/session", { credentials: "include" });
-          if (response.ok) {
-            return await response.json();
-          }
-          return null;
-        }
+        \(fetchSessionScript)
 
         const session = await fetchSession();
         const accessToken = session && (session.accessToken || session.access_token);

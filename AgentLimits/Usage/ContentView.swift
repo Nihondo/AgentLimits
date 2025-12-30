@@ -17,6 +17,8 @@ struct ContentView: View {
         AppGroupConfig.usageRefreshIntervalMinutesKey,
         store: UserDefaults(suiteName: AppGroupConfig.groupId)
     ) private var refreshIntervalMinutes: Int = RefreshIntervalConfig.defaultMinutes
+    @AppStorage(UserDefaultsKeys.menuBarStatusCodexEnabled) private var menuBarCodexEnabled = false
+    @AppStorage(UserDefaultsKeys.menuBarStatusClaudeEnabled) private var menuBarClaudeEnabled = false
     @State private var isShowingClearDataConfirm = false
     @State private var isClearingData = false
     @State private var popupWebView: WKWebView?
@@ -33,6 +35,7 @@ struct ContentView: View {
             Divider()
 
             providerPickerRow
+            menuBarToggleRow
             UsageSummaryView(snapshot: viewModel.snapshot, displayMode: displayMode)
             controlView
             Divider()
@@ -56,9 +59,11 @@ struct ContentView: View {
         }
         .padding()
         .onAppear {
+            // Normalize refresh interval on launch.
             refreshIntervalMinutes = RefreshIntervalConfig.normalizedMinutes(refreshIntervalMinutes)
         }
         .onChange(of: refreshIntervalMinutes) { _, _ in
+            // Restart auto-refresh and notify widgets when interval changes.
             viewModel.restartAutoRefresh()
             WidgetCenter.shared.reloadAllTimelines()
         }
@@ -69,6 +74,7 @@ struct ContentView: View {
         ) {
             Button("content.clearDataConfirmAction".localized(), role: .destructive) {
                 Task {
+                    // Clear all website data and force re-login.
                     isClearingData = true
                     await webViewPool.clearWebsiteData()
                     isClearingData = false
@@ -83,6 +89,7 @@ struct ContentView: View {
                 get: { popupWebView != nil },
                 set: { isPresented in
                     if !isPresented {
+                        // Close popup and release WebView when sheet dismissed.
                         popupWebViewStore?.closePopupWebView()
                         popupWebViewStore = nil
                         popupWebView = nil
@@ -94,6 +101,7 @@ struct ContentView: View {
                 PopupWebViewSheet(
                     webView: popup,
                     onClose: {
+                        // Explicit close action from sheet UI.
                         popupWebViewStore?.closePopupWebView()
                         popupWebViewStore = nil
                         popupWebView = nil
@@ -155,36 +163,67 @@ struct ContentView: View {
     }
 
     private var controlView: some View {
-        HStack(spacing: 12) {
-            Button("content.refreshNow".localized()) {
-                viewModel.fetchNow()
+        VStack(spacing: 8) {
+            HStack(spacing: 12) {
+                Button("content.refreshNow".localized()) {
+                    viewModel.fetchNow()
+                }
+                .disabled(viewModel.isFetching)
+
+                if viewModel.isFetching {
+                    ProgressView()
+                        .controlSize(.small)
+                }
+
+                Button("content.clearData".localized(), role: .destructive) {
+                    isShowingClearDataConfirm = true
+                }
+                .disabled(isClearingData)
+
+                if isClearingData {
+                    ProgressView()
+                        .controlSize(.small)
+                }
+
+                Spacer()
+
+                Text(viewModel.statusMessage)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
             }
-            .disabled(viewModel.isFetching)
-
-            if viewModel.isFetching {
-                ProgressView()
-                    .controlSize(.small)
-            }
-
-            Button("content.clearData".localized(), role: .destructive) {
-                isShowingClearDataConfirm = true
-            }
-            .disabled(isClearingData)
-
-            if isClearingData {
-                ProgressView()
-                    .controlSize(.small)
-            }
-
-            Spacer()
-
-            Text(viewModel.statusMessage)
-                .font(.footnote)
-                .foregroundStyle(.secondary)
         }
         .padding()
         .background(.thinMaterial)
         .cornerRadius(8)
+    }
+
+    private var menuBarToggleRow: some View {
+        HStack {
+            Toggle("settings.showInMenuBar".localized(), isOn: menuBarEnabledBinding)
+                .toggleStyle(.checkbox)
+            Spacer()
+        }
+    }
+
+    private var menuBarEnabledBinding: Binding<Bool> {
+        Binding(
+            get: {
+                switch viewModel.selectedProvider {
+                case .chatgptCodex:
+                    return menuBarCodexEnabled
+                case .claudeCode:
+                    return menuBarClaudeEnabled
+                }
+            },
+            set: { newValue in
+                switch viewModel.selectedProvider {
+                case .chatgptCodex:
+                    menuBarCodexEnabled = newValue
+                case .claudeCode:
+                    menuBarClaudeEnabled = newValue
+                }
+            }
+        )
     }
 
     private var refreshIntervalBinding: Binding<Int> {
@@ -297,9 +336,8 @@ private struct UsageWindowRow: View {
     }
 
     private var windowPercentText: String {
-        guard let window else { return "--%" }
-        let percent = displayMode.displayPercent(from: window.usedPercent)
-        return String(format: "%.0f%%", percent)
+        let percent = window.map { displayMode.displayPercent(from: $0.usedPercent) }
+        return UsagePercentFormatter.formatPercentText(percent)
     }
 }
 

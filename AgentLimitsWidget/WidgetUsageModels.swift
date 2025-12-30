@@ -3,12 +3,14 @@
 
 import Foundation
 
-/// Localized description for widget-facing snapshot store errors
+/// Localized description for widget-facing snapshot store errors.
+/// Provides user-friendly error messages for widget display.
 extension UsageSnapshotStoreError: LocalizedError {
     var errorDescription: String? {
-        switch self {
-        case .appGroupUnavailable:
-            return "App Group が利用できません。"
-        }
+        UsageSnapshotStoreErrorMessageResolver.resolveMessage(
+            for: self,
+            localize: { WidgetLanguageHelper.localizedString($0) },
+            includeUnderlying: false
+        )
     }
 }

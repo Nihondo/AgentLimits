@@ -141,6 +141,8 @@ struct CCUsageSettingsView: View {
 
     // MARK: - Credits Section
 
+    /// Credits section showing links to ccusage website and repository.
+    /// Uses pre-validated static URL constants for safety.
     private var creditsSection: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("ccusage.credits.title".localized())
@@ -151,17 +153,21 @@ struct CCUsageSettingsView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
-            Link(
-                "ccusage.credits.site".localized(),
-                destination: URL(string: "https://ccusage.com/")!
-            )
-            .font(.caption)
+            if let siteURL = CCUsageLinks.siteURL {
+                Link(
+                    "ccusage.credits.site".localized(),
+                    destination: siteURL
+                )
+                .font(.caption)
+            }
 
-            Link(
-                "ccusage.credits.repo".localized(),
-                destination: URL(string: "https://github.com/ryoppippi/ccusage")!
-            )
-            .font(.caption)
+            if let repoURL = CCUsageLinks.repoURL {
+                Link(
+                    "ccusage.credits.repo".localized(),
+                    destination: repoURL
+                )
+                .font(.caption)
+            }
         }
     }
 
@@ -204,10 +210,11 @@ struct CCUsageSettingsView: View {
                         .foregroundStyle(.secondary)
 
                     HStack {
-                        Label(formatCost(snapshot.thisMonth.costUSD), systemImage: "dollarsign.circle")
+                        // Show month totals from the latest snapshot.
+                        Label(TokenUsageFormatter.formatCost(snapshot.thisMonth.costUSD), systemImage: "dollarsign.circle")
                             .font(.footnote)
                         Spacer()
-                        Text(formatTokens(snapshot.thisMonth.totalTokens))
+                        Text(TokenUsageFormatter.formatTokens(snapshot.thisMonth.totalTokens))
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     }
@@ -220,6 +227,7 @@ struct CCUsageSettingsView: View {
     // MARK: - Helpers
 
     private func statusColor(for provider: TokenUsageProvider) -> Color {
+        // Gray when disabled, green when fetched, orange while enabled but no snapshot yet.
         guard let settings = viewModel.settings[provider], settings.isEnabled else {
             return .gray
         }
@@ -229,20 +237,6 @@ struct CCUsageSettingsView: View {
         return .orange
     }
 
-    private func formatCost(_ cost: Double) -> String {
-        String(format: "$ %.2f", cost)
-    }
-
-    private func formatTokens(_ tokens: Int) -> String {
-        let kTokens = Double(tokens) / 1000.0
-        if kTokens >= 1000 {
-            return String(format: "%.1fM Tokens", kTokens / 1000.0)
-        } else if kTokens >= 1 {
-            return String(format: "%.0fK Tokens", kTokens)
-        } else {
-            return "\(tokens) Tokens"
-        }
-    }
 }
 
 // MARK: - Provider Settings View
