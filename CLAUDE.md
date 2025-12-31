@@ -61,7 +61,10 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 | `AgentLimitsShared/TokenUsageModels.swift` | Shared token usage models/store and helpers (`TokenUsageSnapshot`, `TokenUsageProvider`, MonthStartDateResolver, CCUsageLinks) |
 | `AgentLimitsShared/TokenUsageFormatting.swift` | Shared cost/token formatting for ccusage |
 | `AgentLimitsWidget/AgentLimitsWidget.swift` | Usage limits widget TimelineProvider and donut gauge UI |
-| `AgentLimitsWidget/TokenUsageWidget.swift` | ccusage token usage widget TimelineProvider and rows UI |
+| `AgentLimitsWidget/TokenUsageWidget.swift` | ccusage token usage widget TimelineProvider and rows UI (small + medium with heatmap) |
+| `AgentLimitsWidget/HeatmapView.swift` | Heatmap grid view for medium widget (7 rows × 4-6 columns) |
+| `AgentLimitsWidget/HeatmapColors.swift` | 5-level color scheme (GitHub-style) + accented mode support |
+| `AgentLimitsWidget/HeatmapLevelResolver.swift` | Quartile-based level calculation for heatmap colors |
 | `AgentLimitsWidget/AgentLimitsWidgetBundle.swift` | Widget bundle registration |
 | `AgentLimitsWidget/WidgetUsageModels.swift` | Widget error localization (bridges shared resolver to widget strings) |
 | `AgentLimitsWidget/WidgetLanguageHelper.swift` | Widget language helper |
@@ -93,7 +96,13 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 
 #### Token Usage (ccusage)
 - CLI-based fetch and parsing for Codex/Claude
-- Separate widgets for ccusage token usage
+- Separate widgets for ccusage token usage (small and medium sizes)
+- **Small widget**: Usage summary (today/week/month cost and tokens)
+- **Medium widget**: Usage summary + GitHub-style heatmap
+  - Layout: 7 rows (Sun-Sat) × 4-6 columns (weeks of current month)
+  - Color levels: 5 levels based on quartile distribution (GitHub contributions style)
+  - Weekday labels: Mon, Wed, Fri displayed on left side
+  - Desktop pinned mode: Uses opacity-based white colors for accented rendering
 - Auto refresh interval is configurable (1-10 minutes)
 - Widget tap opens `https://ccusage.com/` via app deep link
 
@@ -121,7 +130,12 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 `AgentLimitsShared/TokenUsageModels.swift` defines token usage snapshots:
 - `provider`: `.codex` or `.claude`
 - `today` / `thisWeek` / `thisMonth`: `TokenUsagePeriod` with `costUSD`, `totalTokens`
+- `dailyUsage`: `[DailyUsageEntry]` - Daily usage entries for heatmap (ISO8601 date string + totalTokens)
 - `fetchedAt`: Date
+
+`DailyUsageEntry` struct:
+- `date`: ISO8601 format string (YYYY-MM-DD)
+- `totalTokens`: Total tokens used on this day
 
 ### Storage Paths (App Group: `group.com.dmng.agentlimit`)
 

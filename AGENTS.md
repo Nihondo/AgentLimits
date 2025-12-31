@@ -31,6 +31,12 @@
 ### Token Usage (ccusage)
 - Periodic CLI fetch (Codex/Claude) and snapshot persistence
 - Separate widgets for Codex/Claude token usage (today/this week/this month)
+- **Small widget**: Usage summary only
+- **Medium widget**: Usage summary + GitHub-style heatmap
+  - 7 rows (Sun-Sat) × 4-6 columns (weeks)
+  - 5-level color intensity based on quartile distribution
+  - Weekday labels (Mon, Wed, Fri) displayed
+  - Desktop pinned mode support (opacity-based white colors)
 - Auto refresh: configurable 1-10 minutes (ccusage settings screen)
 - Widget tap opens `https://ccusage.com/` via app deep link
 
@@ -68,6 +74,10 @@
   - `Notification/` (threshold notification components)
 - `AgentLimitsShared/` (shared models/store + display mode/status helpers and ccusage links)
 - `AgentLimitsWidget/` (widget extension)
+  - `TokenUsageWidget.swift` (small + medium widget with heatmap)
+  - `HeatmapView.swift` (heatmap grid rendering)
+  - `HeatmapColors.swift` (5-level color scheme + accented mode)
+  - `HeatmapLevelResolver.swift` (quartile-based level calculation)
 
 ## Storage
 

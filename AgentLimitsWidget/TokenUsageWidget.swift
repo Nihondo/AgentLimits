@@ -40,8 +40,32 @@ struct TokenUsageTimelineProvider: TimelineProvider {
             fetchedAt: Date(),
             today: TokenUsagePeriod(costUSD: 0.28, totalTokens: 6378000),
             thisWeek: TokenUsagePeriod(costUSD: 8.59, totalTokens: 22648000),
-            thisMonth: TokenUsagePeriod(costUSD: 79.39, totalTokens: 87200000)
+            thisMonth: TokenUsagePeriod(costUSD: 79.39, totalTokens: 87200000),
+            dailyUsage: generatePlaceholderDailyUsage()
         )
+    }
+
+    /// Generates placeholder daily usage data for preview.
+    private func generatePlaceholderDailyUsage() -> [DailyUsageEntry] {
+        let calendar = Calendar.current
+        let now = Date()
+        let components = calendar.dateComponents([.year, .month], from: now)
+        guard let startOfMonth = calendar.date(from: components),
+              let range = calendar.range(of: .day, in: .month, for: startOfMonth) else {
+            return []
+        }
+
+        return range.map { day in
+            let dateString = String(
+                format: "%04d-%02d-%02d",
+                components.year ?? 2025,
+                components.month ?? 1,
+                day
+            )
+            // Random usage for preview visualization
+            let tokens = [0, 100000, 500000, 1000000, 2000000].randomElement() ?? 0
+            return DailyUsageEntry(date: dateString, totalTokens: tokens)
+        }
     }
 }
 
@@ -62,6 +86,20 @@ struct TokenUsageWidgetEntryView: View {
     @Environment(\.widgetFamily) private var family
 
     var body: some View {
+        switch family {
+        case .systemSmall:
+            smallWidgetContent
+        case .systemMedium:
+            mediumWidgetContent
+        default:
+            smallWidgetContent
+        }
+    }
+
+    // MARK: - Small Widget Content
+
+    @ViewBuilder
+    private var smallWidgetContent: some View {
         VStack(alignment: .leading, spacing: 4) {
             // Header
             Text(entry.provider.widgetDisplayName)
@@ -73,19 +111,14 @@ struct TokenUsageWidgetEntryView: View {
             if let snapshot = entry.snapshot {
                 VStack(alignment: .leading, spacing: 2) {
                     VStack(alignment: .leading, spacing: 4) {
-                        // Today
                         usageRow(
                             label: "widget.tokenUsage.today".widgetLocalized(),
                             period: snapshot.today
                         )
-
-                        // This Week
                         usageRow(
                             label: "widget.tokenUsage.thisWeek".widgetLocalized(),
                             period: snapshot.thisWeek
                         )
-
-                        // This Month
                         usageRow(
                             label: "widget.tokenUsage.thisMonth".widgetLocalized(),
                             period: snapshot.thisMonth
@@ -102,18 +135,88 @@ struct TokenUsageWidgetEntryView: View {
                 }
                 .padding(.top, 2)
             } else {
-                Spacer()
-                Text("widget.notFetched".widgetLocalized())
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-                Text("widget.pleaseOpenApp".widgetLocalized())
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Spacer()
+                notFetchedView
             }
         }
         .padding(.vertical, 4)
         .widgetURL(entry.provider.widgetDeepLinkURL)
+    }
+
+    // MARK: - Medium Widget Content
+
+    @ViewBuilder
+    private var mediumWidgetContent: some View {
+        HStack(spacing: 8) {
+            // Left side: Usage summary (fixed width, same as small widget)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(entry.provider.widgetDisplayName)
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.primary)
+
+                if let snapshot = entry.snapshot {
+                    VStack(alignment: .leading, spacing: 4) {
+                        usageRow(
+                            label: "widget.tokenUsage.today".widgetLocalized(),
+                            period: snapshot.today
+                        )
+                        usageRow(
+                            label: "widget.tokenUsage.thisWeek".widgetLocalized(),
+                            period: snapshot.thisWeek
+                        )
+                        usageRow(
+                            label: "widget.tokenUsage.thisMonth".widgetLocalized(),
+                            period: snapshot.thisMonth
+                        )
+                    }
+
+                    HStack(spacing: 2) {
+                        Text("widget.updated".widgetLocalized())
+                        Text(WidgetRelativeTimeFormatter.makeRelativeUpdatedText(since: snapshot.fetchedAt))
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                } else {
+                    notFetchedView
+                }
+            }
+            .frame(width: 155, alignment: .leading)
+
+            // Right side: Heatmap (expanded to fill remaining space)
+            if let snapshot = entry.snapshot {
+                HeatmapView(
+                    dailyUsage: snapshot.dailyUsage,
+                    currentDate: entry.date,
+                    cellSize: 13
+                )
+                .frame(maxWidth: .infinity, alignment: .trailing)
+            } else {
+                // Placeholder heatmap
+                HeatmapView(
+                    dailyUsage: [],
+                    currentDate: entry.date,
+                    cellSize: 13
+                )
+                .frame(maxWidth: .infinity, alignment: .trailing)
+            }
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 8)
+        .widgetURL(entry.provider.widgetDeepLinkURL)
+    }
+
+    // MARK: - Not Fetched View
+
+    @ViewBuilder
+    private var notFetchedView: some View {
+        Spacer()
+        Text("widget.notFetched".widgetLocalized())
+            .font(.body)
+            .foregroundStyle(.secondary)
+        Text("widget.pleaseOpenApp".widgetLocalized())
+            .font(.caption)
+            .foregroundStyle(.secondary)
+        Spacer()
     }
 
     // MARK: - Usage Row
@@ -140,9 +243,6 @@ struct TokenUsageWidgetEntryView: View {
             }
         }
     }
-
-    // MARK: - Formatting
-
 }
 
 // MARK: - Widget Definitions
@@ -158,7 +258,7 @@ struct ClaudeTokenUsageWidget: Widget {
         }
         .configurationDisplayName(TokenUsageProvider.claude.widgetDisplayName)
         .description("widget.tokenUsageDescription".widgetLocalized())
-        .supportedFamilies([.systemSmall])
+        .supportedFamilies([.systemSmall, .systemMedium])
     }
 }
 
@@ -173,13 +273,13 @@ struct CodexTokenUsageWidget: Widget {
         }
         .configurationDisplayName(TokenUsageProvider.codex.widgetDisplayName)
         .description("widget.tokenUsageDescription".widgetLocalized())
-        .supportedFamilies([.systemSmall])
+        .supportedFamilies([.systemSmall, .systemMedium])
     }
 }
 
 // MARK: - Preview
 
-#Preview(as: .systemSmall) {
+#Preview("Small", as: .systemSmall) {
     ClaudeTokenUsageWidget()
 } timeline: {
     TokenUsageEntry(
@@ -189,7 +289,30 @@ struct CodexTokenUsageWidget: Widget {
             fetchedAt: Date(),
             today: TokenUsagePeriod(costUSD: 0.28, totalTokens: 6378000),
             thisWeek: TokenUsagePeriod(costUSD: 8.59, totalTokens: 22648000),
-            thisMonth: TokenUsagePeriod(costUSD: 79.39, totalTokens: 87200000)
+            thisMonth: TokenUsagePeriod(costUSD: 79.39, totalTokens: 87200000),
+            dailyUsage: []
+        ),
+        provider: .claude
+    )
+}
+
+#Preview("Medium", as: .systemMedium) {
+    ClaudeTokenUsageWidget()
+} timeline: {
+    TokenUsageEntry(
+        date: Date(),
+        snapshot: TokenUsageSnapshot(
+            provider: .claude,
+            fetchedAt: Date(),
+            today: TokenUsagePeriod(costUSD: 0.28, totalTokens: 6378000),
+            thisWeek: TokenUsagePeriod(costUSD: 8.59, totalTokens: 22648000),
+            thisMonth: TokenUsagePeriod(costUSD: 79.39, totalTokens: 87200000),
+            dailyUsage: (1...31).map { day in
+                DailyUsageEntry(
+                    date: String(format: "2025-12-%02d", day),
+                    totalTokens: [0, 100000, 500000, 1000000, 2000000].randomElement() ?? 0
+                )
+            }
         ),
         provider: .claude
     )

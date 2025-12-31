@@ -97,6 +97,16 @@ struct TokenUsagePeriod: Codable, Equatable {
     let totalTokens: Int
 }
 
+// MARK: - Daily Usage Entry
+
+/// Daily usage data entry for heatmap display
+struct DailyUsageEntry: Codable, Equatable {
+    /// Date in ISO8601 format (YYYY-MM-DD)
+    let date: String
+    /// Total tokens used on this day
+    let totalTokens: Int
+}
+
 // MARK: - Token Usage Snapshot
 
 /// Snapshot of token usage data fetched from ccusage CLI
@@ -109,6 +119,45 @@ struct TokenUsageSnapshot: Codable, SnapshotData {
     let thisWeek: TokenUsagePeriod
     /// This month's usage
     let thisMonth: TokenUsagePeriod
+    /// Daily usage entries for the current month (for heatmap)
+    let dailyUsage: [DailyUsageEntry]
+
+    // MARK: - Coding Keys
+
+    private enum CodingKeys: String, CodingKey {
+        case provider, fetchedAt, today, thisWeek, thisMonth, dailyUsage
+    }
+
+    // MARK: - Initializers
+
+    /// Standard initializer with all properties
+    init(
+        provider: TokenUsageProvider,
+        fetchedAt: Date,
+        today: TokenUsagePeriod,
+        thisWeek: TokenUsagePeriod,
+        thisMonth: TokenUsagePeriod,
+        dailyUsage: [DailyUsageEntry] = []
+    ) {
+        self.provider = provider
+        self.fetchedAt = fetchedAt
+        self.today = today
+        self.thisWeek = thisWeek
+        self.thisMonth = thisMonth
+        self.dailyUsage = dailyUsage
+    }
+
+    /// Custom Decodable for backward compatibility with existing snapshots
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        provider = try container.decode(TokenUsageProvider.self, forKey: .provider)
+        fetchedAt = try container.decode(Date.self, forKey: .fetchedAt)
+        today = try container.decode(TokenUsagePeriod.self, forKey: .today)
+        thisWeek = try container.decode(TokenUsagePeriod.self, forKey: .thisWeek)
+        thisMonth = try container.decode(TokenUsagePeriod.self, forKey: .thisMonth)
+        // Optional for backward compatibility with existing snapshots without dailyUsage
+        dailyUsage = try container.decodeIfPresent([DailyUsageEntry].self, forKey: .dailyUsage) ?? []
+    }
 }
 
 // MARK: - Token Usage Snapshot Store

@@ -197,7 +197,9 @@ final class CCUsageFetcher {
         }
     }
 
-    private struct DailyUsageEntry {
+    /// Internal daily entry for parsing and aggregation.
+    /// Distinct from shared `DailyUsageEntry` which uses ISO8601 dates only.
+    private struct InternalDailyEntry {
         let date: String
         let totalTokens: Int
         let costUSD: Double
@@ -220,11 +222,12 @@ final class CCUsageFetcher {
 
     private func buildSnapshot(
         provider: TokenUsageProvider,
-        dailyEntries: [DailyUsageEntry],
+        dailyEntries: [InternalDailyEntry],
         totals: UsageTotals,
         startOfWeek: Date,
-        isTodayEntry: (DailyUsageEntry) -> Bool,
-        parseDate: (DailyUsageEntry) -> Date?
+        isTodayEntry: (InternalDailyEntry) -> Bool,
+        parseDate: (InternalDailyEntry) -> Date?,
+        normalizeToISO: (InternalDailyEntry) -> String
     ) -> TokenUsageSnapshot {
         // Build "today" usage from the daily entries.
         let todayEntry = dailyEntries.first(where: isTodayEntry)
@@ -249,12 +252,21 @@ final class CCUsageFetcher {
             totalTokens: totals.totalTokens
         )
 
+        // Build daily usage entries with normalized ISO8601 dates for heatmap.
+        let dailyUsage = dailyEntries.map { entry in
+            DailyUsageEntry(
+                date: normalizeToISO(entry),
+                totalTokens: entry.totalTokens
+            )
+        }
+
         return TokenUsageSnapshot(
             provider: provider,
             fetchedAt: Date(),
             today: today,
             thisWeek: thisWeek,
-            thisMonth: thisMonth
+            thisMonth: thisMonth,
+            dailyUsage: dailyUsage
         )
     }
 
@@ -268,7 +280,7 @@ final class CCUsageFetcher {
         // Decode ccusage response and normalize fields.
         let response = try decodeResponse(CCUsageClaudeResponse.self, jsonData: jsonData)
         let dailyEntries = response.daily.map { entry in
-            DailyUsageEntry(
+            InternalDailyEntry(
                 date: entry.date,
                 totalTokens: entry.totalTokens,
                 costUSD: entry.totalCost
@@ -279,13 +291,15 @@ final class CCUsageFetcher {
             costUSD: response.totals.totalCost
         )
         // Build standardized snapshot from normalized entries.
+        // Claude dates are already in ISO8601 format, so return as-is.
         return buildSnapshot(
             provider: provider,
             dailyEntries: dailyEntries,
             totals: totals,
             startOfWeek: startOfWeek,
             isTodayEntry: { $0.date == todayString },
-            parseDate: { isoFormatter.date(from: $0.date) }
+            parseDate: { isoFormatter.date(from: $0.date) },
+            normalizeToISO: { $0.date }
         )
     }
 
@@ -304,7 +318,7 @@ final class CCUsageFetcher {
         let todayEnglish = englishFormatter.string(from: todayDate)
         // Normalize daily entries into a common structure.
         let dailyEntries = response.daily.map { entry in
-            DailyUsageEntry(
+            InternalDailyEntry(
                 date: entry.date,
                 totalTokens: entry.totalTokens,
                 costUSD: entry.costUSD
@@ -315,13 +329,20 @@ final class CCUsageFetcher {
             costUSD: response.totals.costUSD
         )
         // Build standardized snapshot from normalized entries.
+        // Convert Codex English dates ("Dec 14, 2025") to ISO8601 ("2025-12-14").
         return buildSnapshot(
             provider: provider,
             dailyEntries: dailyEntries,
             totals: totals,
             startOfWeek: startOfWeek,
             isTodayEntry: { $0.date == todayEnglish },
-            parseDate: { englishFormatter.date(from: $0.date) }
+            parseDate: { englishFormatter.date(from: $0.date) },
+            normalizeToISO: { entry in
+                guard let date = englishFormatter.date(from: entry.date) else {
+                    return entry.date
+                }
+                return outputFormatter.string(from: date)
+            }
         )
     }
 }

@@ -40,6 +40,12 @@ Please download the latest version from here: [Download](https://github.com/Niho
   - Claude: `npx -y ccusage@latest daily`
 - Shows today/this week/this month tokens and cost
 - Separate widgets for Codex and Claude token usage
+- **Small widget**: Usage summary (today/week/month)
+- **Medium widget**: Usage summary + GitHub-style heatmap showing daily usage for the current month
+  - 7 rows (Sun-Sat) × 4-6 columns (weeks)
+  - 5-level color intensity based on quartile distribution
+  - Weekday labels (Mon, Wed, Fri) displayed
+  - Supports desktop pinned mode (grayscale/accented rendering)
 - Auto refresh: configurable 1-10 minutes (menu next to provider selector in ccusage settings)
 - Widget tap opens `https://ccusage.com/`
 
