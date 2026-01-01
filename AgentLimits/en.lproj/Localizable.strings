@@ -2,12 +2,13 @@
 "tab.usage" = "Usage";
 "tab.wakeUp" = "Wake Up";
 "tab.notification" = "Notification";
+"tab.advanced" = "Advanced";
 
 /* Menu */
 "menu.openSettings" = "AgentLimits Settings...";
 "menu.displayMode" = "Display Mode";
-"menu.displayMode.used" = "Usage";
-"menu.displayMode.remaining" = "Remaining";
+"menu.displayMode.used" = "Usage rate";
+"menu.displayMode.remaining" = "Remaining rate";
 "menu.quit" = "Quit";
 "menu.language" = "Language";
 "menu.language.system" = "System";
@@ -15,7 +16,7 @@
 "menu.language.english" = "English";
 
 /* ContentView */
-"content.login" = "Login to get current usage";
+"content.login" = "Login to get current usage rate";
 "content.usageLimit" = "Usage Limit";
 "content.autoRefresh" = "Logged-in services auto-refresh every %d min.";
 "refreshInterval.label" = "Refresh interval";
@@ -37,8 +38,8 @@
 "settings.showInMenuBar" = "Show in Menu Bar";
 
 /* Display Mode */
-"displayMode.used" = "Usage";
-"displayMode.remaining" = "Remaining";
+"displayMode.used" = "Usage rate";
+"displayMode.remaining" = "Remaining rate";
 
 /* Status */
 "status.notFetched" = "Not fetched";
@@ -94,16 +95,20 @@
 /* Threshold Notification */
 "menu.thresholdSettings" = "Threshold Notification Settings...";
 "notification.windowTitle" = "Threshold Notification Settings";
-"notification.title" = "Usage Threshold Notification";
-"notification.description" = "Notifies when usage exceeds threshold";
+"notification.title" = "Usage Rate Threshold Notification";
+"notification.description" = "Notifies when usage rate exceeds threshold";
 "notification.provider" = "Service";
 "notification.authorization" = "Notification permission required";
 "notification.requestAuth" = "Request Permission";
 "notification.primaryWindow" = "5-Hour Limit";
 "notification.secondaryWindow" = "Weekly Limit";
 "notification.enabled" = "Enable threshold notification";
+"notification.warning" = "Warning Level";
+"notification.danger" = "Danger Level";
+"notification.resetDefaults" = "Reset to Defaults";
 "notification.threshold" = "Threshold:";
-"notification.alertTitle" = "%@ Usage Warning";
+"notification.alertTitleWarning" = "%@ Usage Rate Warning";
+"notification.alertTitleDanger" = "%@ Usage Rate Danger";
 "notification.alertBody5h" = "5-hour usage limit has reached %d%%";
 "notification.alertBodyWeek" = "Weekly usage limit has reached %d%%";
 
@@ -130,3 +135,28 @@
 "ccusage.credits.body" = "Special thanks to ryoppippi, the creator of ccusage.";
 "ccusage.credits.site" = "ccusage website";
 "ccusage.credits.repo" = "GitHub: ryoppippi/ccusage";
+
+/* Advanced Settings */
+"advancedSettings.title" = "Advanced Settings";
+"advancedSettings.description" = "Customize CLI paths and usage colors.";
+"cliPaths.sectionTitle" = "CLI Command Paths";
+"cliPaths.description" = "Specify full paths for codex, claude, and npx. Leave blank to use PATH lookup.";
+"cliPaths.codex" = "codex path";
+"cliPaths.claude" = "claude path";
+"cliPaths.npx" = "npx path";
+"cliPaths.codex.placeholder" = "e.g. /opt/homebrew/bin/codex";
+"cliPaths.claude.placeholder" = "e.g. /opt/homebrew/bin/claude";
+"cliPaths.npx.placeholder" = "e.g. /opt/homebrew/bin/npx";
+"cliPaths.note" = "Changes take effect on the next CLI execution.";
+"cliPaths.resolvedLabel" = "Resolved:";
+"cliPaths.notFound" = "Not found";
+
+/* CLI Colors */
+"cliColors.title" = "Usage Rate Colors";
+"cliColors.donut" = "Donut chart color";
+"cliColors.donutUseStatus" = "Use usage rate colors";
+"cliColors.green" = "Usage rate (normal)";
+"cliColors.orange" = "Usage rate (warning)";
+"cliColors.red" = "Usage rate (danger)";
+"cliColors.note" = "Changes apply to widgets and the menu bar.";
+"cliColors.reset" = "Reset to Defaults";

@@ -31,11 +31,15 @@ final class ThresholdNotificationStore: @unchecked Sendable {
         }
         let result = Dictionary(uniqueKeysWithValues: settings.map { ($0.provider, $0) })
         for (provider, providerSettings) in result {
-            let primaryLastNotified = providerSettings.primaryWindow.lastNotifiedResetAt
+            let primaryWarningLastNotified = providerSettings.primaryWindow.warning.lastNotifiedResetAt
                 .map { Int($0.timeIntervalSince1970) } ?? -1
-            let secondaryLastNotified = providerSettings.secondaryWindow.lastNotifiedResetAt
+            let primaryDangerLastNotified = providerSettings.primaryWindow.danger.lastNotifiedResetAt
                 .map { Int($0.timeIntervalSince1970) } ?? -1
-            Logger.notification.debug("ThresholdNotificationStore: Loaded \(provider.rawValue) primary.lastNotified=\(primaryLastNotified) secondary.lastNotified=\(secondaryLastNotified)")
+            let secondaryWarningLastNotified = providerSettings.secondaryWindow.warning.lastNotifiedResetAt
+                .map { Int($0.timeIntervalSince1970) } ?? -1
+            let secondaryDangerLastNotified = providerSettings.secondaryWindow.danger.lastNotifiedResetAt
+                .map { Int($0.timeIntervalSince1970) } ?? -1
+            Logger.notification.debug("ThresholdNotificationStore: Loaded \(provider.rawValue) primary.warning.lastNotified=\(primaryWarningLastNotified) primary.danger.lastNotified=\(primaryDangerLastNotified) secondary.warning.lastNotified=\(secondaryWarningLastNotified) secondary.danger.lastNotified=\(secondaryDangerLastNotified)")
         }
         return result
     }
@@ -52,6 +56,7 @@ final class ThresholdNotificationStore: @unchecked Sendable {
     func updateLastNotifiedResetAt(
         for provider: UsageProvider,
         windowKind: UsageWindowKind,
+        level: UsageThresholdLevel,
         resetAt: Date
     ) {
         var settings = loadSettings()
@@ -60,16 +65,20 @@ final class ThresholdNotificationStore: @unchecked Sendable {
             return
         }
 
-        switch windowKind {
-        case .primary:
-            providerSettings.primaryWindow.lastNotifiedResetAt = resetAt
-        case .secondary:
-            providerSettings.secondaryWindow.lastNotifiedResetAt = resetAt
+        switch (windowKind, level) {
+        case (.primary, .warning):
+            providerSettings.primaryWindow.warning.lastNotifiedResetAt = resetAt
+        case (.primary, .danger):
+            providerSettings.primaryWindow.danger.lastNotifiedResetAt = resetAt
+        case (.secondary, .warning):
+            providerSettings.secondaryWindow.warning.lastNotifiedResetAt = resetAt
+        case (.secondary, .danger):
+            providerSettings.secondaryWindow.danger.lastNotifiedResetAt = resetAt
         }
 
         settings[provider] = providerSettings
         saveSettings(settings)
-        Logger.notification.debug("ThresholdNotificationStore: Saved lastNotifiedResetAt=\(Int(resetAt.timeIntervalSince1970)) for \(provider.rawValue) \(windowKind.rawValue)")
+        Logger.notification.debug("ThresholdNotificationStore: Saved lastNotifiedResetAt=\(Int(resetAt.timeIntervalSince1970)) for \(provider.rawValue) \(windowKind.rawValue) \(level.rawValue)")
     }
 
     /// Creates default settings for all providers

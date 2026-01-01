@@ -11,8 +11,8 @@ import UserNotifications
 
 /// Identifiers for threshold notifications
 private enum NotificationIdentifier {
-    static func makeId(provider: UsageProvider, windowKind: UsageWindowKind) -> String {
-        "threshold-\(provider.rawValue)-\(windowKind.rawValue)"
+    static func makeId(provider: UsageProvider, windowKind: UsageWindowKind, level: UsageThresholdLevel) -> String {
+        "threshold-\(provider.rawValue)-\(windowKind.rawValue)-\(level.rawValue)"
     }
 }
 
@@ -36,7 +36,13 @@ final class ThresholdNotificationManager: ObservableObject {
         let useStore = store ?? ThresholdNotificationStore()
         self.store = useStore
         self.notificationCenter = notificationCenter
-        self.settings = useStore.loadSettings()
+        let loadedSettings = useStore.loadSettings()
+        let sanitizedSettings = Self.sanitizeSettings(loadedSettings)
+        if sanitizedSettings != loadedSettings {
+            useStore.saveSettings(sanitizedSettings)
+        }
+        self.settings = sanitizedSettings
+        syncUsageStatusThresholds(from: sanitizedSettings)
 
         Task {
             await checkAuthorizationStatus()
@@ -73,26 +79,45 @@ final class ThresholdNotificationManager: ObservableObject {
     /// Resets lastNotifiedResetAt if threshold is changed (to allow re-notification)
     func updateSettings(_ providerSettings: ProviderThresholdSettings) {
         var updatedSettings = providerSettings
+        updatedSettings.primaryWindow = Self.normalizeWindowSettings(updatedSettings.primaryWindow)
+        updatedSettings.secondaryWindow = Self.normalizeWindowSettings(updatedSettings.secondaryWindow)
 
         // Check if threshold changed and reset lastNotifiedResetAt if so
         if let oldSettings = settings[providerSettings.provider] {
-            // Primary window: reset if threshold changed
-            if oldSettings.primaryWindow.thresholdPercent != providerSettings.primaryWindow.thresholdPercent {
-                updatedSettings.primaryWindow.lastNotifiedResetAt = nil
-            }
-            // Secondary window: reset if threshold changed
-            if oldSettings.secondaryWindow.thresholdPercent != providerSettings.secondaryWindow.thresholdPercent {
-                updatedSettings.secondaryWindow.lastNotifiedResetAt = nil
-            }
+            updatedSettings.primaryWindow.warning = makeResetLevelSettings(
+                oldLevel: oldSettings.primaryWindow.warning,
+                newLevel: updatedSettings.primaryWindow.warning
+            )
+            updatedSettings.primaryWindow.danger = makeResetLevelSettings(
+                oldLevel: oldSettings.primaryWindow.danger,
+                newLevel: updatedSettings.primaryWindow.danger
+            )
+            updatedSettings.secondaryWindow.warning = makeResetLevelSettings(
+                oldLevel: oldSettings.secondaryWindow.warning,
+                newLevel: updatedSettings.secondaryWindow.warning
+            )
+            updatedSettings.secondaryWindow.danger = makeResetLevelSettings(
+                oldLevel: oldSettings.secondaryWindow.danger,
+                newLevel: updatedSettings.secondaryWindow.danger
+            )
         }
 
         settings[providerSettings.provider] = updatedSettings
         store.saveSettings(settings)
+        syncUsageStatusThresholds(from: settings)
     }
 
     /// Returns settings for a provider
     func getSettings(for provider: UsageProvider) -> ProviderThresholdSettings {
         settings[provider] ?? .defaultSettings(for: provider)
+    }
+
+    /// Resets settings for a provider to defaults
+    func resetSettings(for provider: UsageProvider) {
+        let defaultSettings = ProviderThresholdSettings.defaultSettings(for: provider)
+        settings[provider] = defaultSettings
+        store.saveSettings(settings)
+        syncUsageStatusThresholds(from: settings)
     }
 
     // MARK: - Threshold Checking
@@ -108,7 +133,14 @@ final class ThresholdNotificationManager: ObservableObject {
             await checkWindowThreshold(
                 provider: snapshot.provider,
                 window: window,
-                windowSettings: providerSettings.primaryWindow
+                level: .warning,
+                levelSettings: providerSettings.primaryWindow.warning
+            )
+            await checkWindowThreshold(
+                provider: snapshot.provider,
+                window: window,
+                level: .danger,
+                levelSettings: providerSettings.primaryWindow.danger
             )
         }
 
@@ -117,7 +149,14 @@ final class ThresholdNotificationManager: ObservableObject {
             await checkWindowThreshold(
                 provider: snapshot.provider,
                 window: window,
-                windowSettings: providerSettings.secondaryWindow
+                level: .warning,
+                levelSettings: providerSettings.secondaryWindow.warning
+            )
+            await checkWindowThreshold(
+                provider: snapshot.provider,
+                window: window,
+                level: .danger,
+                levelSettings: providerSettings.secondaryWindow.danger
             )
         }
     }
@@ -126,37 +165,31 @@ final class ThresholdNotificationManager: ObservableObject {
     private func checkWindowThreshold(
         provider: UsageProvider,
         window: UsageWindow,
-        windowSettings: WindowThresholdSettings
+        level: UsageThresholdLevel,
+        levelSettings: ThresholdLevelSettings
     ) async {
         // Skip if disabled
-        guard windowSettings.isEnabled else { return }
+        guard levelSettings.isEnabled else { return }
 
         // Skip if below threshold
         let usedPercent = Int(window.usedPercent)
-        guard usedPercent >= windowSettings.thresholdPercent else { return }
+        guard usedPercent >= levelSettings.thresholdPercent else { return }
 
-        // Skip if already notified for this reset cycle (duplicate prevention)
-        // Allow 10 seconds tolerance to handle API returning slightly different timestamps
-        if let lastNotified = windowSettings.lastNotifiedResetAt,
-           let resetAt = window.resetAt {
-            let lastNotifiedSeconds = Int(lastNotified.timeIntervalSince1970)
-            let resetAtSeconds = Int(resetAt.timeIntervalSince1970)
-            let diff = abs(lastNotifiedSeconds - resetAtSeconds)
-            Logger.notification.debug("ThresholdNotificationManager: \(provider.displayName) \(window.kind.rawValue) lastNotified=\(lastNotifiedSeconds) resetAt=\(resetAtSeconds) diff=\(diff)")
-            if diff <= 10 {
-                Logger.notification.debug("ThresholdNotificationManager: Skipping duplicate notification (within 10s tolerance)")
-                return
-            }
-        } else {
-            Logger.notification.debug("ThresholdNotificationManager: \(provider.displayName) \(window.kind.rawValue) lastNotified=\(windowSettings.lastNotifiedResetAt?.description ?? "nil") resetAt=\(window.resetAt?.description ?? "nil")")
+        if shouldSkipDuplicateNotification(
+            provider: provider,
+            window: window,
+            level: level,
+            lastNotifiedResetAt: levelSettings.lastNotifiedResetAt
+        ) {
+            return
         }
 
         // Send notification
         await sendNotification(
             provider: provider,
             windowKind: window.kind,
-            usedPercent: usedPercent,
-            thresholdPercent: windowSettings.thresholdPercent
+            level: level,
+            usedPercent: usedPercent
         )
 
         // Update lastNotifiedResetAt to prevent duplicates
@@ -164,6 +197,7 @@ final class ThresholdNotificationManager: ObservableObject {
             store.updateLastNotifiedResetAt(
                 for: provider,
                 windowKind: window.kind,
+                level: level,
                 resetAt: resetAt
             )
             // Reload settings to update published property
@@ -171,18 +205,45 @@ final class ThresholdNotificationManager: ObservableObject {
         }
     }
 
+    private func shouldSkipDuplicateNotification(
+        provider: UsageProvider,
+        window: UsageWindow,
+        level: UsageThresholdLevel,
+        lastNotifiedResetAt: Date?
+    ) -> Bool {
+        // Allow 10 seconds tolerance to handle API returning slightly different timestamps
+        if let lastNotified = lastNotifiedResetAt,
+           let resetAt = window.resetAt {
+            let lastNotifiedSeconds = Int(lastNotified.timeIntervalSince1970)
+            let resetAtSeconds = Int(resetAt.timeIntervalSince1970)
+            let diff = abs(lastNotifiedSeconds - resetAtSeconds)
+            Logger.notification.debug("ThresholdNotificationManager: \(provider.displayName) \(window.kind.rawValue) \(level.rawValue) lastNotified=\(lastNotifiedSeconds) resetAt=\(resetAtSeconds) diff=\(diff)")
+            if diff <= 10 {
+                Logger.notification.debug("ThresholdNotificationManager: Skipping duplicate notification (within 10s tolerance)")
+                return true
+            }
+            return false
+        }
+
+        Logger.notification.debug("ThresholdNotificationManager: \(provider.displayName) \(window.kind.rawValue) \(level.rawValue) lastNotified=\(lastNotifiedResetAt?.description ?? "nil") resetAt=\(window.resetAt?.description ?? "nil")")
+        return false
+    }
+
     /// Sends a notification for threshold exceeded
     private func sendNotification(
         provider: UsageProvider,
         windowKind: UsageWindowKind,
-        usedPercent: Int,
-        thresholdPercent: Int
+        level: UsageThresholdLevel,
+        usedPercent: Int
     ) async {
         let content = UNMutableNotificationContent()
 
         // Title: "Codex 使用量警告" or "Claude Code 使用量警告"
+        let titleKey = level == .warning
+            ? "notification.alertTitleWarning"
+            : "notification.alertTitleDanger"
         content.title = String(
-            format: "notification.alertTitle".localized(),
+            format: titleKey.localized(),
             provider.displayName
         )
 
@@ -192,7 +253,7 @@ final class ThresholdNotificationManager: ObservableObject {
 
         content.sound = .default
 
-        let identifier = NotificationIdentifier.makeId(provider: provider, windowKind: windowKind)
+        let identifier = NotificationIdentifier.makeId(provider: provider, windowKind: windowKind, level: level)
         let request = UNNotificationRequest(
             identifier: identifier,
             content: content,
@@ -201,10 +262,92 @@ final class ThresholdNotificationManager: ObservableObject {
 
         do {
             try await notificationCenter.add(request)
-            Logger.notification.info("ThresholdNotificationManager: Sent notification for \(provider.displayName) \(windowKind.rawValue) at \(usedPercent)%")
+            Logger.notification.info("ThresholdNotificationManager: Sent notification for \(provider.displayName) \(windowKind.rawValue) \(level.rawValue) at \(usedPercent)%")
         } catch {
             Logger.notification.error("ThresholdNotificationManager: Failed to send notification: \(error.localizedDescription)")
         }
+    }
+
+    private func makeResetLevelSettings(
+        oldLevel: ThresholdLevelSettings,
+        newLevel: ThresholdLevelSettings
+    ) -> ThresholdLevelSettings {
+        guard shouldResetNotification(oldLevel: oldLevel, newLevel: newLevel) else { return newLevel }
+        var updated = newLevel
+        updated.lastNotifiedResetAt = nil
+        return updated
+    }
+
+    private func shouldResetNotification(
+        oldLevel: ThresholdLevelSettings,
+        newLevel: ThresholdLevelSettings
+    ) -> Bool {
+        if oldLevel.thresholdPercent != newLevel.thresholdPercent {
+            return true
+        }
+        if oldLevel.isEnabled == false && newLevel.isEnabled {
+            return true
+        }
+        return false
+    }
+
+    private static func sanitizeSettings(
+        _ settings: [UsageProvider: ProviderThresholdSettings]
+    ) -> [UsageProvider: ProviderThresholdSettings] {
+        Dictionary(uniqueKeysWithValues: settings.map { provider, providerSettings in
+            if isValidProviderSettings(providerSettings, provider: provider) {
+                return (provider, providerSettings)
+            }
+            return (provider, ProviderThresholdSettings.defaultSettings(for: provider))
+        })
+    }
+
+    private static func normalizeWindowSettings(_ settings: WindowThresholdSettings) -> WindowThresholdSettings {
+        var updated = settings
+        let warningPercent = clampPercent(updated.warning.thresholdPercent)
+        let dangerPercent = clampPercent(updated.danger.thresholdPercent)
+        updated.warning.thresholdPercent = warningPercent
+        updated.danger.thresholdPercent = dangerPercent
+        return updated
+    }
+
+    private static func clampPercent(_ value: Int) -> Int {
+        min(max(value, 1), 100)
+    }
+
+    private func syncUsageStatusThresholds(from settings: [UsageProvider: ProviderThresholdSettings]) {
+        for (provider, providerSettings) in settings {
+            let primaryThresholds = makeUsageStatusThresholds(from: providerSettings.primaryWindow)
+            UsageStatusThresholdStore.saveThresholds(primaryThresholds, for: provider, windowKind: .primary)
+            let secondaryThresholds = makeUsageStatusThresholds(from: providerSettings.secondaryWindow)
+            UsageStatusThresholdStore.saveThresholds(secondaryThresholds, for: provider, windowKind: .secondary)
+        }
+        UsageStatusThresholdStore.bumpRevision()
+    }
+
+    private func makeUsageStatusThresholds(from settings: WindowThresholdSettings) -> UsageStatusThresholds {
+        let warningPercent = Self.clampPercent(settings.warning.thresholdPercent)
+        let dangerPercent = Self.clampPercent(settings.danger.thresholdPercent)
+        return UsageStatusThresholds(warningPercent: warningPercent, dangerPercent: dangerPercent)
+    }
+
+    private static func isValidProviderSettings(
+        _ settings: ProviderThresholdSettings,
+        provider: UsageProvider
+    ) -> Bool {
+        guard settings.provider == provider else { return false }
+        return isValidWindowSettings(settings.primaryWindow)
+            && isValidWindowSettings(settings.secondaryWindow)
+    }
+
+    private static func isValidWindowSettings(_ settings: WindowThresholdSettings) -> Bool {
+        guard isValidLevelSettings(settings.warning) else { return false }
+        guard isValidLevelSettings(settings.danger) else { return false }
+        return settings.warning.thresholdPercent <= settings.danger.thresholdPercent
+    }
+
+    private static func isValidLevelSettings(_ settings: ThresholdLevelSettings) -> Bool {
+        (1...100).contains(settings.thresholdPercent)
     }
 
     // MARK: - Testing Support

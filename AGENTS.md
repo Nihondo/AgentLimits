@@ -17,10 +17,11 @@
 - Real-time usage percentage display in menu bar (5h/weekly)
 - Two-line layout (line 1: provider name, line 2: `X% / Y%`)
 - Color-coded status:
-  - Used mode: green (<70%), orange (70-89%), red (≥90%)
-  - Remaining mode: green (>=31%), orange (11-30%), red (<=10%)
+  - Used mode: normal / warning / danger
+  - Remaining mode: normal / warning / danger (thresholds inverted)
 - Per-provider toggle (Codex/Claude separately)
 - Responds to display mode changes (used/remaining)
+- Colors are customizable from Advanced Settings
 
 ### Usage Monitoring
 - Auto refresh: configurable 1-10 minutes while the app is running (usage limits)
@@ -54,6 +55,14 @@
 - Default threshold: 90%
 - Duplicate prevention: notifies only once per reset cycle (tracked by `lastNotifiedResetAt`)
 
+### Advanced Settings (CLI Paths / Colors)
+- Full path overrides for `codex`, `claude`, `npx`
+- Resolved PATH results shown in UI
+- Donut ring color for widget
+- Usage status colors (normal/warning/danger) for menu bar + widget
+- Option to color donuts by usage status
+- Reset to defaults
+
 ## Key Decisions
 - App Group ID: `group.com.dmng.agentlimit`
 - Widget kinds:
@@ -64,6 +73,8 @@
 - Wake Up uses `launchctl bootstrap/bootout` (modern macOS API)
 - Threshold notification requires user permission (requested via settings UI)
 - Menu bar status uses ImageRenderer for dynamic template images
+- CLI execution uses the user login shell and prefixes PATH with `/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH`
+- Full-path overrides (Advanced Settings) take precedence
 
 ## Structure
 - `AgentLimits/` (macOS app)
@@ -73,6 +84,7 @@
   - `WakeUp/` (Wake Up feature)
   - `Notification/` (threshold notification components)
 - `AgentLimitsShared/` (shared models/store + display mode/status helpers and ccusage links)
+  - `UsageColorSettings.swift` (usage color persistence)
 - `AgentLimitsWidget/` (widget extension)
   - `TokenUsageWidget.swift` (small + medium widget with heatmap)
   - `HeatmapView.swift` (heatmap grid rendering)
@@ -103,6 +115,14 @@
 | `usage_refresh_interval_minutes` | Usage limits auto-refresh interval (minutes) |
 | `token_usage_refresh_interval_minutes` | ccusage auto-refresh interval (minutes) |
 | `ccusage_settings` | ccusage settings (JSON) |
+| `cli_path_codex` | Full path override for codex |
+| `cli_path_claude` | Full path override for claude |
+| `cli_path_npx` | Full path override for npx |
+| `usage_color_donut` | Donut ring color (widget) |
+| `usage_color_donut_use_status` | Donut uses usage status colors |
+| `usage_color_green` | Usage normal color |
+| `usage_color_orange` | Usage warning color |
+| `usage_color_red` | Usage danger color |
 
 ## Update Workflow
 1. App saves a `UsageSnapshot` and `TokenUsageSnapshot` as JSON in the App Group container

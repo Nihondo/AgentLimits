@@ -42,7 +42,8 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 |------|---------|
 | `AgentLimits/App/AgentLimitsApp.swift` | Main app entry, menu bar UI, deep link handling |
 | `AgentLimits/App/AppSharedState.swift` | Shared app state for menu bar and settings window |
-| `AgentLimits/App/SettingsTabView.swift` | Tab-based settings UI (Usage, ccusage, Wake Up, Notification) |
+| `AgentLimits/App/SettingsTabView.swift` | Tab-based settings UI (Usage, ccusage, Wake Up, Notification, Advanced) |
+| `AgentLimits/App/CLICommandSettingsView.swift` | Advanced Settings UI (CLI paths + color settings) |
 | `AgentLimits/App/LanguageManager.swift` | Language settings management (Japanese/English/System) |
 | `AgentLimits/App/LoginItemManager.swift` | Login item (start at login) management |
 | `AgentLimits/Usage/CodexUsageFetcher.swift` | Codex API + JS token extraction |
@@ -57,8 +58,9 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 | `AgentLimits/CCUsage/TokenUsageViewModel.swift` | ccusage state, auto-refresh, snapshot persistence |
 | `AgentLimits/CCUsage/CCUsageFetcher.swift` | CLI execution + parsing for ccusage |
 | `AgentLimits/CCUsage/CCUsageSettingsView.swift` | ccusage settings UI |
-| `AgentLimitsShared/UsageModels.swift` | Shared usage models/store and helpers (`UsageSnapshot`, `UsageWindow`, `UsageSnapshotStore`, `UsageProvider`, display mode + status/percent helpers) |
-| `AgentLimitsShared/TokenUsageModels.swift` | Shared token usage models/store and helpers (`TokenUsageSnapshot`, `TokenUsageProvider`, MonthStartDateResolver, CCUsageLinks) |
+| `AgentLimitsShared/UsageModels.swift` | Shared usage models/store and helpers |
+| `AgentLimitsShared/UsageColorSettings.swift` | Usage color persistence (menu bar + widgets) |
+| `AgentLimitsShared/TokenUsageModels.swift` | Shared token usage models/store and helpers |
 | `AgentLimitsShared/TokenUsageFormatting.swift` | Shared cost/token formatting for ccusage |
 | `AgentLimitsWidget/AgentLimitsWidget.swift` | Usage limits widget TimelineProvider and donut gauge UI |
 | `AgentLimitsWidget/TokenUsageWidget.swift` | ccusage token usage widget TimelineProvider and rows UI (small + medium with heatmap) |
@@ -81,12 +83,10 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 #### Menu Bar Status Display
 - Real-time usage percentage display in menu bar for enabled providers
 - Two-line layout (line 1: provider name, line 2: `X% / Y%` for 5h/weekly)
-- Color-coded status:
-  - Used mode: green (<70%), orange (70-89%), red (≥90%)
-  - Remaining mode: green (>=31%), orange (11-30%), red (<=10%)
+- Color-coded status (normal/warning/danger)
 - Per-provider toggle (Codex/Claude separately)
 - Responds to display mode changes (used/remaining)
-- Uses ImageRenderer to generate dynamic images that honor light/dark mode
+- Colors are customizable from Advanced Settings
 
 #### Usage Monitoring
 - Sign in to each service in the in-app WKWebView (Codex/Claude)
@@ -120,22 +120,23 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 - Default threshold: 90%
 - Duplicate prevention: notifies only once per reset cycle
 
+#### Advanced Settings (CLI Paths / Colors)
+- Full path overrides for `codex`, `claude`, `npx`
+- PATH resolution results shown in UI
+- Donut ring color for widgets
+- Usage status colors (normal/warning/danger) for menu bar + widgets
+- Optional donut coloring by usage status
+- Reset to defaults
+
 ### Shared Data Model
 
-`AgentLimitsShared/UsageModels.swift` defines the shared usage model and snapshot store. App/widget add target-specific extensions in `AgentLimits/Usage/AppUsageModels.swift` and `AgentLimitsWidget/WidgetUsageModels.swift`. The `UsageSnapshot` struct contains:
-- `provider`: `.chatgptCodex` or `.claudeCode`
-- `primaryWindow` / `secondaryWindow`: `UsageWindow` with `usedPercent`, `resetAt`, `limitWindowSeconds`
-- `fetchedAt`: Date
+`AgentLimitsShared/UsageModels.swift` defines the shared usage model and snapshot store. App/widget add target-specific extensions in `AgentLimits/Usage/AppUsageModels.swift` and `AgentLimitsWidget/WidgetUsageModels.swift`.
 
 `AgentLimitsShared/TokenUsageModels.swift` defines token usage snapshots:
 - `provider`: `.codex` or `.claude`
 - `today` / `thisWeek` / `thisMonth`: `TokenUsagePeriod` with `costUSD`, `totalTokens`
 - `dailyUsage`: `[DailyUsageEntry]` - Daily usage entries for heatmap (ISO8601 date string + totalTokens)
 - `fetchedAt`: Date
-
-`DailyUsageEntry` struct:
-- `date`: ISO8601 format string (YYYY-MM-DD)
-- `totalTokens`: Total tokens used on this day
 
 ### Storage Paths (App Group: `group.com.dmng.agentlimit`)
 
@@ -161,6 +162,14 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 | `usage_refresh_interval_minutes` | Usage limits auto-refresh interval (minutes) |
 | `token_usage_refresh_interval_minutes` | ccusage auto-refresh interval (minutes) |
 | `ccusage_settings` | ccusage settings (JSON) |
+| `cli_path_codex` | Full path override for codex |
+| `cli_path_claude` | Full path override for claude |
+| `cli_path_npx` | Full path override for npx |
+| `usage_color_donut` | Donut ring color (widget) |
+| `usage_color_donut_use_status` | Donut uses usage status colors |
+| `usage_color_green` | Usage normal color |
+| `usage_color_orange` | Usage warning color |
+| `usage_color_red` | Usage danger color |
 
 ### Widget Kinds
 
@@ -181,3 +190,5 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 - Keep `AGENTS.md` and `CLAUDE.md` in English
 - Backend APIs are undocumented and may change without notice
 - Widget refresh frequency may be throttled by the OS
+- CLI execution uses the user login shell and prefixes PATH with `/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH`
+- Full-path overrides from Advanced Settings take precedence

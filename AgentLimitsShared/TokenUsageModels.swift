@@ -36,11 +36,12 @@ enum TokenUsageProvider: String, Codable, CaseIterable, Identifiable, SnapshotFi
 
     /// Base CLI command (without arguments)
     var cliCommandBase: String {
+        let npxExecutable = CLICommandPathResolver.resolveExecutable(for: .npx, defaultName: "npx")
         switch self {
         case .codex:
-            return "npx -y @ccusage/codex@latest daily"
+            return "\(npxExecutable) -y @ccusage/codex@latest daily"
         case .claude:
-            return "npx -y ccusage@latest daily"
+            return "\(npxExecutable) -y ccusage@latest daily"
         }
     }
 

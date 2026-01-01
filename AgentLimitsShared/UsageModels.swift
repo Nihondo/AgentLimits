@@ -22,6 +22,57 @@ enum SharedUserDefaultsKeys {
     static let cachedDisplayMode = "usage_display_mode_cached"
 }
 
+// MARK: - CLI Command Paths
+
+/// UserDefaults keys for CLI command path overrides.
+enum CLICommandPathKeys {
+    static let codex = "cli_path_codex"
+    static let claude = "cli_path_claude"
+    static let npx = "cli_path_npx"
+}
+
+/// CLI command kinds that support path overrides.
+enum CLICommandKind: String, CaseIterable, Identifiable {
+    case codex
+    case claude
+    case npx
+
+    var id: String { rawValue }
+}
+
+/// Resolves CLI executable names using optional full-path overrides.
+enum CLICommandPathResolver {
+    /// Returns the executable path to use for a command.
+    /// - Parameters:
+    ///   - kind: Command kind that may have a path override.
+    ///   - defaultName: Default executable name to use when no override is set.
+    static func resolveExecutable(for kind: CLICommandKind, defaultName: String) -> String {
+        guard let overridePath = loadCommandPath(for: kind) else {
+            return defaultName
+        }
+        return overridePath
+    }
+
+    private static func loadCommandPath(for kind: CLICommandKind) -> String? {
+        let defaults = UserDefaults(suiteName: AppGroupConfig.groupId) ?? .standard
+        let key = commandPathKey(for: kind)
+        let rawValue = defaults.string(forKey: key) ?? ""
+        let trimmedValue = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmedValue.isEmpty ? nil : trimmedValue
+    }
+
+    private static func commandPathKey(for kind: CLICommandKind) -> String {
+        switch kind {
+        case .codex:
+            return CLICommandPathKeys.codex
+        case .claude:
+            return CLICommandPathKeys.claude
+        case .npx:
+            return CLICommandPathKeys.npx
+        }
+    }
+}
+
 /// Raw display mode values persisted to shared UserDefaults.
 enum UsageDisplayModeRaw: String {
     case used
@@ -49,19 +100,103 @@ enum UsageStatusLevelResolver {
     /// - Parameters:
     ///   - percent: Percent value in the current display mode.
     ///   - isRemainingMode: Whether the display mode is "remaining".
-    static func level(for percent: Double, isRemainingMode: Bool) -> UsageStatusLevel {
+    ///   - warningThreshold: Warning threshold percentage for used mode.
+    ///   - dangerThreshold: Danger threshold percentage for used mode.
+    static func level(
+        for percent: Double,
+        isRemainingMode: Bool,
+        warningThreshold: Int = UsageStatusThresholdDefaults.warningPercent,
+        dangerThreshold: Int = UsageStatusThresholdDefaults.dangerPercent
+    ) -> UsageStatusLevel {
         // Normalize input to a 0-100 range before threshold evaluation.
         let clamped = max(0, min(100, percent))
+        let normalizedWarning = clampThreshold(warningThreshold)
+        let normalizedDanger = clampThreshold(dangerThreshold)
+        let usedWarning = min(normalizedWarning, normalizedDanger)
+        let usedDanger = max(normalizedWarning, normalizedDanger)
         // Remaining-mode thresholds invert the semantics (low remaining => warning).
         if isRemainingMode {
-            if clamped <= 10 { return .red }
-            if clamped <= 30 { return .orange }
+            let remainingDanger = 100 - usedDanger
+            let remainingWarning = 100 - usedWarning
+            if clamped <= Double(remainingDanger) { return .red }
+            if clamped <= Double(remainingWarning) { return .orange }
             return .green
         }
         // Used-mode thresholds (high usage => warning).
-        if clamped >= 90 { return .red }
-        if clamped >= 70 { return .orange }
+        if clamped >= Double(usedDanger) { return .red }
+        if clamped >= Double(usedWarning) { return .orange }
         return .green
+    }
+
+    private static func clampThreshold(_ value: Int) -> Int {
+        min(max(value, 1), 100)
+    }
+}
+
+// MARK: - Usage Status Thresholds
+
+/// Default thresholds for usage status coloring.
+enum UsageStatusThresholdDefaults {
+    static let warningPercent = 70
+    static let dangerPercent = 90
+}
+
+/// Thresholds used for coloring usage percentages.
+struct UsageStatusThresholds: Codable, Equatable {
+    let warningPercent: Int
+    let dangerPercent: Int
+}
+
+/// Stores per-provider, per-window thresholds in App Group defaults for coloring.
+enum UsageStatusThresholdStore {
+    static let revisionKey = "usage_color_threshold_revision"
+
+    static func loadThresholds(
+        for provider: UsageProvider,
+        windowKind: UsageWindowKind
+    ) -> UsageStatusThresholds {
+        let defaults = UserDefaults(suiteName: AppGroupConfig.groupId)
+        let warning = loadPercent(
+            from: defaults,
+            key: makeWarningKey(provider: provider, windowKind: windowKind),
+            fallback: UsageStatusThresholdDefaults.warningPercent
+        )
+        let danger = loadPercent(
+            from: defaults,
+            key: makeDangerKey(provider: provider, windowKind: windowKind),
+            fallback: UsageStatusThresholdDefaults.dangerPercent
+        )
+        return UsageStatusThresholds(warningPercent: warning, dangerPercent: danger)
+    }
+
+    static func saveThresholds(
+        _ thresholds: UsageStatusThresholds,
+        for provider: UsageProvider,
+        windowKind: UsageWindowKind
+    ) {
+        let defaults = UserDefaults(suiteName: AppGroupConfig.groupId)
+        defaults?.set(thresholds.warningPercent, forKey: makeWarningKey(provider: provider, windowKind: windowKind))
+        defaults?.set(thresholds.dangerPercent, forKey: makeDangerKey(provider: provider, windowKind: windowKind))
+    }
+
+    static func bumpRevision() {
+        let defaults = UserDefaults(suiteName: AppGroupConfig.groupId)
+        defaults?.set(Date().timeIntervalSince1970, forKey: revisionKey)
+    }
+
+    private static func loadPercent(from defaults: UserDefaults?, key: String, fallback: Int) -> Int {
+        guard let storedValue = defaults?.object(forKey: key) as? Int else {
+            return fallback
+        }
+        return min(max(storedValue, 1), 100)
+    }
+
+    private static func makeWarningKey(provider: UsageProvider, windowKind: UsageWindowKind) -> String {
+        "usage_color_threshold_warning_\(provider.rawValue)_\(windowKind.rawValue)"
+    }
+
+    private static func makeDangerKey(provider: UsageProvider, windowKind: UsageWindowKind) -> String {
+        "usage_color_threshold_danger_\(provider.rawValue)_\(windowKind.rawValue)"
     }
 }
 

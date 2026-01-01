@@ -2,12 +2,13 @@
 "tab.usage" = "使用制限";
 "tab.wakeUp" = "Wake Up";
 "tab.notification" = "通知";
+"tab.advanced" = "詳細設定";
 
 /* Menu */
 "menu.openSettings" = "AgentLimits 設定...";
 "menu.displayMode" = "表示モード";
-"menu.displayMode.used" = "使用量";
-"menu.displayMode.remaining" = "残り使用量";
+"menu.displayMode.used" = "使用率";
+"menu.displayMode.remaining" = "残り使用率";
 "menu.quit" = "終了";
 "menu.language" = "言語";
 "menu.language.system" = "システム";
@@ -15,7 +16,7 @@
 "menu.language.english" = "English";
 
 /* ContentView */
-"content.login" = "ログインして現在の使用量を取得";
+"content.login" = "ログインして現在の使用率を取得";
 "content.usageLimit" = "使用制限";
 "content.autoRefresh" = "ログイン済みのサービスは%d分ごとに自動更新されます。";
 "refreshInterval.label" = "更新間隔";
@@ -37,8 +38,8 @@
 "settings.showInMenuBar" = "メニューバーに表示";
 
 /* Display Mode */
-"displayMode.used" = "使用量";
-"displayMode.remaining" = "残り使用量";
+"displayMode.used" = "使用率";
+"displayMode.remaining" = "残り使用率";
 
 /* Status */
 "status.notFetched" = "未取得";
@@ -94,16 +95,20 @@
 /* Threshold Notification */
 "menu.thresholdSettings" = "閾値通知設定...";
 "notification.windowTitle" = "閾値通知設定";
-"notification.title" = "使用量閾値通知";
-"notification.description" = "使用量が閾値を超えると通知します";
+"notification.title" = "使用率閾値通知";
+"notification.description" = "使用率が閾値を超えると通知します";
 "notification.provider" = "サービス";
 "notification.authorization" = "通知権限が必要です";
 "notification.requestAuth" = "権限をリクエスト";
 "notification.primaryWindow" = "5時間の使用制限";
 "notification.secondaryWindow" = "週間の使用制限";
 "notification.enabled" = "閾値通知を有効にする";
+"notification.warning" = "警告域";
+"notification.danger" = "危険域";
+"notification.resetDefaults" = "デフォルトに戻す";
 "notification.threshold" = "閾値:";
-"notification.alertTitle" = "%@ 使用量警告";
+"notification.alertTitleWarning" = "%@ 使用率 警告域";
+"notification.alertTitleDanger" = "%@ 使用率 危険域";
 "notification.alertBody5h" = "5時間の使用制限の%d%%に達しました";
 "notification.alertBodyWeek" = "週間の使用制限の%d%%に達しました";
 
@@ -130,3 +135,28 @@
 "ccusage.credits.body" = "ccusage の作者 ryoppippi さんへの感謝を込めて。";
 "ccusage.credits.site" = "ccusage 公式サイト";
 "ccusage.credits.repo" = "GitHub: ryoppippi/ccusage";
+
+/* Advanced Settings */
+"advancedSettings.title" = "詳細設定";
+"advancedSettings.description" = "CLI コマンドと使用率表示の色を設定します。";
+"cliPaths.sectionTitle" = "CLI コマンドのフルパス";
+"cliPaths.description" = "codex / claude / npx のフルパスを指定します。空欄の場合は PATH から解決します。";
+"cliPaths.codex" = "codex パス";
+"cliPaths.claude" = "claude パス";
+"cliPaths.npx" = "npx パス";
+"cliPaths.codex.placeholder" = "例: /opt/homebrew/bin/codex";
+"cliPaths.claude.placeholder" = "例: /opt/homebrew/bin/claude";
+"cliPaths.npx.placeholder" = "例: /opt/homebrew/bin/npx";
+"cliPaths.note" = "変更内容は次回のCLI実行から反映されます。";
+"cliPaths.resolvedLabel" = "解決結果:";
+"cliPaths.notFound" = "見つかりません";
+
+/* CLI Colors */
+"cliColors.title" = "使用率の色設定";
+"cliColors.donut" = "ドーナツグラフ";
+"cliColors.donutUseStatus" = "使用率に従って色を変える";
+"cliColors.green" = "使用率（正常域）";
+"cliColors.orange" = "使用率（警告域）";
+"cliColors.red" = "使用率（危険域）";
+"cliColors.note" = "変更はウィジェットとメニューバーに反映されます。";
+"cliColors.reset" = "デフォルトに戻す";

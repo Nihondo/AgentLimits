@@ -2,37 +2,38 @@
 
 **In Development**
 
-A macOS Sonoma+ menu bar app and Notification Center widgets that show ChatGPT Codex / Claude Code usage limits (5-hour and weekly windows) and ccusage token usage.
+AgentLimits is a macOS Sonoma+ menu bar app with Notification Center widgets that display ChatGPT Codex / Claude Code usage limits (5-hour and weekly windows) and ccusage token usage.
 
 ![](./images/agentlimit_sample.png)
 
 ## Latest Version Download
-Please download the latest version from here: [Download](https://github.com/Nihondo/AgentLimits/releases/latest/download/AgentLimits.zip)
+Download the latest build here: [Download](https://github.com/Nihondo/AgentLimits/releases/latest/download/AgentLimits.zip)
 
 ## Features
 
 ### Menu Bar Status Display
-- Real-time usage percentage display directly in the menu bar
-- Shows 5h/weekly usage for each enabled provider (Codex/Claude) in two lines
+- Real-time usage percentage in the menu bar
+- Two-line layout per provider (Codex/Claude)
   - Line 1: provider name
-  - Line 2: `X% / Y%` (primary / weekly)
-- Color-coded status:
-  - Used mode: green (<70%), orange (70-89%), red (≥90%)
-  - Remaining mode: green (>=31%), orange (11-30%), red (<=10%)
-- Enable/disable per provider in the Usage settings tab (toggle under the provider selector)
+  - Line 2: `X% / Y%` (5-hour / weekly)
+- Status coloring by usage rate
+  - Used mode: normal / warning / danger
+  - Remaining mode: normal / warning / danger (thresholds inverted)
+- Per-provider toggle in Usage settings
 - Responds to display mode changes (used/remaining)
-- Uses `ImageRenderer` to render dynamic label content in the menu bar
+- Renders dynamic images via `ImageRenderer`
+- Usage rate colors (normal/warning/danger) are customizable in Advanced Settings
 
 ### Usage Monitoring (Codex / Claude)
-- Sign in to each service in the in-app WKWebView (switch between Codex/Claude)
+- Sign in via in-app WKWebView (switch between Codex/Claude)
 - Fetch usage data from internal APIs:
-  - Codex: `https://chatgpt.com/backend-api/wham/usage` (JSON)
-  - Claude: `https://claude.ai/api/organizations/{orgId}/usage` (JSON)
-- Store provider-specific snapshots in App Group `group.com.dmng.agentlimit`
+  - Codex: `https://chatgpt.com/backend-api/wham/usage`
+  - Claude: `https://claude.ai/api/organizations/{orgId}/usage`
+- Provider snapshots are saved to App Group `group.com.dmng.agentlimit`
 - Separate widgets for Codex and Claude
-- Auto refresh: configurable 1-10 minutes (menu next to provider selector)
-- Display mode (used/remaining) is switched from the menu bar
-- Color-coded percentage display in widgets based on usage level and display mode
+- Auto refresh: configurable 1–10 minutes
+- Display mode is switched from the menu bar
+- Widget percentages are color-coded by usage level
 
 ### ccusage Token Usage
 - Fetch via CLI and store snapshots
@@ -40,84 +41,97 @@ Please download the latest version from here: [Download](https://github.com/Niho
   - Claude: `npx -y ccusage@latest daily`
 - Shows today/this week/this month tokens and cost
 - Separate widgets for Codex and Claude token usage
-- **Small widget**: Usage summary (today/week/month)
-- **Medium widget**: Usage summary + GitHub-style heatmap showing daily usage for the current month
-  - 7 rows (Sun-Sat) × 4-6 columns (weeks)
-  - 5-level color intensity based on quartile distribution
-  - Weekday labels (Mon, Wed, Fri) displayed
-  - Supports desktop pinned mode (grayscale/accented rendering)
-- Auto refresh: configurable 1-10 minutes (menu next to provider selector in ccusage settings)
+- **Small widget**: Summary (today/week/month)
+- **Medium widget**: Summary + GitHub-style heatmap for the current month
+  - 7 rows (Sun–Sat) × 4–6 columns (weeks)
+  - 5 levels by quartile distribution
+  - Weekday labels (Mon, Wed, Fri)
+  - Desktop pinned mode support (accented/grayscale)
+- Auto refresh: configurable 1–10 minutes
 - Widget tap opens `https://ccusage.com/`
 
 ### Wake Up (CLI Scheduler)
-- Automatically run CLI commands (`codex exec --skip-git-repo-check "hello"` / `claude -p "hello"`) at scheduled hours
-- Implemented via LaunchAgent (macOS standard scheduled execution)
-- Per-provider schedule configuration
-- Supports additional arguments (e.g., `--model="haiku"`)
-- LaunchAgent plists: `~/Library/LaunchAgents/com.dmng.agentlimit.wakeup-*.plist`
+- Runs CLI commands at scheduled hours
+  - `codex exec --skip-git-repo-check "hello"`
+  - `claude -p "hello"`
+- Implemented via LaunchAgent
+- Per-provider schedule and additional args support
+- LaunchAgent plist: `~/Library/LaunchAgents/com.dmng.agentlimit.wakeup-*.plist`
 - Logs: `/tmp/agentlimit-wakeup-*.log`
-- **What is this feature for?** Often, a session starts at 9 AM, is used up by 12 PM, leaving the user unable to do anything until 2 PM. In such cases, if the session starts at 7 AM, it will be reset by 12 PM, allowing it to be used again.
 
 ### Threshold Notification
-- Display system notification when usage exceeds threshold
-- Per-provider settings (Codex / Claude separately)
-- Per-window settings (5h / weekly separately)
+- System notification when usage rate exceeds threshold
+- Per-provider (Codex/Claude) and per-window (5h/weekly) settings
 - Default threshold: 90%
-- Notifies only once per reset cycle (duplicate prevention)
+- Notifies once per reset cycle
+
+### Advanced Settings (CLI Paths / Colors)
+- Set full paths for `codex`, `claude`, and `npx` (optional)
+  - Empty = resolve via PATH
+  - Resolution results are shown in the UI
+- Customize donut chart color
+- Customize usage rate colors (normal/warning/danger)
+  - Applies to menu bar + widgets
+- “Use usage-based colors” for donuts
+- “Reset to Defaults” restores color settings
 
 ## Basic Usage
-1. Run the AgentLimits app.
+1. Run AgentLimits.
 2. Add the widget in Notification Center.
-3. Select "AgentLimits Settings..." from the menu bar icon.
-4. Switch between Codex/Claude at the top of the window.
-5. Choose refresh interval (1-10 minutes) from the menu on the right.
-6. Log in to each service in the WebView at the bottom.
-7. Use the menu bar "Display Mode" to switch used/remaining.
-8. "Refresh Now" updates only the currently selected service.
+3. Choose “AgentLimits Settings...” from the menu bar.
+4. Switch between Codex/Claude.
+5. Select refresh interval (1–10 minutes).
+6. Log in via WebView.
+7. Use menu bar “Display Mode” to switch usage rate/remaining rate.
+8. “Refresh Now” updates the selected service.
 
-### Menu Bar Status Settings
-1. Open the Usage settings tab.
-2. Toggle "Show in menu bar" for each provider (Codex/Claude).
-3. The menu bar will display real-time usage percentages for enabled providers.
+## Settings Screens
+
+### Usage Settings
+1. Open the **Usage** tab.
+2. Select Codex or Claude.
+3. Choose refresh interval (1–10 minutes).
+4. Toggle “Show in menu bar” per provider.
+5. Log in via the embedded WebView.
+
+### Menu Bar Status
+1. Enable “Show in menu bar” for each provider you want displayed.
+2. The menu bar shows `X% / Y%` for 5-hour and weekly windows.
 
 ### ccusage Settings
-1. Select "ccusage Settings..." from the menu bar.
-2. Choose provider (Codex / Claude).
-3. Choose refresh interval (1-10 minutes) from the menu on the right.
+1. Open the **ccusage** tab.
+2. Select provider (Codex / Claude).
+3. Choose refresh interval (1–10 minutes).
 4. Enable periodic fetch.
-5. Use "Test Now" to verify CLI execution.
+5. Use “Test Now” to verify CLI execution.
 
 ### Wake Up Settings
-1. Select "Wake up Settings..." from the menu bar.
-2. Choose provider (Codex / Claude Code).
+1. Open the **Wake Up** tab.
+2. Select provider (Codex / Claude Code).
 3. Enable schedule.
-4. Select hours to run (0-23).
-5. Use "Test Now" to verify CLI execution.
+4. Select hours to run (0–23).
+5. Use “Test Now” to verify CLI execution.
 
 ### Threshold Notification Settings
-1. Select "Threshold Notification Settings..." from the menu bar.
+1. Open the **Notification** tab.
 2. Request notification permission (first time only).
-3. Choose provider (Codex / Claude Code).
-4. Configure threshold for 5h/weekly limits separately.
+3. Select provider (Codex / Claude Code).
+4. Configure thresholds for 5-hour and weekly windows.
 
-## Displayed Data
-- Usage widgets:
-  - 5-hour usage (%) or remaining (%)
-  - Weekly usage (%) or remaining (%)
-  - Last updated (relative time)
-  - Color-coded percentage based on usage level
-- ccusage widgets:
-  - Today/this week/this month cost (USD)
-  - Today/this week/this month tokens
-  - Last updated (relative time)
-- Menu bar:
-  - Provider name (Codex/Claude) on line 1
-  - `X% / Y%` on line 2 with color coding
+### Advanced Settings
+1. Open the **Advanced** tab.
+2. Set full paths for `codex`, `claude`, and `npx` if needed.
+3. Review PATH resolution results.
+4. Customize donut chart color and usage status colors.
+5. Enable “Use usage-based colors” for donuts if desired.
+6. Use “Reset to Defaults” to restore colors.
 
 ## Notes
-- Fetching depends on internal APIs and may break if they change.
+- Internal APIs may change without notice.
 - ccusage CLI output changes may break parsing.
-- Widget refresh frequency may be throttled by the OS.
+- Widget refresh can be throttled by macOS.
 - Threshold notifications require permission.
-- The CLI is launched via zsh, and the PATH for the codex, claude, and npx commands must be set in the zsh environment.
-- You may experience login failures with Claude, requiring multiple attempts.
+- CLI execution uses the **user login shell**.
+- PATH is prefixed with `"/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH"`.
+- If full paths are specified in Advanced Settings, those paths are used.
+- Claude logins may require multiple attempts.

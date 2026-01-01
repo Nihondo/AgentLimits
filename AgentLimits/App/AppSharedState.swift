@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import WidgetKit
 
 // MARK: - App Shared State
 
@@ -32,6 +33,9 @@ final class AppSharedState: ObservableObject {
 
         // Initialize WakeUpScheduler to sync LaunchAgents on startup
         _ = WakeUpScheduler.shared
+
+        // Refresh widgets once on app launch.
+        WidgetCenter.shared.reloadAllTimelines()
     }
 
     /// Starts background refresh and loads WebViews (called once)

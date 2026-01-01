@@ -54,9 +54,11 @@ struct WakeUpSchedule: Codable, Equatable {
 
         switch provider {
         case .chatgptCodex:
-            return "codex exec --skip-git-repo-check \"hello\"\(suffix)"
+            let codexExecutable = CLICommandPathResolver.resolveExecutable(for: .codex, defaultName: "codex")
+            return "\(codexExecutable) exec --skip-git-repo-check \"hello\"\(suffix)"
         case .claudeCode:
-            return "claude -p \"hello\"\(suffix)"
+            let claudeExecutable = CLICommandPathResolver.resolveExecutable(for: .claude, defaultName: "claude")
+            return "\(claudeExecutable) -p \"hello\"\(suffix)"
         }
     }
 
@@ -240,7 +242,8 @@ final class LaunchAgentManager {
     /// Generates plist data for a schedule
     private func generatePlist(for schedule: WakeUpSchedule) throws -> Data {
         // Build full command with logging prefix
-        let fullCommand = "echo \"=== $(date) ===\" && echo \"Command: \(schedule.cliCommand)\" && mkdir -p ~/.agentlimits && cd ~/.agentlimits && \(schedule.cliCommand)"
+        let prefixedCommand = ShellCommandPathPrefixer.prefixIfNeeded(command: schedule.cliCommand)
+        let fullCommand = "echo \"=== $(date) ===\" && echo \"Command: \(prefixedCommand)\" && mkdir -p ~/.agentlimits && cd ~/.agentlimits && \(prefixedCommand)"
 
         // Build StartCalendarInterval array
         var calendarIntervals: [[String: Int]] = []
@@ -255,7 +258,7 @@ final class LaunchAgentManager {
         let plist: [String: Any] = [
             "Label": schedule.launchAgentLabel,
             "ProgramArguments": [
-                "/bin/zsh",
+                ShellPathResolver.resolveLoginShellPath(),
                 "-l",
                 "-c",
                 fullCommand

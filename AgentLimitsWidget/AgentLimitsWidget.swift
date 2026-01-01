@@ -87,6 +87,7 @@ struct AgentLimitsWidgetEntryView: View {
                         let donutSize = min(targetDonutSize, availableDonutSize)
                         let columnHeight = donutSize + 30
                         UsageDonutRow(
+                            provider: entry.provider,
                             primaryWindow: snapshot.primaryWindow,
                             secondaryWindow: snapshot.secondaryWindow,
                             donutSize: donutSize,
@@ -108,6 +109,7 @@ struct AgentLimitsWidgetEntryView: View {
                         let columnHeight = donutSize + 30
                         HStack(alignment: .center, spacing: 0) {
                             UsageDonutRow(
+                                provider: entry.provider,
                                 primaryWindow: snapshot.primaryWindow,
                                 secondaryWindow: snapshot.secondaryWindow,
                                 donutSize: donutSize,
@@ -132,6 +134,7 @@ struct AgentLimitsWidgetEntryView: View {
                     .padding(.top, 6)
                 default:
                     UsageDonutRow(
+                        provider: entry.provider,
                         primaryWindow: snapshot.primaryWindow,
                         secondaryWindow: snapshot.secondaryWindow,
                         donutSize: 44,
@@ -185,6 +188,7 @@ struct ClaudeUsageLimitWidget: Widget {
 }
 
 private struct UsageDonutRow: View {
+    let provider: UsageProvider
     let primaryWindow: UsageWindow?
     let secondaryWindow: UsageWindow?
     let donutSize: CGFloat
@@ -194,13 +198,17 @@ private struct UsageDonutRow: View {
     var body: some View {
         HStack(spacing: spacing) {
             UsageDonutColumnView(
+                provider: provider,
                 centerLabel: "5h",
+                windowKind: .primary,
                 window: primaryWindow,
                 donutSize: donutSize,
                 columnHeight: columnHeight
             )
             UsageDonutColumnView(
+                provider: provider,
                 centerLabel: "1w",
+                windowKind: .secondary,
                 window: secondaryWindow,
                 donutSize: donutSize,
                 columnHeight: columnHeight
@@ -210,14 +218,22 @@ private struct UsageDonutRow: View {
 }
 
 private struct UsageDonutColumnView: View {
+    let provider: UsageProvider
     let centerLabel: String
+    let windowKind: UsageWindowKind
     let window: UsageWindow?
     let donutSize: CGFloat
     let columnHeight: CGFloat
 
     var body: some View {
         VStack(spacing: 4) {
-            UsageDonutView(centerLabel: centerLabel, usedPercent: window?.usedPercent, size: donutSize)
+            UsageDonutView(
+                provider: provider,
+                windowKind: windowKind,
+                centerLabel: centerLabel,
+                usedPercent: window?.usedPercent,
+                size: donutSize
+            )
             Text(percentText)
                 .font(.title3)
                 .fontWeight(.bold)
@@ -232,11 +248,13 @@ private struct UsageDonutColumnView: View {
     }
 
     private var statusColor: Color {
-        WidgetUsageColorResolver.statusColor(for: window)
+        WidgetUsageColorResolver.statusColor(for: window, provider: provider, windowKind: windowKind)
     }
 }
 
 private struct UsageDonutView: View {
+    let provider: UsageProvider
+    let windowKind: UsageWindowKind
     let centerLabel: String
     let usedPercent: Double?
     let size: CGFloat
@@ -254,7 +272,13 @@ private struct UsageDonutView: View {
                 .trim(from: 0, to: progress)
                 .stroke(style: StrokeStyle(lineWidth: 8, lineCap: .butt))
                 .rotationEffect(.degrees(-90))
-                .foregroundStyle(.tint)
+                .foregroundStyle(
+                    WidgetUsageColorResolver.donutRingColor(
+                        usedPercent: usedPercent,
+                        provider: provider,
+                        windowKind: windowKind
+                    )
+                )
             Text(centerLabel)
                 .font(.title3)
                 .fontWeight(.bold)
@@ -372,20 +396,64 @@ private enum DateFormatters {
 }
 
 private enum WidgetUsageColorResolver {
-    static func statusColor(for window: UsageWindow?) -> Color {
+    static func statusColor(
+        for window: UsageWindow?,
+        provider: UsageProvider,
+        windowKind: UsageWindowKind
+    ) -> Color {
         guard let window else { return .secondary }
+        let thresholds = UsageStatusThresholdStore.loadThresholds(for: provider, windowKind: windowKind)
         let level = UsageStatusLevelResolver.level(
             for: window.usedPercent,
-            isRemainingMode: WidgetDisplayModeResolver.isRemainingMode
+            isRemainingMode: WidgetDisplayModeResolver.isRemainingMode,
+            warningThreshold: thresholds.warningPercent,
+            dangerThreshold: thresholds.dangerPercent
         )
         switch level {
         case .green:
-            return .green
+            return resolveStoredColor(for: UsageColorKeys.statusGreen, defaultColor: .green)
         case .orange:
-            return .orange
+            return resolveStoredColor(for: UsageColorKeys.statusOrange, defaultColor: .orange)
         case .red:
-            return .red
+            return resolveStoredColor(for: UsageColorKeys.statusRed, defaultColor: .red)
         }
+    }
+
+    static func donutRingColor(
+        usedPercent: Double?,
+        provider: UsageProvider,
+        windowKind: UsageWindowKind
+    ) -> Color {
+        let defaults = UserDefaults(suiteName: AppGroupConfig.groupId)
+        let useStatusColor = defaults?.bool(forKey: UsageColorKeys.donutUseStatus) ?? false
+        if useStatusColor, let usedPercent {
+            let thresholds = UsageStatusThresholdStore.loadThresholds(for: provider, windowKind: windowKind)
+            let level = UsageStatusLevelResolver.level(
+                for: usedPercent,
+                isRemainingMode: WidgetDisplayModeResolver.isRemainingMode,
+                warningThreshold: thresholds.warningPercent,
+                dangerThreshold: thresholds.dangerPercent
+            )
+            return statusColor(for: level)
+        }
+        return resolveStoredColor(for: UsageColorKeys.donut, defaultColor: .accentColor)
+    }
+
+    private static func statusColor(for level: UsageStatusLevel) -> Color {
+        switch level {
+        case .green:
+            return resolveStoredColor(for: UsageColorKeys.statusGreen, defaultColor: .green)
+        case .orange:
+            return resolveStoredColor(for: UsageColorKeys.statusOrange, defaultColor: .orange)
+        case .red:
+            return resolveStoredColor(for: UsageColorKeys.statusRed, defaultColor: .red)
+        }
+    }
+
+    private static func resolveStoredColor(for key: String, defaultColor: Color) -> Color {
+        let defaults = UserDefaults(suiteName: AppGroupConfig.groupId)
+        let storedValue = defaults?.string(forKey: key)
+        return ColorHexCodec.resolveColor(from: storedValue, defaultColor: defaultColor)
     }
 }
 

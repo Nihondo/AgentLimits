@@ -3,9 +3,47 @@
 // Used by CLI-based features like ccusage and Wake Up.
 
 import Foundation
+import Darwin
 @preconcurrency import Dispatch
 
 // MARK: - Execution Result
+
+/// Resolves the user's login shell path for CLI execution.
+enum ShellPathResolver {
+    /// Returns the login shell path from the system user record.
+    /// Falls back to `/bin/zsh` when unavailable or non-executable.
+    static func resolveLoginShellPath(fallback: String = "/bin/zsh") -> String {
+        guard let shellPath = fetchLoginShellPath(),
+              !shellPath.isEmpty,
+              FileManager.default.isExecutableFile(atPath: shellPath) else {
+            return fallback
+        }
+        return shellPath
+    }
+
+    /// Fetches the login shell path from the current user's passwd entry.
+    private static func fetchLoginShellPath() -> String? {
+        guard let passwd = getpwuid(getuid()),
+              let shellPointer = passwd.pointee.pw_shell else {
+            return nil
+        }
+        return String(cString: shellPointer)
+    }
+}
+
+/// Adds a PATH prefix to commands to ensure Homebrew binaries are discoverable.
+enum ShellCommandPathPrefixer {
+    private static let pathPrefix = "export PATH=\"/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH\";"
+
+    /// Returns a command prefixed with PATH export unless it already sets PATH.
+    static func prefixIfNeeded(command: String) -> String {
+        let trimmed = command.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.hasPrefix("PATH=") || trimmed.hasPrefix("export PATH=") || trimmed.hasPrefix("env PATH=") {
+            return command
+        }
+        return "\(pathPrefix) \(command)"
+    }
+}
 
 /// Contains the complete result of a shell command execution
 struct ShellExecutionResult {
@@ -59,7 +97,7 @@ enum ShellExecutorError: Error, LocalizedError {
 // MARK: - Shell Executor
 
 /// Executes shell commands asynchronously with timeout support.
-/// Uses `/bin/zsh` with login shell mode to ensure environment variables are loaded.
+/// Uses the user's login shell with login mode to ensure environment variables are loaded.
 final class ShellExecutor: Sendable {
     /// Default timeout in seconds
     static let defaultTimeout: TimeInterval = 60
@@ -76,11 +114,11 @@ final class ShellExecutor: Sendable {
     /// Creates a new shell executor with the specified configuration.
     /// - Parameters:
     ///   - timeout: Maximum time to wait for command completion (default: 60 seconds)
-    ///   - shellPath: Path to the shell executable (default: /bin/zsh)
+    ///   - shellPath: Path to the shell executable (default: user's login shell)
     ///   - workingDirectory: Directory to execute commands in (default: user's home)
     init(
         timeout: TimeInterval = defaultTimeout,
-        shellPath: String = "/bin/zsh",
+        shellPath: String = ShellPathResolver.resolveLoginShellPath(),
         workingDirectory: URL = FileManager.default.homeDirectoryForCurrentUser
     ) {
         self.timeout = timeout
@@ -133,11 +171,12 @@ final class ShellExecutor: Sendable {
         let process = Process()
         let stdout = Pipe()
         let stderr = Pipe()
+        let prefixedCommand = ShellCommandPathPrefixer.prefixIfNeeded(command: command)
 
         // Configure the process to run via login shell
         // Using -l flag ensures PATH and other environment variables are loaded
         process.executableURL = URL(fileURLWithPath: shellPath)
-        process.arguments = ["-l", "-c", command]
+        process.arguments = ["-l", "-c", prefixedCommand]
         process.standardOutput = stdout
         process.standardError = stderr
         process.currentDirectoryURL = workingDirectory

@@ -146,8 +146,8 @@ struct ContentView: View {
     private var refreshIntervalMenu: some View {
         HStack(spacing: 6) {
             Text("refreshInterval.label".localized())
-                .font(.footnote)
-                .foregroundStyle(.secondary)
+                .font(.body)
+                .foregroundStyle(.primary)
             Picker(
                 "refreshInterval.label".localized(),
                 selection: refreshIntervalBinding

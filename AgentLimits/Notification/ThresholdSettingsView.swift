@@ -3,6 +3,7 @@
 // Allows users to set per-provider, per-window notification thresholds.
 
 import SwiftUI
+import WidgetKit
 
 // MARK: - Threshold Settings View
 
@@ -89,6 +90,9 @@ struct ThresholdSettingsView: View {
             WindowThresholdView(
                 title: "notification.primaryWindow".localized(),
                 settings: settings.primaryWindow,
+                onCommit: {
+                    reloadUsageWidgets(for: selectedProvider)
+                },
                 onUpdate: { newWindowSettings in
                     var updated = settings
                     updated.primaryWindow = newWindowSettings
@@ -99,13 +103,28 @@ struct ThresholdSettingsView: View {
             WindowThresholdView(
                 title: "notification.secondaryWindow".localized(),
                 settings: settings.secondaryWindow,
+                onCommit: {
+                    reloadUsageWidgets(for: selectedProvider)
+                },
                 onUpdate: { newWindowSettings in
                     var updated = settings
                     updated.secondaryWindow = newWindowSettings
                     manager.updateSettings(updated)
                 }
             )
+
+            HStack {
+                Spacer()
+                Button("notification.resetDefaults".localized()) {
+                    manager.resetSettings(for: selectedProvider)
+                    reloadUsageWidgets(for: selectedProvider)
+                }
+            }
         }
+    }
+
+    private func reloadUsageWidgets(for provider: UsageProvider) {
+        WidgetCenter.shared.reloadTimelines(ofKind: provider.widgetKind)
     }
 }
 
@@ -115,6 +134,7 @@ struct ThresholdSettingsView: View {
 private struct WindowThresholdView: View {
     let title: String
     let settings: WindowThresholdSettings
+    let onCommit: () -> Void
     let onUpdate: (WindowThresholdSettings) -> Void
 
     var body: some View {
@@ -122,48 +142,110 @@ private struct WindowThresholdView: View {
             Text(title)
                 .font(.headline)
 
-            Toggle("notification.enabled".localized(), isOn: enabledBinding)
-
-            if settings.isEnabled {
-                HStack {
-                    Text("notification.threshold".localized())
-                    Stepper(
-                        "\(settings.thresholdPercent)%",
-                        value: thresholdBinding,
-                        in: 1...100,
-                        step: 1
+            ThresholdLevelRow(
+                title: "notification.warning".localized(),
+                settings: settings.warning,
+                onCommit: onCommit,
+                onUpdate: { newLevelSettings in
+                    var updated = settings
+                    var normalized = newLevelSettings
+                    normalized.thresholdPercent = min(
+                        max(normalized.thresholdPercent, 1),
+                        settings.danger.thresholdPercent
                     )
-                    .monospacedDigit()
+                    updated.warning = normalized
+                    onUpdate(updated)
                 }
-            }
+            )
+
+            ThresholdLevelRow(
+                title: "notification.danger".localized(),
+                settings: settings.danger,
+                onCommit: onCommit,
+                onUpdate: { newLevelSettings in
+                    var updated = settings
+                    var normalized = newLevelSettings
+                    normalized.thresholdPercent = max(
+                        min(normalized.thresholdPercent, 100),
+                        settings.warning.thresholdPercent
+                    )
+                    updated.danger = normalized
+                    onUpdate(updated)
+                }
+            )
         }
         .padding()
         .background(.thinMaterial)
         .cornerRadius(8)
     }
 
-    private var enabledBinding: Binding<Bool> {
+}
+
+// MARK: - Threshold Level Row
+
+private struct ThresholdLevelRow: View {
+    let title: String
+    let settings: ThresholdLevelSettings
+    let onCommit: () -> Void
+    let onUpdate: (ThresholdLevelSettings) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 12) {
+                Text(title)
+                    .font(.headline)
+                    .frame(width: 70, alignment: .leading)
+
+                Toggle("notification.enabled".localized(), isOn: makeEnabledBinding())
+                    .toggleStyle(.checkbox)
+            }
+
+            HStack(spacing: 12) {
+                Slider(
+                    value: makeThresholdBinding(),
+                    in: 1...100,
+                    step: 1,
+                    onEditingChanged: { isEditing in
+                        if !isEditing {
+                            onCommit()
+                        }
+                    }
+                )
+                .disabled(!settings.isEnabled)
+                .accessibilityValue(Text("\(settings.thresholdPercent)%"))
+
+                Text("\(settings.thresholdPercent)%")
+                    .monospacedDigit()
+                    .frame(width: 48, alignment: .trailing)
+            }
+        }
+    }
+
+    private func makeEnabledBinding() -> Binding<Bool> {
         Binding(
             get: { settings.isEnabled },
             set: { newValue in
-                // Propagate enabled toggle to the settings store.
                 var updated = settings
                 updated.isEnabled = newValue
+                onUpdate(updated)
+                onCommit()
+            }
+        )
+    }
+
+    private func makeThresholdBinding() -> Binding<Double> {
+        Binding(
+            get: { Double(clampThreshold(settings.thresholdPercent)) },
+            set: { newValue in
+                var updated = settings
+                updated.thresholdPercent = clampThreshold(Int(newValue.rounded()))
                 onUpdate(updated)
             }
         )
     }
 
-    private var thresholdBinding: Binding<Int> {
-        Binding(
-            get: { settings.thresholdPercent },
-            set: { newValue in
-                // Persist updated threshold percent.
-                var updated = settings
-                updated.thresholdPercent = newValue
-                onUpdate(updated)
-            }
-        )
+    private func clampThreshold(_ value: Int) -> Int {
+        min(max(value, 1), 100)
     }
 }
 

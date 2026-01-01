@@ -11,6 +11,7 @@ enum SettingsTab: String, Hashable, CaseIterable, Identifiable {
     case wakeUp
     case threshold
     case ccusage
+    case advanced
 
     var id: String { rawValue }
 
@@ -20,6 +21,7 @@ enum SettingsTab: String, Hashable, CaseIterable, Identifiable {
         case .wakeUp: return "tab.wakeUp".localized()
         case .threshold: return "tab.notification".localized()
         case .ccusage: return "tab.ccusage".localized()
+        case .advanced: return "tab.advanced".localized()
         }
     }
 
@@ -29,6 +31,7 @@ enum SettingsTab: String, Hashable, CaseIterable, Identifiable {
         case .wakeUp: return "alarm"
         case .threshold: return "bell"
         case .ccusage: return "chart.bar"
+        case .advanced: return "gearshape"
         }
     }
 }
@@ -104,6 +107,8 @@ struct SettingsTabView: View {
                     ThresholdSettingsView(manager: .shared)
                 case .ccusage:
                     CCUsageSettingsView(viewModel: tokenUsageViewModel)
+                case .advanced:
+                    CLICommandSettingsView()
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)

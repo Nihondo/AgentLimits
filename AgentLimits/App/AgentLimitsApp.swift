@@ -97,6 +97,8 @@ private struct MenuBarLabelView: View {
     @AppStorage(UserDefaultsKeys.menuBarStatusCodexEnabled) private var codexEnabled = false
     @AppStorage(UserDefaultsKeys.menuBarStatusClaudeEnabled) private var claudeEnabled = false
     @AppStorage(UserDefaultsKeys.displayMode) private var displayMode: UsageDisplayMode = .used
+    @AppStorage(UsageStatusThresholdStore.revisionKey, store: UserDefaults(suiteName: AppGroupConfig.groupId))
+    private var thresholdRevision: Double = 0
     @State private var renderedImage: NSImage?
     @Environment(\.colorScheme) private var colorScheme
 
@@ -129,6 +131,9 @@ private struct MenuBarLabelView: View {
             scheduleImageUpdate()
         }
         .onChange(of: colorScheme) { _, _ in
+            scheduleImageUpdate()
+        }
+        .onChange(of: thresholdRevision) { _, _ in
             scheduleImageUpdate()
         }
         .onReceive(appState.viewModel.objectWillChange) { _ in
@@ -184,7 +189,7 @@ private struct MenuBarLabelContentView: View {
             Image(.menuBarIcon)
             if let codexSnapshot {
                 MenuBarProviderStatusView(
-                    providerName: "Codex",
+                    provider: .chatgptCodex,
                     primaryWindow: codexSnapshot.primaryWindow,
                     secondaryWindow: codexSnapshot.secondaryWindow,
                     displayMode: displayMode
@@ -192,7 +197,7 @@ private struct MenuBarLabelContentView: View {
             }
             if let claudeSnapshot {
                 MenuBarProviderStatusView(
-                    providerName: "Claude",
+                    provider: .claudeCode,
                     primaryWindow: claudeSnapshot.primaryWindow,
                     secondaryWindow: claudeSnapshot.secondaryWindow,
                     displayMode: displayMode
@@ -204,17 +209,18 @@ private struct MenuBarLabelContentView: View {
 
 /// Status view for a single provider showing 5h/1w usage in two rows
 private struct MenuBarProviderStatusView: View {
-    let providerName: String
+    let provider: UsageProvider
     let primaryWindow: UsageWindow?
     let secondaryWindow: UsageWindow?
     let displayMode: UsageDisplayMode
 
     var body: some View {
         VStack(alignment: .leading, spacing: -2) {
-            Text(providerName)
+            Text(provider.displayName)
                 .font(.system(size: 9.5, weight: .semibold))
                 .foregroundStyle(.primary)
             MenuBarPercentLineView(
+                provider: provider,
                 primaryWindow: primaryWindow,
                 secondaryWindow: secondaryWindow,
                 displayMode: displayMode
@@ -225,18 +231,25 @@ private struct MenuBarProviderStatusView: View {
 
 /// A compact menu bar line showing primary/secondary usage percentages
 private struct MenuBarPercentLineView: View {
+    let provider: UsageProvider
     let primaryWindow: UsageWindow?
     let secondaryWindow: UsageWindow?
     let displayMode: UsageDisplayMode
+    @AppStorage(UsageColorKeys.statusGreen, store: UserDefaults(suiteName: AppGroupConfig.groupId))
+    private var statusGreenHex: String = ""
+    @AppStorage(UsageColorKeys.statusOrange, store: UserDefaults(suiteName: AppGroupConfig.groupId))
+    private var statusOrangeHex: String = ""
+    @AppStorage(UsageColorKeys.statusRed, store: UserDefaults(suiteName: AppGroupConfig.groupId))
+    private var statusRedHex: String = ""
 
     var body: some View {
         HStack(spacing: 2) {
             Text(formatPercentText(primaryWindow))
-                .foregroundColor(resolveStatusColor(primaryWindow))
+                .foregroundColor(resolveStatusColor(primaryWindow, windowKind: .primary))
             Text("/")
                 .foregroundStyle(.secondary)
             Text(formatPercentText(secondaryWindow))
-                .foregroundColor(resolveStatusColor(secondaryWindow))
+                .foregroundColor(resolveStatusColor(secondaryWindow, windowKind: .secondary))
         }
         .font(.system(size: 13.5, weight: .semibold, design: .monospaced))
         .monospacedDigit()
@@ -249,21 +262,30 @@ private struct MenuBarPercentLineView: View {
         return UsagePercentFormatter.formatPercentText(percent)
     }
 
-    private func resolveStatusColor(_ window: UsageWindow?) -> Color {
+    private func resolveStatusColor(_ window: UsageWindow?, windowKind: UsageWindowKind) -> Color {
         guard let window else { return .secondary }
         let percent = displayMode.displayPercent(from: window.usedPercent)
+        let thresholds = UsageStatusThresholdStore.loadThresholds(for: provider, windowKind: windowKind)
         let level = UsageStatusLevelResolver.level(
             for: percent,
-            isRemainingMode: displayMode == .remaining
+            isRemainingMode: displayMode == .remaining,
+            warningThreshold: thresholds.warningPercent,
+            dangerThreshold: thresholds.dangerPercent
         )
         switch level {
         case .green:
-            return .green
+            return resolveStoredColor(from: statusGreenHex, defaultColor: .green)
         case .orange:
-            return .orange
+            return resolveStoredColor(from: statusOrangeHex, defaultColor: .orange)
         case .red:
-            return .red
+            return resolveStoredColor(from: statusRedHex, defaultColor: .red)
         }
+    }
+
+    private func resolveStoredColor(from storedValue: String, defaultColor: Color) -> Color {
+        let trimmedValue = storedValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        let resolvedValue = trimmedValue.isEmpty ? nil : trimmedValue
+        return ColorHexCodec.resolveColor(from: resolvedValue, defaultColor: defaultColor)
     }
 }
 
