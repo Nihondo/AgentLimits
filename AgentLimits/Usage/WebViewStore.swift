@@ -14,6 +14,7 @@ import WebKit
 final class WebViewStore: ObservableObject {
     let webView: WKWebView
     let usageURL: URL
+    let provider: UsageProvider
     @Published var isPageReady = false
     @Published var popupWebView: WKWebView?
     @Published var cookieChangeToken = UUID()
@@ -21,8 +22,12 @@ final class WebViewStore: ObservableObject {
     private var coordinator: WebViewCoordinator?
     private let cookieStore: WKHTTPCookieStore
     private var cookieObserver: CookieObserver?
+    /// Callback invoked when popup navigation finishes. Returns true if popup should close.
+    var onPopupNavigationFinished: ((WKWebView) async -> Bool)?
+    private var isClosingPopup = false
 
     init(initialProvider: UsageProvider = .chatgptCodex) {
+        self.provider = initialProvider
         let configuration = WKWebViewConfiguration()
         configuration.websiteDataStore = .default()
         configuration.preferences.javaScriptCanOpenWindowsAutomatically = true
@@ -71,9 +76,14 @@ final class WebViewStore: ObservableObject {
 
     /// Closes any open popup WebView
     func closePopupWebView() {
+        // Prevent duplicate close calls.
+        guard !isClosingPopup else { return }
+        isClosingPopup = true
         // Stop any popup loading and release the reference.
         popupWebView?.stopLoading()
         popupWebView = nil
+        onPopupNavigationFinished = nil
+        isClosingPopup = false
     }
 
     private final class CookieObserver: NSObject, WKHTTPCookieStoreObserver {
@@ -126,6 +136,16 @@ final class WebViewCoordinator: NSObject, WKNavigationDelegate {
         guard let store else { return }
         if webView === store.webView {
             store.isPageReady = webView.url?.host == store.targetHost
+        } else if webView === store.popupWebView {
+            // Check login status when popup navigation finishes.
+            Task {
+                if let callback = store.onPopupNavigationFinished,
+                   await callback(webView) {
+                    // Wait before closing to allow redirect processing.
+                    try? await Task.sleep(nanoseconds: 500_000_000)
+                    store.closePopupWebView()
+                }
+            }
         }
     }
 

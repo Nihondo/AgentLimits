@@ -46,9 +46,21 @@ struct ContentView: View {
                     let store = webViewPool.getWebViewStore(for: provider)
                     WebViewRepresentable(store: store)
                         .onReceive(store.$popupWebView) { popup in
-                            guard let popup else { return }
-                            popupWebView = popup
-                            popupWebViewStore = store
+                            if let popup {
+                                popupWebView = popup
+                                popupWebViewStore = store
+                                // Set up login check callback for auto-close.
+                                store.onPopupNavigationFinished = { [weak viewModel] _ in
+                                    guard let viewModel else { return false }
+                                    return await viewModel.checkLoginStatus(for: store.provider)
+                                }
+                            } else {
+                                // Close sheet when popup is dismissed programmatically.
+                                if popupWebViewStore === store {
+                                    popupWebView = nil
+                                    popupWebViewStore = nil
+                                }
+                            }
                         }
                     .opacity(viewModel.selectedProvider == provider ? 1 : 0)
                     .allowsHitTesting(viewModel.selectedProvider == provider)

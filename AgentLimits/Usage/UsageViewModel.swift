@@ -79,6 +79,13 @@ final class UsageViewModel: ObservableObject {
         stateManager.allSnapshots
     }
 
+    /// Checks if user is logged in for the specified provider.
+    /// Used by popup auto-close to detect OAuth completion.
+    func checkLoginStatus(for provider: UsageProvider) async -> Bool {
+        let webViewStore = webViewPool.getWebViewStore(for: provider)
+        return await checkLoginStatus(for: provider, using: webViewStore.webView)
+    }
+
     // MARK: - Auto Refresh
 
     /// Starts the auto-refresh timer for eligible providers.
