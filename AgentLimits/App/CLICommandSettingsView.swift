@@ -2,148 +2,179 @@
 // Detailed settings for overriding CLI command full paths.
 
 import SwiftUI
-import WidgetKit
 
 @MainActor
 struct CLICommandSettingsView: View {
     @AppStorage(
         CLICommandPathKeys.codex,
-        store: UserDefaults(suiteName: AppGroupConfig.groupId)
+        store: AppGroupDefaults.shared
     ) private var codexCommandPathText: String = ""
 
     @AppStorage(
         CLICommandPathKeys.claude,
-        store: UserDefaults(suiteName: AppGroupConfig.groupId)
+        store: AppGroupDefaults.shared
     ) private var claudeCommandPathText: String = ""
 
     @AppStorage(
         CLICommandPathKeys.npx,
-        store: UserDefaults(suiteName: AppGroupConfig.groupId)
+        store: AppGroupDefaults.shared
     ) private var npxCommandPathText: String = ""
 
     @State private var resolvedPaths: [CLICommandKind: String] = [:]
-    @State private var donutColor: Color = UsageColorSettings.loadDonutColor()
-    @State private var isDonutColorByUsage: Bool = UsageColorSettings.loadDonutUseStatus()
-    @State private var statusGreenColor: Color = UsageColorSettings.loadStatusGreenColor()
-    @State private var statusOrangeColor: Color = UsageColorSettings.loadStatusOrangeColor()
-    @State private var statusRedColor: Color = UsageColorSettings.loadStatusRedColor()
+    @State private var scriptCopyFeedback: Bool = false
+    @State private var widgetTapAction: WidgetTapAction = WidgetTapActionStore.loadAction()
+
+    private var statusLineScriptPath: String? {
+        Bundle.main.path(forResource: "agentlimits_statusline_claude", ofType: "sh")
+    }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        SettingsScrollContainer {
             headerView
-            Divider()
-            SettingsSection(title: "cliPaths.sectionTitle".localized()) {
-                commandPathSection
+
+            Form {
+                SettingsFormSection(title: "cliPaths.sectionTitle".localized()) {
+                    commandPathSection
+                }
+
+                SettingsFormSection(title: "scripts.title".localized()) {
+                    scriptsSection
+                }
+
+                SettingsFormSection(title: "widgetTapAction.title".localized()) {
+                    widgetTapActionSection
+                }
             }
-            Divider()
-            SettingsSection(title: "cliColors.title".localized()) {
-                colorSettingsSection
-            }
-            Spacer()
+            .formStyle(.grouped)
         }
-        .padding()
         .frame(minWidth: 420, minHeight: 420)
-        .onAppear {
-            refreshAllResolvedPaths()
-            reloadColorSettings()
-        }
-        .onChange(of: codexCommandPathText) { _, _ in
-            refreshResolvedPath(for: .codex, commandName: "codex", overrideText: codexCommandPathText)
-        }
-        .onChange(of: claudeCommandPathText) { _, _ in
-            refreshResolvedPath(for: .claude, commandName: "claude", overrideText: claudeCommandPathText)
-        }
-        .onChange(of: npxCommandPathText) { _, _ in
-            refreshResolvedPath(for: .npx, commandName: "npx", overrideText: npxCommandPathText)
-        }
-        .onChange(of: donutColor) { _, _ in
-            UsageColorSettings.saveDonutColor(donutColor)
-            WidgetCenter.shared.reloadAllTimelines()
-        }
-        .onChange(of: isDonutColorByUsage) { _, _ in
-            UsageColorSettings.saveDonutUseStatus(isDonutColorByUsage)
-            WidgetCenter.shared.reloadAllTimelines()
-        }
-        .onChange(of: statusGreenColor) { _, _ in
-            UsageColorSettings.saveStatusGreenColor(statusGreenColor)
-            WidgetCenter.shared.reloadAllTimelines()
-        }
-        .onChange(of: statusOrangeColor) { _, _ in
-            UsageColorSettings.saveStatusOrangeColor(statusOrangeColor)
-            WidgetCenter.shared.reloadAllTimelines()
-        }
-        .onChange(of: statusRedColor) { _, _ in
-            UsageColorSettings.saveStatusRedColor(statusRedColor)
-            WidgetCenter.shared.reloadAllTimelines()
-        }
+        .onAppear { refreshAllResolvedPaths() }
+        .onChange(of: codexCommandPathText) { refreshResolvedPath(for: .codex) }
+        .onChange(of: claudeCommandPathText) { refreshResolvedPath(for: .claude) }
+        .onChange(of: npxCommandPathText) { refreshResolvedPath(for: .npx) }
     }
 
     private var headerView: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("advancedSettings.title".localized())
-                .font(.title2)
-                .bold()
-            Text("advancedSettings.description".localized())
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        }
+        SettingsHeaderView(
+            titleText: "advancedSettings.title".localized(),
+            descriptionText: "advancedSettings.description".localized()
+        )
+    }
+
+    private struct CommandPathDescriptor: Identifiable {
+        let kind: CLICommandKind
+        let titleKey: String
+        let placeholderKey: String
+
+        var id: String { kind.rawValue }
+    }
+
+    private var commandPathDescriptors: [CommandPathDescriptor] {
+        [
+            CommandPathDescriptor(
+                kind: .codex,
+                titleKey: "cliPaths.codex",
+                placeholderKey: "cliPaths.codex.placeholder"
+            ),
+            CommandPathDescriptor(
+                kind: .claude,
+                titleKey: "cliPaths.claude",
+                placeholderKey: "cliPaths.claude.placeholder"
+            ),
+            CommandPathDescriptor(
+                kind: .npx,
+                titleKey: "cliPaths.npx",
+                placeholderKey: "cliPaths.npx.placeholder"
+            )
+        ]
     }
 
     private var commandPathSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            CommandPathRow(
-                title: "cliPaths.codex".localized(),
-                placeholder: "cliPaths.codex.placeholder".localized(),
-                commandPathText: $codexCommandPathText,
-                resolvedPathText: resolvedPathText(for: .codex),
-                isResolved: isResolvedPath(for: .codex)
-            )
-            CommandPathRow(
-                title: "cliPaths.claude".localized(),
-                placeholder: "cliPaths.claude.placeholder".localized(),
-                commandPathText: $claudeCommandPathText,
-                resolvedPathText: resolvedPathText(for: .claude),
-                isResolved: isResolvedPath(for: .claude)
-            )
-            CommandPathRow(
-                title: "cliPaths.npx".localized(),
-                placeholder: "cliPaths.npx.placeholder".localized(),
-                commandPathText: $npxCommandPathText,
-                resolvedPathText: resolvedPathText(for: .npx),
-                isResolved: isResolvedPath(for: .npx)
-            )
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.medium) {
+            ForEach(Array(commandPathDescriptors.enumerated()), id: \.element.id) { index, descriptor in
+                if index > 0 {
+                    Divider()
+                }
+                CommandPathRow(
+                    title: descriptor.titleKey.localized(),
+                    placeholder: descriptor.placeholderKey.localized(),
+                    commandPathText: makeCommandPathBinding(for: descriptor.kind),
+                    resolvedPathText: makeResolvedPathText(for: descriptor.kind),
+                    isResolved: isResolvedPath(for: descriptor.kind)
+                )
+            }
             Text("cliPaths.note".localized())
                 .font(.footnote)
                 .foregroundStyle(.secondary)
         }
     }
 
-    private var colorSettingsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .firstTextBaseline, spacing: 12) {
-                ColorPicker("cliColors.donut".localized(), selection: $donutColor, supportsOpacity: false)
-                    .disabled(isDonutColorByUsage)
-                Toggle("cliColors.donutUseStatus".localized(), isOn: $isDonutColorByUsage)
-                    .toggleStyle(.switch)
-            }
-            ColorPicker("cliColors.green".localized(), selection: $statusGreenColor, supportsOpacity: false)
-            ColorPicker("cliColors.orange".localized(), selection: $statusOrangeColor, supportsOpacity: false)
-            ColorPicker("cliColors.red".localized(), selection: $statusRedColor, supportsOpacity: false)
-
-            HStack {
+    private var scriptsSection: some View {
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
+            HStack(alignment: .top, spacing: DesignTokens.Spacing.small) {
+                VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
+                    Text("scripts.claudeCode.title".localized())
+                        .font(.body)
+                    if let path = statusLineScriptPath {
+                        Text(path)
+                            .font(.system(.footnote, design: .monospaced))
+                            .foregroundStyle(.secondary)
+                            .textSelection(.enabled)
+                    } else {
+                        Text("scripts.notFound".localized())
+                            .font(.footnote)
+                            .foregroundStyle(.red)
+                    }
+                }
                 Spacer()
-                Button("cliColors.reset".localized()) {
-                    resetUsageColors()
+                if statusLineScriptPath != nil {
+                    Button {
+                        copyScriptPath()
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: scriptCopyFeedback ? "checkmark" : "doc.on.doc")
+                            Text(scriptCopyFeedback ? "scripts.copied".localized() : "scripts.copy".localized())
+                        }
+                    }
+                    .settingsButtonStyle(.secondary)
                 }
             }
-
-            Text("cliColors.note".localized())
+            Text("scripts.claudeCode.note".localized())
                 .font(.footnote)
                 .foregroundStyle(.secondary)
         }
     }
 
-    private func resolvedPathText(for kind: CLICommandKind) -> String {
+    private var widgetTapActionSection: some View {
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
+            Picker("", selection: $widgetTapAction) {
+                ForEach(WidgetTapAction.allCases) { action in
+                    Text(action.localizationKey.localized()).tag(action)
+                }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .onChange(of: widgetTapAction) { _, newValue in
+                WidgetTapActionStore.saveAction(newValue)
+            }
+
+            Text("widgetTapAction.note".localized())
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private func copyScriptPath() {
+        guard let path = statusLineScriptPath else { return }
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(path, forType: .string)
+        scriptCopyFeedback = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            scriptCopyFeedback = false
+        }
+    }
+
+    private func makeResolvedPathText(for kind: CLICommandKind) -> String {
         resolvedPaths[kind] ?? "cliPaths.notFound".localized()
     }
 
@@ -152,90 +183,52 @@ struct CLICommandSettingsView: View {
     }
 
     private func refreshAllResolvedPaths() {
-        refreshResolvedPath(for: .codex, commandName: "codex", overrideText: codexCommandPathText)
-        refreshResolvedPath(for: .claude, commandName: "claude", overrideText: claudeCommandPathText)
-        refreshResolvedPath(for: .npx, commandName: "npx", overrideText: npxCommandPathText)
+        for descriptor in commandPathDescriptors {
+            refreshResolvedPath(for: descriptor.kind)
+        }
     }
 
-    private func reloadColorSettings() {
-        donutColor = UsageColorSettings.loadDonutColor()
-        isDonutColorByUsage = UsageColorSettings.loadDonutUseStatus()
-        statusGreenColor = UsageColorSettings.loadStatusGreenColor()
-        statusOrangeColor = UsageColorSettings.loadStatusOrangeColor()
-        statusRedColor = UsageColorSettings.loadStatusRedColor()
-    }
-
-    private func resetUsageColors() {
-        UsageColorSettings.resetToDefaults()
-        reloadColorSettings()
-        WidgetCenter.shared.reloadAllTimelines()
-    }
-
-    private func refreshResolvedPath(
-        for kind: CLICommandKind,
-        commandName: String,
-        overrideText: String
-    ) {
-        let trimmedOverride = overrideText.trimmingCharacters(in: .whitespacesAndNewlines)
+    private func refreshResolvedPath(for kind: CLICommandKind) {
+        let trimmedOverride = CLICommandPathValidator.normalizeOverridePath(
+            loadOverrideText(for: kind)
+        )
         Task {
             let resolvedPath: String?
-            if trimmedOverride.isEmpty {
-                resolvedPath = await resolveCommandPath(for: commandName)
+            if let trimmedOverride {
+                resolvedPath = CLICommandPathValidator.isExecutablePathValid(trimmedOverride)
+                    ? trimmedOverride
+                    : nil
             } else {
-                resolvedPath = validateExecutablePath(trimmedOverride) ? trimmedOverride : nil
+                resolvedPath = await CLICommandPathResolver.resolveExecutablePath(for: kind)
             }
             await MainActor.run {
-                if let resolvedPath, !resolvedPath.isEmpty {
-                    resolvedPaths[kind] = resolvedPath
-                } else {
-                    resolvedPaths[kind] = nil
-                }
+                resolvedPaths[kind] = resolvedPath
             }
         }
     }
 
-    private func resolveCommandPath(for commandName: String) async -> String? {
-        do {
-            let output = try await ShellExecutor(timeout: 5).executeString(
-                command: "command -v \(commandName)"
-            )
-            let trimmed = output.trimmingCharacters(in: .whitespacesAndNewlines)
-            return trimmed.isEmpty ? nil : trimmed
-        } catch {
-            return nil
+    private func loadOverrideText(for kind: CLICommandKind) -> String {
+        switch kind {
+        case .codex:
+            return codexCommandPathText
+        case .claude:
+            return claudeCommandPathText
+        case .npx:
+            return npxCommandPathText
         }
     }
 
-    private func validateExecutablePath(_ path: String) -> Bool {
-        let expandedPath = (path as NSString).expandingTildeInPath
-        var isDirectory: ObjCBool = false
-        let fileExists = FileManager.default.fileExists(atPath: expandedPath, isDirectory: &isDirectory)
-        guard fileExists, !isDirectory.boolValue else {
-            return false
+    private func makeCommandPathBinding(for kind: CLICommandKind) -> Binding<String> {
+        switch kind {
+        case .codex:
+            return $codexCommandPathText
+        case .claude:
+            return $claudeCommandPathText
+        case .npx:
+            return $npxCommandPathText
         }
-        return FileManager.default.isExecutableFile(atPath: expandedPath)
-    }
-}
-
-private struct SettingsSection<Content: View>: View {
-    let title: String
-    let content: Content
-
-    init(title: String, @ViewBuilder content: () -> Content) {
-        self.title = title
-        self.content = content()
     }
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(title)
-                .font(.headline)
-            content
-        }
-        .padding()
-        .background(.thinMaterial)
-        .cornerRadius(8)
-    }
 }
 
 private struct CommandPathRow: View {
@@ -246,20 +239,26 @@ private struct CommandPathRow: View {
     let isResolved: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(title)
-                .font(.body)
-                .foregroundStyle(.primary)
-            TextField(placeholder, text: $commandPathText)
-                .textFieldStyle(.roundedBorder)
-                .font(.system(.body, design: .monospaced))
-                .foregroundStyle(.primary)
-            HStack(spacing: 8) {
-                Image(systemName: isResolved ? "checkmark.circle.fill" : "xmark.circle.fill")
-                    .foregroundStyle(isResolved ? .green : .red)
-                Text("cliPaths.resolvedLabel".localized())
-                    .font(.footnote)
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
+            LabeledContent(title) {
+                TextField(
+                    "",
+                    text: $commandPathText,
+                    prompt: Text(placeholder)
+                )
+                    .textFieldStyle(.roundedBorder)
+                    .font(.system(.body, design: .monospaced))
                     .foregroundStyle(.primary)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityLabel(Text(title))
+            }
+
+            HStack(spacing: DesignTokens.Spacing.small) {
+                SettingsStatusIndicator(
+                    text: "cliPaths.resolvedLabel".localized(),
+                    level: isResolved ? .success : .error
+                )
                 Text(resolvedPathText)
                     .font(.system(.footnote, design: .monospaced))
                     .foregroundStyle(.primary)

@@ -74,11 +74,6 @@ struct WakeUpSchedule: Codable, Equatable {
 enum WakeUpResult {
     case success(output: String)
     case failure(error: WakeUpError)
-
-    var isSuccess: Bool {
-        if case .success = self { return true }
-        return false
-    }
 }
 
 /// Errors that can occur during wake-up operations
@@ -241,9 +236,8 @@ final class LaunchAgentManager {
 
     /// Generates plist data for a schedule
     private func generatePlist(for schedule: WakeUpSchedule) throws -> Data {
-        // Build full command with logging prefix
-        let prefixedCommand = ShellCommandPathPrefixer.prefixIfNeeded(command: schedule.cliCommand)
-        let fullCommand = "echo \"=== $(date) ===\" && echo \"Command: \(prefixedCommand)\" && mkdir -p ~/.agentlimits && cd ~/.agentlimits && \(prefixedCommand)"
+        // Build full command with logging prefix.
+        let fullCommand = WakeUpCommandBuilder.buildLaunchAgentCommand(for: schedule)
 
         // Build StartCalendarInterval array
         var calendarIntervals: [[String: Int]] = []
@@ -279,6 +273,27 @@ final class LaunchAgentManager {
 
 // MARK: - CLI Executor
 
+private enum WakeUpCommandBuilder {
+    static func buildLaunchAgentCommand(for schedule: WakeUpSchedule) -> String {
+        let prefixedCommand = ShellCommandPathPrefixer.prefixIfNeeded(command: schedule.cliCommand)
+        return buildCommand(for: schedule, command: prefixedCommand, marker: nil)
+    }
+
+    static func buildTestCommand(for schedule: WakeUpSchedule) -> String {
+        let baseCommand = buildCommand(for: schedule, command: schedule.cliCommand, marker: "[TEST]")
+        return "{ \(baseCommand); } 2>&1 | tee -a \"\(schedule.logPath)\""
+    }
+
+    private static func buildCommand(
+        for schedule: WakeUpSchedule,
+        command: String,
+        marker: String?
+    ) -> String {
+        let markerSuffix = marker.map { " \($0)" } ?? ""
+        return "echo \"=== $(date)\(markerSuffix) ===\" && echo \"Command: \(command)\" && mkdir -p ~/.agentlimits && cd ~/.agentlimits && \(command)"
+    }
+}
+
 /// Executes CLI commands for manual wake-up testing.
 /// Uses ShellExecutor for command execution with timeout support.
 final class CLIExecutor {
@@ -296,8 +311,8 @@ final class CLIExecutor {
     /// - Returns: The command output as a string
     /// - Throws: `WakeUpError` if execution fails
     func execute(for schedule: WakeUpSchedule) async throws -> String {
-        // Build command with logging (same format as LaunchAgent, with [TEST] marker)
-        let command = "{ echo \"=== $(date) [TEST] ===\" && echo \"Command: \(schedule.cliCommand)\" && mkdir -p ~/.agentlimits && cd ~/.agentlimits && \(schedule.cliCommand); } 2>&1 | tee -a \"\(schedule.logPath)\""
+        // Build command with logging (same format as LaunchAgent, with [TEST] marker).
+        let command = WakeUpCommandBuilder.buildTestCommand(for: schedule)
 
         do {
             return try await shellExecutor.executeString(command: command)

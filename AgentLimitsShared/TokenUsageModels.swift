@@ -227,9 +227,16 @@ struct CCUsageSettings: Codable, Equatable {
 
     /// CLI command for display (includes -s startDate -j)
     var displayCommand: String {
-        // Include start date and JSON flag for UI display.
+        makeCLICommand(startDate: Self.currentStartOfMonth)
+    }
+
+    /// Builds the full CLI command with start date and JSON output flag.
+    /// - Parameter startDate: Start date in YYYYMMDD format.
+    /// - Returns: CLI command string with date and JSON arguments.
+    func makeCLICommand(startDate: String) -> String {
+        // Include start date and JSON flag for parsing.
         var cmd = cliCommand
-        cmd += " -s \(Self.currentStartOfMonth) -j"
+        cmd += " -s \(startDate) -j"
         return cmd
     }
 

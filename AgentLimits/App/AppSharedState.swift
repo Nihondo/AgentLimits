@@ -12,6 +12,8 @@ import WidgetKit
 /// Initializes WebView pool, view model, and observes page-ready changes.
 @MainActor
 final class AppSharedState: ObservableObject {
+    static let shared = AppSharedState()
+
     let webViewPool: UsageWebViewPool
     let viewModel: UsageViewModel
     let tokenUsageViewModel: TokenUsageViewModel

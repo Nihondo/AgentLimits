@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-AgentLimits is a macOS Sonoma+ menu bar app with WidgetKit widgets that display usage limits (Codex/Claude) and ccusage token usage (today/this week/this month). The app embeds WKWebView for service login and fetches usage data from internal backend APIs. ccusage token usage is fetched via CLI and stored as snapshots for widgets.
+AgentLimits is a macOS Sonoma+ menu bar app with WidgetKit widgets that display usage limits (Codex/Claude Code) and ccusage token usage (today/this week/this month). The app embeds WKWebView for service login and fetches usage data from internal backend APIs. ccusage token usage is fetched via CLI and stored as snapshots for widgets.
 
 ## Build Commands
 
@@ -25,16 +25,17 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 1. User logs into service (chatgpt.com or claude.ai) via WKWebView
 2. `*UsageFetcher` executes JavaScript to extract auth token/org ID, then fetches usage API:
    - Codex: `https://chatgpt.com/backend-api/wham/usage`
-   - Claude: `https://claude.ai/api/organizations/{orgId}/usage`
+   - Claude Code: `https://claude.ai/api/organizations/{orgId}/usage`
 3. `UsageViewModel` manages auto-refresh (configurable 1-10 minutes) and per-provider state
 4. `UsageSnapshotStore` persists usage snapshots as JSON under App Group container
 5. `CCUsageFetcher` runs CLI to fetch token usage:
    - Codex: `npx -y @ccusage/codex@latest daily`
-   - Claude: `npx -y ccusage@latest daily`
+   - Claude Code: `npx -y ccusage@latest daily`
 6. `TokenUsageViewModel` manages auto-refresh (configurable 1-10 minutes) and snapshot persistence
 7. Widgets read their respective snapshot files (no network access)
 8. `ThresholdNotificationManager` checks usage against thresholds and sends notifications
 9. Menu bar label displays real-time usage percentages for enabled providers
+10. Bundled Claude Code status line script reads snapshots + App Group settings for CLI display
 
 ### Key Components
 
@@ -43,12 +44,16 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 | `AgentLimits/App/AgentLimitsApp.swift` | Main app entry, menu bar UI, deep link handling |
 | `AgentLimits/App/AppSharedState.swift` | Shared app state for menu bar and settings window |
 | `AgentLimits/App/SettingsTabView.swift` | Tab-based settings UI (Usage, ccusage, Wake Up, Notification, Advanced) |
-| `AgentLimits/App/CLICommandSettingsView.swift` | Advanced Settings UI (CLI paths + color settings) |
+| `AgentLimits/App/CLICommandSettingsView.swift` | Advanced Settings UI (CLI paths + scripts + widget tap action) |
 | `AgentLimits/App/LanguageManager.swift` | Language settings management (Japanese/English/System) |
 | `AgentLimits/App/LoginItemManager.swift` | Login item (start at login) management |
+| `AgentLimits/App/AppLogger.swift` | Application-wide logging utility |
+| `AgentLimits/App/AutoRefreshCoordinator.swift` | Auto-refresh cycle coordination |
+| `AgentLimits/App/ShellExecutor.swift` | Shell command execution utility |
 | `AgentLimits/Usage/CodexUsageFetcher.swift` | Codex API + JS token extraction |
 | `AgentLimits/Usage/ClaudeUsageFetcher.swift` | Claude API + JS org ID extraction |
 | `AgentLimits/Usage/UsageViewModel.swift` | Usage limits state, auto-refresh, per-provider tracking, threshold check |
+| `AgentLimits/Usage/ProviderStateManager.swift` | Per-provider state management (Codex/Claude Code independent tracking) |
 | `AgentLimits/Usage/UsageDisplayModeStore.swift` | Display mode persistence and snapshot conversion |
 | `AgentLimits/Usage/AppUsageModels.swift` | App-only display mode + localized errors |
 | `AgentLimits/Usage/ContentView.swift` | Usage limits settings UI with WebView |
@@ -62,6 +67,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 | `AgentLimitsShared/UsageColorSettings.swift` | Usage color persistence (menu bar + widgets) |
 | `AgentLimitsShared/TokenUsageModels.swift` | Shared token usage models/store and helpers |
 | `AgentLimitsShared/TokenUsageFormatting.swift` | Shared cost/token formatting for ccusage |
+| `AgentLimitsShared/WidgetTapActionSettings.swift` | Widget tap action settings (open website / refresh data) |
 | `AgentLimitsWidget/AgentLimitsWidget.swift` | Usage limits widget TimelineProvider and donut gauge UI |
 | `AgentLimitsWidget/TokenUsageWidget.swift` | ccusage token usage widget TimelineProvider and rows UI (small + medium with heatmap) |
 | `AgentLimitsWidget/HeatmapView.swift` | Heatmap grid view for medium widget (7 rows × 4-6 columns) |
@@ -70,13 +76,14 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 | `AgentLimitsWidget/AgentLimitsWidgetBundle.swift` | Widget bundle registration |
 | `AgentLimitsWidget/WidgetUsageModels.swift` | Widget error localization (bridges shared resolver to widget strings) |
 | `AgentLimitsWidget/WidgetLanguageHelper.swift` | Widget language helper |
-| `AgentLimitsWidget/WidgetRelativeTimeFormatter.swift` | Relative time formatting for widgets |
+| `AgentLimitsWidget/WidgetUpdateTimeFormatter.swift` | Update time formatting (HH:mm or --:-- if >24h ago) |
 | `AgentLimits/WakeUp/WakeUpScheduler.swift` | LaunchAgent-based CLI scheduler for starting 5h sessions |
 | `AgentLimits/WakeUp/WakeUpSettingsView.swift` | Wake Up schedule configuration UI |
 | `AgentLimits/Notification/ThresholdNotificationManager.swift` | Usage threshold notification logic |
 | `AgentLimits/Notification/ThresholdNotificationSettings.swift` | Per-provider, per-window threshold settings model |
 | `AgentLimits/Notification/ThresholdNotificationStore.swift` | Threshold settings persistence |
-| `AgentLimits/Notification/ThresholdSettingsView.swift` | Threshold notification settings UI |
+| `AgentLimits/Notification/ThresholdSettingsView.swift` | Threshold notification settings UI (thresholds + usage colors) |
+| `AgentLimits/Scripts/agentlimits_statusline_claude.sh` | Claude Code status line script (reads App Group snapshots) |
 
 ### Features
 
@@ -84,19 +91,23 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 - Real-time usage percentage display in menu bar for enabled providers
 - Two-line layout (line 1: provider name, line 2: `X% / Y%` for 5h/weekly)
 - Color-coded status (normal/warning/danger)
-- Per-provider toggle (Codex/Claude separately)
+- Per-provider toggle (Codex/Claude Code separately)
 - Responds to display mode changes (used/remaining)
-- Colors are customizable from Advanced Settings
+- Colors are customizable from Notification settings
+- Menu bar menu includes Display Mode, Language selection, Wake Up → Run Now, and Start app at login
 
 #### Usage Monitoring
-- Sign in to each service in the in-app WKWebView (Codex/Claude)
+- Sign in to each service in the in-app WKWebView (Codex/Claude Code)
 - Auto refresh interval is configurable (1-10 minutes)
 - Display mode (used/remaining) shared across app + widgets
 - Color-coded percentage display in widgets based on usage level and display mode
+- Widget tap action configurable: open website or refresh data (Advanced Settings)
+- Usage screen includes **Clear Data** to remove embedded browser login data and website storage
 
 #### Token Usage (ccusage)
-- CLI-based fetch and parsing for Codex/Claude
+- CLI-based fetch and parsing for Codex/Claude Code
 - Separate widgets for ccusage token usage (small and medium sizes)
+- Per-provider enable/disable with additional CLI arguments support
 - **Small widget**: Usage summary (today/week/month cost and tokens)
 - **Medium widget**: Usage summary + GitHub-style heatmap
   - Layout: 7 rows (Sun-Sat) × 4-6 columns (weeks of current month)
@@ -104,7 +115,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
   - Weekday labels: Mon, Wed, Fri displayed on left side
   - Desktop pinned mode: Uses opacity-based white colors for accented rendering
 - Auto refresh interval is configurable (1-10 minutes)
-- Widget tap opens `https://ccusage.com/` via app deep link
+- Widget tap action configurable: open website or refresh data (Advanced Settings)
 
 #### Wake Up (LaunchAgent-based CLI Scheduler)
 - Schedules CLI commands (`codex exec --skip-git-repo-check "hello"` / `claude -p "hello"`) at user-defined hours
@@ -115,18 +126,24 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 
 #### Threshold Notification
 - Sends system notifications when usage exceeds configured threshold
-- Per-provider settings (Codex / Claude separately)
+- Per-provider settings (Codex / Claude Code separately)
 - Per-window settings (5h / weekly separately)
 - Default threshold: 90%
 - Duplicate prevention: notifies only once per reset cycle
+- Usage color settings (donut + status colors) live in Notification settings
 
-#### Advanced Settings (CLI Paths / Colors)
+#### Advanced Settings (CLI Paths / Scripts / Widget Tap)
 - Full path overrides for `codex`, `claude`, `npx`
 - PATH resolution results shown in UI
-- Donut ring color for widgets
-- Usage status colors (normal/warning/danger) for menu bar + widgets
-- Optional donut coloring by usage status
-- Reset to defaults
+- Bundled status line script path shown with copy action
+- Widget tap action: open website (default) or refresh data
+
+#### Claude Code Status Line Script
+- Bundled script for Claude Code status line integration
+- Reads Claude Code usage snapshot and App Group settings (display mode, language, thresholds, colors)
+- Outputs a single line with 5h/weekly usage, reset times, and update time
+- Supports overrides: `-ja`, `-en`, `-r` (remaining), `-u` (used), `-d` (debug)
+- Requires `jq`
 
 ### Shared Data Model
 
@@ -143,7 +160,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 ```
 ~/Library/Group Containers/group.com.dmng.agentlimit/Library/Application Support/AgentLimit/
 ├── usage_snapshot.json           # Codex usage limits
-├── usage_snapshot_claude.json    # Claude usage limits
+├── usage_snapshot_claude.json    # Claude Code usage limits
 ├── token_usage_codex.json        # ccusage Codex
 └── token_usage_claude.json       # ccusage Claude
 ```
@@ -155,7 +172,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 | `usage_display_mode` | Display mode (used% / remaining%) |
 | `usage_display_mode_cached` | Cached display mode used to convert stored snapshots (also shared via App Group for widgets) |
 | `menu_bar_status_codex_enabled` | Menu bar Codex status display toggle |
-| `menu_bar_status_claude_enabled` | Menu bar Claude status display toggle |
+| `menu_bar_status_claude_enabled` | Menu bar Claude Code status display toggle |
 | `wake_up_schedules` | Wake Up schedules (JSON array) |
 | `threshold_notification_settings` | Threshold settings (JSON array) |
 | `app_language` | Language preference (App Group shared) |
@@ -170,11 +187,15 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 | `usage_color_green` | Usage normal color |
 | `usage_color_orange` | Usage warning color |
 | `usage_color_red` | Usage danger color |
+| `usage_color_threshold_revision` | Revision bump for threshold updates |
+| `usage_color_threshold_warning_{provider}_{window}` | Warning threshold used for usage status colors |
+| `usage_color_threshold_danger_{provider}_{window}` | Danger threshold used for usage status colors |
+| `widget_tap_action` | Widget tap action (openWebsite / refreshData) |
 
 ### Widget Kinds
 
 - `AgentLimitWidget` - Codex usage limits widget
-- `AgentLimitWidgetClaude` - Claude usage limits widget
+- `AgentLimitWidgetClaude` - Claude Code usage limits widget
 - `TokenUsageWidgetCodex` - ccusage Codex widget
 - `TokenUsageWidgetClaude` - ccusage Claude widget
 
@@ -192,3 +213,5 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 - Widget refresh frequency may be throttled by the OS
 - CLI execution uses the user login shell and prefixes PATH with `/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH`
 - Full-path overrides from Advanced Settings take precedence
+- Usage status color thresholds are synced from notification thresholds per provider/window
+- Claude Code status line script requires `jq`

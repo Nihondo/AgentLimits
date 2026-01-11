@@ -52,7 +52,8 @@ struct UsageTimelineProvider: TimelineProvider {
                 usedPercent: 73,
                 resetAt: Date().addingTimeInterval(60 * 60 * 24),
                 limitWindowSeconds: 60 * 60 * 24 * 7
-            )
+            ),
+            displayMode: .used
         )
     }
 }
@@ -88,6 +89,7 @@ struct AgentLimitsWidgetEntryView: View {
                         let columnHeight = donutSize + 30
                         UsageDonutRow(
                             provider: entry.provider,
+                            displayMode: snapshot.displayMode,
                             primaryWindow: snapshot.primaryWindow,
                             secondaryWindow: snapshot.secondaryWindow,
                             donutSize: donutSize,
@@ -110,6 +112,7 @@ struct AgentLimitsWidgetEntryView: View {
                         HStack(alignment: .center, spacing: 0) {
                             UsageDonutRow(
                                 provider: entry.provider,
+                                displayMode: snapshot.displayMode,
                                 primaryWindow: snapshot.primaryWindow,
                                 secondaryWindow: snapshot.secondaryWindow,
                                 donutSize: donutSize,
@@ -135,6 +138,7 @@ struct AgentLimitsWidgetEntryView: View {
                 default:
                     UsageDonutRow(
                         provider: entry.provider,
+                        displayMode: snapshot.displayMode,
                         primaryWindow: snapshot.primaryWindow,
                         secondaryWindow: snapshot.secondaryWindow,
                         donutSize: 44,
@@ -143,13 +147,10 @@ struct AgentLimitsWidgetEntryView: View {
                     )
                     .padding(.top, 0)
                 }
-                HStack(spacing: 6) {
-                    Text("widget.updated".widgetLocalized())
-                    Text(WidgetRelativeTimeFormatter.makeRelativeUpdatedText(since: snapshot.fetchedAt))
-                }
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .padding(.top, -6)
+                Text("\("widget.updatedAt".widgetLocalized()) \(WidgetUpdateTimeFormatter.formatUpdateTime(since: snapshot.fetchedAt))")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .padding(.top, -6)
             } else {
                 Text("widget.notFetched".widgetLocalized())
                     .font(.subheadline)
@@ -189,6 +190,7 @@ struct ClaudeUsageLimitWidget: Widget {
 
 private struct UsageDonutRow: View {
     let provider: UsageProvider
+    let displayMode: UsageDisplayModeRaw
     let primaryWindow: UsageWindow?
     let secondaryWindow: UsageWindow?
     let donutSize: CGFloat
@@ -199,6 +201,7 @@ private struct UsageDonutRow: View {
         HStack(spacing: spacing) {
             UsageDonutColumnView(
                 provider: provider,
+                displayMode: displayMode,
                 centerLabel: "5h",
                 windowKind: .primary,
                 window: primaryWindow,
@@ -207,6 +210,7 @@ private struct UsageDonutRow: View {
             )
             UsageDonutColumnView(
                 provider: provider,
+                displayMode: displayMode,
                 centerLabel: "1w",
                 windowKind: .secondary,
                 window: secondaryWindow,
@@ -219,6 +223,7 @@ private struct UsageDonutRow: View {
 
 private struct UsageDonutColumnView: View {
     let provider: UsageProvider
+    let displayMode: UsageDisplayModeRaw
     let centerLabel: String
     let windowKind: UsageWindowKind
     let window: UsageWindow?
@@ -231,6 +236,7 @@ private struct UsageDonutColumnView: View {
                 provider: provider,
                 windowKind: windowKind,
                 centerLabel: centerLabel,
+                displayPercent: displayPercent,
                 usedPercent: window?.usedPercent,
                 size: donutSize
             )
@@ -244,11 +250,16 @@ private struct UsageDonutColumnView: View {
     }
 
     private var percentText: String {
-        return UsagePercentFormatter.formatPercentText(window?.usedPercent)
+        return UsagePercentFormatter.formatPercentText(displayPercent)
     }
 
     private var statusColor: Color {
         WidgetUsageColorResolver.statusColor(for: window, provider: provider, windowKind: windowKind)
+    }
+
+    private var displayPercent: Double? {
+        guard let window else { return nil }
+        return displayMode.makeDisplayPercent(from: window.usedPercent)
     }
 }
 
@@ -256,11 +267,12 @@ private struct UsageDonutView: View {
     let provider: UsageProvider
     let windowKind: UsageWindowKind
     let centerLabel: String
+    let displayPercent: Double?
     let usedPercent: Double?
     let size: CGFloat
 
     private var progress: Double {
-        let value = (usedPercent ?? 0) / 100
+        let value = (displayPercent ?? 0) / 100
         return min(max(value, 0), 1)
     }
 
@@ -285,7 +297,7 @@ private struct UsageDonutView: View {
         }
         .frame(width: size, height: size)
         .accessibilityLabel(centerLabel)
-        .accessibilityValue(UsagePercentFormatter.formatPercentText(usedPercent, placeholder: "0%"))
+        .accessibilityValue(UsagePercentFormatter.formatPercentText(displayPercent, placeholder: "0%"))
     }
 }
 
@@ -405,7 +417,7 @@ private enum WidgetUsageColorResolver {
         let thresholds = UsageStatusThresholdStore.loadThresholds(for: provider, windowKind: windowKind)
         let level = UsageStatusLevelResolver.level(
             for: window.usedPercent,
-            isRemainingMode: WidgetDisplayModeResolver.isRemainingMode,
+            isRemainingMode: false,
             warningThreshold: thresholds.warningPercent,
             dangerThreshold: thresholds.dangerPercent
         )
@@ -424,13 +436,13 @@ private enum WidgetUsageColorResolver {
         provider: UsageProvider,
         windowKind: UsageWindowKind
     ) -> Color {
-        let defaults = UserDefaults(suiteName: AppGroupConfig.groupId)
+        let defaults = AppGroupDefaults.shared
         let useStatusColor = defaults?.bool(forKey: UsageColorKeys.donutUseStatus) ?? false
         if useStatusColor, let usedPercent {
             let thresholds = UsageStatusThresholdStore.loadThresholds(for: provider, windowKind: windowKind)
             let level = UsageStatusLevelResolver.level(
                 for: usedPercent,
-                isRemainingMode: WidgetDisplayModeResolver.isRemainingMode,
+                isRemainingMode: false,
                 warningThreshold: thresholds.warningPercent,
                 dangerThreshold: thresholds.dangerPercent
             )
@@ -451,24 +463,8 @@ private enum WidgetUsageColorResolver {
     }
 
     private static func resolveStoredColor(for key: String, defaultColor: Color) -> Color {
-        let defaults = UserDefaults(suiteName: AppGroupConfig.groupId)
+        let defaults = AppGroupDefaults.shared
         let storedValue = defaults?.string(forKey: key)
         return ColorHexCodec.resolveColor(from: storedValue, defaultColor: defaultColor)
     }
 }
-
-private enum WidgetDisplayModeResolver {
-    static var isRemainingMode: Bool {
-        // Compare cached display mode to determine remaining/used behavior.
-        loadRawValue() == UsageDisplayModeRaw.remaining.rawValue
-    }
-
-    private static func loadRawValue() -> String {
-        // Read cached mode from App Group defaults for widget rendering.
-        let defaults = UserDefaults(suiteName: AppGroupConfig.groupId)
-        return defaults?.string(forKey: SharedUserDefaultsKeys.cachedDisplayMode)
-            ?? UsageDisplayModeRaw.used.rawValue
-    }
-}
-
-// UsageDisplayModeRaw is shared in AgentLimitsShared.

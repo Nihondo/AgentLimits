@@ -48,10 +48,8 @@ final class UsageViewModel: ObservableObject {
         let useCodexFetcher = codexFetcher ?? CodexUsageFetcher()
         let useClaudeFetcher = claudeFetcher ?? ClaudeUsageFetcher()
         let useStateManager = stateManager ?? ProviderStateManager()
-        let cachedMode = useDisplayModeStore.loadCachedDisplayMode() ?? .used
-
         // Load cached snapshots into state manager
-        useStateManager.loadCachedSnapshots(from: useStore, displayMode: cachedMode)
+        useStateManager.loadCachedSnapshots(from: useStore)
 
         let selectedState = useStateManager.getState(for: selectedProvider)
 
@@ -77,6 +75,11 @@ final class UsageViewModel: ObservableObject {
     /// Returns all provider snapshots for menu bar status display
     var snapshots: [UsageProvider: UsageSnapshot] {
         stateManager.allSnapshots
+    }
+
+    /// Returns latest fetch statuses for all providers (for summary UI)
+    var fetchStatuses: [UsageProvider: ProviderFetchStatus] {
+        stateManager.allFetchStatuses
     }
 
     /// Checks if user is logged in for the specified provider.
@@ -114,6 +117,11 @@ final class UsageViewModel: ObservableObject {
     }
 
     // MARK: - Manual Refresh
+
+    /// Triggers an immediate refresh for the specified provider (for widget tap)
+    func refreshNow(for provider: UsageProvider) async {
+        await refreshSnapshot(for: provider)
+    }
 
     /// Triggers an immediate refresh for the current provider
     func fetchNow() {
@@ -219,19 +227,19 @@ final class UsageViewModel: ObservableObject {
         }
 
         do {
-            // Fetch latest snapshot from provider and persist with display-mode conversion.
+            // Fetch latest snapshot from provider and persist with display-mode marker.
             let fetchedSnapshot = try await fetchSnapshot(for: provider, using: webViewStore.webView)
-            let snapshotToSave = fetchedSnapshot.makeSnapshot(from: .used, to: displayMode)
+            let snapshotToSave = fetchedSnapshot.makeSnapshot(for: displayMode)
             try store.saveSnapshot(snapshotToSave)
             displayModeStore.saveCachedDisplayMode(displayMode)
-            stateManager.updateAfterSuccessfulFetch(snapshot: fetchedSnapshot, for: provider)
+            stateManager.updateAfterSuccessfulFetch(snapshot: snapshotToSave, for: provider)
             stateManager.setStatusMessage("status.updated".localized(), for: provider)
             if provider == selectedProvider {
-                self.snapshot = fetchedSnapshot
+                self.snapshot = snapshotToSave
                 statusMessage = "status.updated".localized()
             }
             // Notify widgets to refresh their timelines.
-            WidgetCenter.shared.reloadTimelines(ofKind: fetchedSnapshot.provider.widgetKind)
+            WidgetCenter.shared.reloadTimelines(ofKind: snapshotToSave.provider.widgetKind)
 
             // Check thresholds and send notifications if needed
             await ThresholdNotificationManager.shared.checkThresholdsIfNeeded(for: fetchedSnapshot)
@@ -240,6 +248,7 @@ final class UsageViewModel: ObservableObject {
             if shouldDisableAutoRefresh(for: provider, error: error) {
                 stateManager.setAutoRefreshEnabled(false, for: provider)
             }
+            stateManager.setFetchStatus(.failure(error.localizedDescription), for: provider)
             stateManager.setStatusMessage(error.localizedDescription, for: provider)
             if provider == selectedProvider {
                 statusMessage = error.localizedDescription

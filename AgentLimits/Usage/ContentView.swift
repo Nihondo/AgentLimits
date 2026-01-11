@@ -15,7 +15,7 @@ struct ContentView: View {
     @AppStorage(UserDefaultsKeys.displayMode) private var displayMode: UsageDisplayMode = .used
     @AppStorage(
         AppGroupConfig.usageRefreshIntervalMinutesKey,
-        store: UserDefaults(suiteName: AppGroupConfig.groupId)
+        store: AppGroupDefaults.shared
     ) private var refreshIntervalMinutes: Int = RefreshIntervalConfig.defaultMinutes
     @AppStorage(UserDefaultsKeys.menuBarStatusCodexEnabled) private var menuBarCodexEnabled = false
     @AppStorage(UserDefaultsKeys.menuBarStatusClaudeEnabled) private var menuBarClaudeEnabled = false
@@ -30,50 +30,48 @@ struct ContentView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.large) {
             headerView
-            Divider()
 
-            providerPickerRow
-            menuBarToggleRow
-            UsageSummaryView(snapshot: viewModel.snapshot, displayMode: displayMode)
-            controlView
-            Divider()
-            Text("content.login".localized())
-                .font(.headline)
-            ZStack {
-                ForEach(UsageProvider.allCases) { provider in
-                    let store = webViewPool.getWebViewStore(for: provider)
-                    WebViewRepresentable(store: store)
-                        .onReceive(store.$popupWebView) { popup in
-                            if let popup {
-                                popupWebView = popup
-                                popupWebViewStore = store
-                                // Set up login check callback for auto-close.
-                                store.onPopupNavigationFinished = { [weak viewModel] _ in
-                                    guard let viewModel else { return false }
-                                    return await viewModel.checkLoginStatus(for: store.provider)
-                                }
-                            } else {
-                                // Close sheet when popup is dismissed programmatically.
-                                if popupWebViewStore === store {
-                                    popupWebView = nil
-                                    popupWebViewStore = nil
-                                }
-                            }
-                        }
-                    .opacity(viewModel.selectedProvider == provider ? 1 : 0)
-                    .allowsHitTesting(viewModel.selectedProvider == provider)
+            Form {
+                SettingsFormSection {
+                    LabeledContent("content.provider".localized()) {
+                        providerPicker
+                    }
+                    LabeledContent("refreshInterval.label".localized()) {
+                        RefreshIntervalPickerRow(showsLabel: false, refreshIntervalMinutes: $refreshIntervalMinutes)
+                    }
+                }
+
+                SettingsFormSection {
+                    menuBarToggleRow
+                }
+
+                SettingsFormSection(title: "content.usageSummary".localized()) {
+                    UsageSummaryView(
+                        snapshot: viewModel.snapshot,
+                        displayMode: displayMode,
+                        fetchStatuses: viewModel.fetchStatuses
+                    )
+                }
+
+                SettingsFormSection {
+                    controlView
                 }
             }
-            .frame(minHeight: 360)
-            .cornerRadius(8)
+            .formStyle(.grouped)
+            .fixedSize(horizontal: false, vertical: true)
+
+            VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
+                Divider()
+                Text("content.login".localized())
+                    .font(.headline)
+                loginWebViewSection
+            }
+            .frame(maxHeight: .infinity)
+            .layoutPriority(1)
         }
-        .padding()
-        .onAppear {
-            // Normalize refresh interval on launch.
-            refreshIntervalMinutes = RefreshIntervalConfig.normalizedMinutes(refreshIntervalMinutes)
-        }
+        .padding(DesignTokens.Spacing.large)
         .onChange(of: refreshIntervalMinutes) { _, _ in
             // Restart auto-refresh and notify widgets when interval changes.
             viewModel.restartAutoRefresh()
@@ -124,28 +122,16 @@ struct ContentView: View {
     }
 
     private var headerView: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("content.usageLimit".localized())
-                .font(.title2)
-                .bold()
-            Text("content.autoRefresh".localized(refreshIntervalMinutes))
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        }
+        SettingsHeaderView(
+            titleText: "content.usageLimit".localized(),
+            descriptionText: "content.autoRefresh".localized(refreshIntervalMinutes)
+        )
     }
 
     // MARK: - Provider Picker
 
-    private var providerPickerRow: some View {
-        HStack(spacing: 12) {
-            providerPicker
-            Spacer(minLength: 0)
-            refreshIntervalMenu
-        }
-    }
-
     private var providerPicker: some View {
-        Picker("content.provider".localized(), selection: $viewModel.selectedProvider) {
+        Picker("", selection: $viewModel.selectedProvider) {
             ForEach(UsageProvider.allCases) { provider in
                 Text(provider.displayName)
                     .tag(provider)
@@ -153,34 +139,18 @@ struct ContentView: View {
         }
         .pickerStyle(.segmented)
         .frame(maxWidth: 260)
-    }
-
-    private var refreshIntervalMenu: some View {
-        HStack(spacing: 6) {
-            Text("refreshInterval.label".localized())
-                .font(.body)
-                .foregroundStyle(.primary)
-            Picker(
-                "refreshInterval.label".localized(),
-                selection: refreshIntervalBinding
-            ) {
-                ForEach(RefreshIntervalConfig.supportedMinutes, id: \.self) { minutes in
-                    Text("refreshInterval.minutesFormat".localized(minutes))
-                        .tag(minutes)
-                }
-            }
-            .labelsHidden()
-            .pickerStyle(.menu)
-        }
+        .labelsHidden()
+        .accessibilityLabel(Text("content.provider".localized()))
     }
 
     private var controlView: some View {
-        VStack(spacing: 8) {
-            HStack(spacing: 12) {
+        VStack(spacing: DesignTokens.Spacing.small) {
+            HStack(spacing: DesignTokens.Spacing.medium) {
                 Button("content.refreshNow".localized()) {
                     viewModel.fetchNow()
                 }
                 .disabled(viewModel.isFetching)
+                .settingsButtonStyle(.primary)
 
                 if viewModel.isFetching {
                     ProgressView()
@@ -191,6 +161,7 @@ struct ContentView: View {
                     isShowingClearDataConfirm = true
                 }
                 .disabled(isClearingData)
+                .settingsButtonStyle(.destructive)
 
                 if isClearingData {
                     ProgressView()
@@ -204,17 +175,11 @@ struct ContentView: View {
                     .foregroundStyle(.secondary)
             }
         }
-        .padding()
-        .background(.thinMaterial)
-        .cornerRadius(8)
     }
 
     private var menuBarToggleRow: some View {
-        HStack {
-            Toggle("settings.showInMenuBar".localized(), isOn: menuBarEnabledBinding)
-                .toggleStyle(.checkbox)
-            Spacer()
-        }
+        Toggle("settings.showInMenuBar".localized(), isOn: menuBarEnabledBinding)
+            .toggleStyle(.checkbox)
     }
 
     private var menuBarEnabledBinding: Binding<Bool> {
@@ -238,13 +203,35 @@ struct ContentView: View {
         )
     }
 
-    private var refreshIntervalBinding: Binding<Int> {
-        Binding(
-            get: { RefreshIntervalConfig.normalizedMinutes(refreshIntervalMinutes) },
-            set: { newValue in
-                refreshIntervalMinutes = RefreshIntervalConfig.normalizedMinutes(newValue)
+    private var loginWebViewSection: some View {
+        ZStack {
+            ForEach(UsageProvider.allCases) { provider in
+                let store = webViewPool.getWebViewStore(for: provider)
+                WebViewRepresentable(store: store)
+                    .onReceive(store.$popupWebView) { popup in
+                        if let popup {
+                            popupWebView = popup
+                            popupWebViewStore = store
+                            // Set up login check callback for auto-close.
+                            store.onPopupNavigationFinished = { [weak viewModel] _ in
+                                guard let viewModel else { return false }
+                                return await viewModel.checkLoginStatus(for: store.provider)
+                            }
+                        } else {
+                            // Close sheet when popup is dismissed programmatically.
+                            if popupWebViewStore === store {
+                                popupWebView = nil
+                                popupWebViewStore = nil
+                            }
+                        }
+                    }
+                .opacity(viewModel.selectedProvider == provider ? 1 : 0)
+                .allowsHitTesting(viewModel.selectedProvider == provider)
             }
-        )
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .layoutPriority(1)
+        .cornerRadius(DesignTokens.CornerRadius.medium)
     }
 
 }
@@ -287,32 +274,78 @@ private struct WebViewContainer: NSViewRepresentable {
 
 /// Displays the current usage snapshot with 5-hour and weekly windows
 private struct UsageSummaryView: View {
+    private static let timeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.timeStyle = .short
+        return formatter
+    }()
+
     let snapshot: UsageSnapshot?
     let displayMode: UsageDisplayMode
+    let fetchStatuses: [UsageProvider: ProviderFetchStatus]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("content.latestUsage".localized())
-                .font(.headline)
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
+            statusSection
 
+            Divider()
+                .padding(.vertical, 2)
+
+            usageSection
+        }
+    }
+
+    private var statusSection: some View {
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
+            ForEach(UsageProvider.allCases) { provider in
+                HStack(spacing: DesignTokens.Spacing.small) {
+                    SettingsStatusIndicator(
+                        text: provider.displayName,
+                        level: statusLevel(for: provider)
+                    )
+                    Spacer()
+                    Text(statusText(for: provider))
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+
+    private var usageSection: some View {
+        Group {
             if let snapshot {
                 UsageWindowRow(title: "content.5hours".localized(), window: snapshot.primaryWindow, displayMode: displayMode)
                 UsageWindowRow(title: "content.week".localized(), window: snapshot.secondaryWindow, displayMode: displayMode)
-                HStack(spacing: 6) {
-                    Text("content.updated".localized())
-                    Text(snapshot.fetchedAt, style: .relative)
-                }
-                .font(.footnote)
-                .foregroundStyle(.secondary)
             } else {
                 Text("content.notFetched".localized())
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
         }
-        .padding()
-        .background(.thinMaterial)
-        .cornerRadius(8)
+    }
+
+    private func statusLevel(for provider: UsageProvider) -> SettingsStatusLevel {
+        switch fetchStatuses[provider] ?? .notFetched {
+        case .success:
+            return .success
+        case .failure:
+            return .error
+        case .notFetched:
+            return .warning
+        }
+    }
+
+    private func statusText(for provider: UsageProvider) -> String {
+        switch fetchStatuses[provider] ?? .notFetched {
+        case .success(let fetchedAt):
+            return "usage.updated".localized() + Self.timeFormatter.string(from: fetchedAt)
+        case .failure(let message):
+            return message
+        case .notFetched:
+            return "status.notFetched".localized()
+        }
     }
 }
 
@@ -323,26 +356,29 @@ private struct UsageWindowRow: View {
     let displayMode: UsageDisplayMode
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                Text(title)
-                    .font(.body)
-                Spacer()
+        HStack(spacing: 8) {
+            Text(title)
+                .font(.body)
+            Spacer()
+            HStack(spacing: 6) {
                 Text(windowPercentText)
                     .font(.body)
                     .monospacedDigit()
-            }
-            if let window {
-                HStack(spacing: 6) {
-                    Text("content.reset".localized())
-                    if let resetAt = window.resetAt {
-                        Text(resetAt, style: .relative)
-                    } else {
-                        Text("-")
-                    }
+                Text("•")
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                Text("content.reset".localized())
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                if let resetAt = window?.resetAt {
+                    Text(resetAt, style: .relative)
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("-")
+                        .font(.body)
+                        .foregroundStyle(.secondary)
                 }
-                .font(.footnote)
-                .foregroundStyle(.secondary)
             }
         }
     }

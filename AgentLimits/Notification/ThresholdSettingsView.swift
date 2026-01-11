@@ -18,41 +18,69 @@ struct ThresholdSettingsView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        SettingsScrollContainer {
             headerView
-            Divider()
 
-            if !manager.isNotificationAuthorized {
-                authorizationSection
-                Divider()
+            Form {
+                if !manager.isNotificationAuthorized {
+                    SettingsFormSection {
+                        authorizationSection
+                    }
+                }
+
+                SettingsFormSection {
+                    LabeledContent("notification.provider".localized()) {
+                        providerPicker
+                    }
+                }
+
+                SettingsFormSection(title: "notification.primaryWindow".localized()) {
+                    thresholdSection(
+                        settings: manager.getSettings(for: selectedProvider).primaryWindow,
+                        windowKind: .primary
+                    )
+                }
+
+                SettingsFormSection(title: "notification.secondaryWindow".localized()) {
+                    thresholdSection(
+                        settings: manager.getSettings(for: selectedProvider).secondaryWindow,
+                        windowKind: .secondary
+                    )
+                }
+
+                SettingsFormSection {
+                    HStack {
+                        Spacer()
+                        Button("notification.resetDefaults".localized()) {
+                            manager.resetSettings(for: selectedProvider)
+                            reloadUsageWidgets(for: selectedProvider)
+                        }
+                        .settingsButtonStyle(.secondary)
+                    }
+                }
+
+                SettingsFormSection(title: "notification.colors".localized()) {
+                    UsageColorSettingsSection()
+                }
             }
-
-            providerPicker
-            thresholdSection
-
-            Spacer()
+            .formStyle(.grouped)
         }
-        .padding()
         .frame(minWidth: 400, minHeight: 400)
     }
 
     // MARK: - Header
 
     private var headerView: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("notification.title".localized())
-                .font(.title2)
-                .bold()
-            Text("notification.description".localized())
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        }
+        SettingsHeaderView(
+            titleText: "notification.title".localized(),
+            descriptionText: "notification.description".localized()
+        )
     }
 
     // MARK: - Authorization Section
 
     private var authorizationSection: some View {
-        HStack {
+        HStack(spacing: DesignTokens.Spacing.small) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundColor(.orange)
             Text("notification.authorization".localized())
@@ -63,64 +91,54 @@ struct ThresholdSettingsView: View {
                     await manager.requestNotificationAuthorization()
                 }
             }
+            .settingsButtonStyle(.secondary)
         }
-        .padding()
+        .padding(DesignTokens.Spacing.small)
         .background(Color.orange.opacity(0.1))
-        .cornerRadius(8)
+        .cornerRadius(DesignTokens.CornerRadius.medium)
     }
 
     // MARK: - Provider Picker
 
     private var providerPicker: some View {
-        Picker("notification.provider".localized(), selection: $selectedProvider) {
+        Picker("", selection: $selectedProvider) {
             ForEach(UsageProvider.allCases) { provider in
                 Text(provider.displayName).tag(provider)
             }
         }
         .pickerStyle(.segmented)
         .frame(maxWidth: 260)
+        .labelsHidden()
+        .accessibilityLabel(Text("notification.provider".localized()))
     }
 
     // MARK: - Threshold Section
 
-    private var thresholdSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            let settings = manager.getSettings(for: selectedProvider)
+    private enum ThresholdWindowKind {
+        case primary
+        case secondary
+    }
 
-            WindowThresholdView(
-                title: "notification.primaryWindow".localized(),
-                settings: settings.primaryWindow,
-                onCommit: {
-                    reloadUsageWidgets(for: selectedProvider)
-                },
-                onUpdate: { newWindowSettings in
-                    var updated = settings
+    private func thresholdSection(
+        settings: WindowThresholdSettings,
+        windowKind: ThresholdWindowKind
+    ) -> some View {
+        WindowThresholdView(
+            settings: settings,
+            onCommit: {
+                reloadUsageWidgets(for: selectedProvider)
+            },
+            onUpdate: { newWindowSettings in
+                var updated = manager.getSettings(for: selectedProvider)
+                switch windowKind {
+                case .primary:
                     updated.primaryWindow = newWindowSettings
-                    manager.updateSettings(updated)
-                }
-            )
-
-            WindowThresholdView(
-                title: "notification.secondaryWindow".localized(),
-                settings: settings.secondaryWindow,
-                onCommit: {
-                    reloadUsageWidgets(for: selectedProvider)
-                },
-                onUpdate: { newWindowSettings in
-                    var updated = settings
+                case .secondary:
                     updated.secondaryWindow = newWindowSettings
-                    manager.updateSettings(updated)
                 }
-            )
-
-            HStack {
-                Spacer()
-                Button("notification.resetDefaults".localized()) {
-                    manager.resetSettings(for: selectedProvider)
-                    reloadUsageWidgets(for: selectedProvider)
-                }
+                manager.updateSettings(updated)
             }
-        }
+        )
     }
 
     private func reloadUsageWidgets(for provider: UsageProvider) {
@@ -132,16 +150,12 @@ struct ThresholdSettingsView: View {
 
 /// Configuration view for a single window's threshold settings
 private struct WindowThresholdView: View {
-    let title: String
     let settings: WindowThresholdSettings
     let onCommit: () -> Void
     let onUpdate: (WindowThresholdSettings) -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.headline)
-
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
             ThresholdLevelRow(
                 title: "notification.warning".localized(),
                 settings: settings.warning,
@@ -157,6 +171,8 @@ private struct WindowThresholdView: View {
                     onUpdate(updated)
                 }
             )
+
+            Divider()
 
             ThresholdLevelRow(
                 title: "notification.danger".localized(),
@@ -174,9 +190,6 @@ private struct WindowThresholdView: View {
                 }
             )
         }
-        .padding()
-        .background(.thinMaterial)
-        .cornerRadius(8)
     }
 
 }
@@ -190,34 +203,32 @@ private struct ThresholdLevelRow: View {
     let onUpdate: (ThresholdLevelSettings) -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 12) {
-                Text(title)
-                    .font(.headline)
-                    .frame(width: 70, alignment: .leading)
+        HStack(spacing: DesignTokens.Spacing.medium) {
+            Text(title)
+                .font(.headline)
+                .frame(width: 70, alignment: .leading)
 
-                Toggle("notification.enabled".localized(), isOn: makeEnabledBinding())
-                    .toggleStyle(.checkbox)
-            }
+            Toggle("notification.enabled".localized(), isOn: makeEnabledBinding())
+                .toggleStyle(.checkbox)
 
-            HStack(spacing: 12) {
-                Slider(
-                    value: makeThresholdBinding(),
-                    in: 1...100,
-                    step: 1,
-                    onEditingChanged: { isEditing in
-                        if !isEditing {
-                            onCommit()
-                        }
+            Spacer(minLength: 0)
+
+            Slider(
+                value: makeThresholdBinding(),
+                in: 1...100,
+                onEditingChanged: { isEditing in
+                    if !isEditing {
+                        onCommit()
                     }
-                )
-                .disabled(!settings.isEnabled)
-                .accessibilityValue(Text("\(settings.thresholdPercent)%"))
+                }
+            )
+            .disabled(!settings.isEnabled)
+            .accessibilityValue(Text("\(settings.thresholdPercent)%"))
+            .frame(maxWidth: .infinity, alignment: .leading)
 
-                Text("\(settings.thresholdPercent)%")
-                    .monospacedDigit()
-                    .frame(width: 48, alignment: .trailing)
-            }
+            Text("\(settings.thresholdPercent)%")
+                .monospacedDigit()
+                .frame(width: 48, alignment: .trailing)
         }
     }
 
@@ -246,6 +257,93 @@ private struct ThresholdLevelRow: View {
 
     private func clampThreshold(_ value: Int) -> Int {
         min(max(value, 1), 100)
+    }
+}
+
+// MARK: - Usage Color Settings Section
+
+
+private struct UsageColorSettingsSection: View {
+    @State private var donutColor: Color = UsageColorSettings.loadDonutColor()
+    @State private var isDonutColorByUsage: Bool = UsageColorSettings.loadDonutUseStatus()
+    @State private var statusGreenColor: Color = UsageColorSettings.loadStatusGreenColor()
+    @State private var statusOrangeColor: Color = UsageColorSettings.loadStatusOrangeColor()
+    @State private var statusRedColor: Color = UsageColorSettings.loadStatusRedColor()
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 6) {
+                ColorPicker("cliColors.donut".localized(), selection: $donutColor, supportsOpacity: false)
+                    .disabled(isDonutColorByUsage)
+                Toggle(isOn: $isDonutColorByUsage) {
+                    HStack {
+                        Spacer()
+                        Text("cliColors.donutUseStatus".localized())
+                    }
+                }
+                .toggleStyle(.switch)
+            }
+
+            Divider()
+            ColorPicker("cliColors.green".localized(), selection: $statusGreenColor, supportsOpacity: false)
+            Divider()
+            ColorPicker("cliColors.orange".localized(), selection: $statusOrangeColor, supportsOpacity: false)
+            Divider()
+            ColorPicker("cliColors.red".localized(), selection: $statusRedColor, supportsOpacity: false)
+
+            Divider()
+            HStack {
+                Spacer()
+                Button("cliColors.reset".localized()) {
+                    resetUsageColors()
+                }
+            }
+
+        }
+        .padding()
+        .background(.thinMaterial)
+        .cornerRadius(8)
+        .onAppear {
+            reloadUsageColorSettings()
+        }
+        .onChange(of: donutColor) { _, _ in
+            UsageColorSettings.saveDonutColor(donutColor)
+            reloadUsageTimelines()
+        }
+        .onChange(of: isDonutColorByUsage) { _, _ in
+            UsageColorSettings.saveDonutUseStatus(isDonutColorByUsage)
+            reloadUsageTimelines()
+        }
+        .onChange(of: statusGreenColor) { _, _ in
+            UsageColorSettings.saveStatusGreenColor(statusGreenColor)
+            reloadUsageTimelines()
+        }
+        .onChange(of: statusOrangeColor) { _, _ in
+            UsageColorSettings.saveStatusOrangeColor(statusOrangeColor)
+            reloadUsageTimelines()
+        }
+        .onChange(of: statusRedColor) { _, _ in
+            UsageColorSettings.saveStatusRedColor(statusRedColor)
+            reloadUsageTimelines()
+        }
+    }
+
+    private func reloadUsageColorSettings() {
+        donutColor = UsageColorSettings.loadDonutColor()
+        isDonutColorByUsage = UsageColorSettings.loadDonutUseStatus()
+        statusGreenColor = UsageColorSettings.loadStatusGreenColor()
+        statusOrangeColor = UsageColorSettings.loadStatusOrangeColor()
+        statusRedColor = UsageColorSettings.loadStatusRedColor()
+    }
+
+    private func resetUsageColors() {
+        UsageColorSettings.resetToDefaults()
+        reloadUsageColorSettings()
+        reloadUsageTimelines()
+    }
+
+    private func reloadUsageTimelines() {
+        WidgetCenter.shared.reloadAllTimelines()
     }
 }
 

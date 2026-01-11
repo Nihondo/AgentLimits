@@ -16,6 +16,13 @@ enum AppGroupConfig {
     static let tokenUsageRefreshIntervalMinutesKey = "token_usage_refresh_interval_minutes"
 }
 
+/// Shared UserDefaults accessor for the App Group container.
+enum AppGroupDefaults {
+    static var shared: UserDefaults? {
+        UserDefaults(suiteName: AppGroupConfig.groupId)
+    }
+}
+
 /// Shared UserDefaults keys used by app + widget
 enum SharedUserDefaultsKeys {
     static let displayMode = "usage_display_mode"
@@ -29,6 +36,26 @@ enum CLICommandPathKeys {
     static let codex = "cli_path_codex"
     static let claude = "cli_path_claude"
     static let npx = "cli_path_npx"
+}
+
+/// Normalizes and validates CLI command path overrides.
+enum CLICommandPathValidator {
+    /// Returns a trimmed override path, or nil when empty.
+    static func normalizeOverridePath(_ rawValue: String) -> String? {
+        let trimmedValue = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmedValue.isEmpty ? nil : trimmedValue
+    }
+
+    /// Returns true when the path exists and is executable.
+    static func isExecutablePathValid(_ path: String) -> Bool {
+        let expandedPath = (path as NSString).expandingTildeInPath
+        var isDirectory: ObjCBool = false
+        let fileExists = FileManager.default.fileExists(atPath: expandedPath, isDirectory: &isDirectory)
+        guard fileExists, !isDirectory.boolValue else {
+            return false
+        }
+        return FileManager.default.isExecutableFile(atPath: expandedPath)
+    }
 }
 
 /// CLI command kinds that support path overrides.
@@ -54,11 +81,10 @@ enum CLICommandPathResolver {
     }
 
     private static func loadCommandPath(for kind: CLICommandKind) -> String? {
-        let defaults = UserDefaults(suiteName: AppGroupConfig.groupId) ?? .standard
+        let defaults = AppGroupDefaults.shared ?? .standard
         let key = commandPathKey(for: kind)
         let rawValue = defaults.string(forKey: key) ?? ""
-        let trimmedValue = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmedValue.isEmpty ? nil : trimmedValue
+        return CLICommandPathValidator.normalizeOverridePath(rawValue)
     }
 
     private static func commandPathKey(for kind: CLICommandKind) -> String {
@@ -73,16 +99,28 @@ enum CLICommandPathResolver {
     }
 }
 
-/// Raw display mode values persisted to shared UserDefaults.
-enum UsageDisplayModeRaw: String {
+/// Raw display mode values persisted to shared storage.
+enum UsageDisplayModeRaw: String, Codable {
     case used
     case remaining
+
+    /// Returns the display percentage based on the stored used percent.
+    func makeDisplayPercent(from usedPercent: Double) -> Double {
+        let value: Double
+        switch self {
+        case .used:
+            value = usedPercent
+        case .remaining:
+            value = 100 - usedPercent
+        }
+        return max(0, min(100, value))
+    }
 }
 
 /// Localization configuration constants
 enum LocalizationConfig {
-    static let japaneseLanguageCode = "ja"
-    static let englishLanguageCode = "en"
+    static let systemLanguageCode = "system"
+    static let fallbackLanguageCode = "en"
 }
 
 // MARK: - Usage Status Levels
@@ -155,7 +193,7 @@ enum UsageStatusThresholdStore {
         for provider: UsageProvider,
         windowKind: UsageWindowKind
     ) -> UsageStatusThresholds {
-        let defaults = UserDefaults(suiteName: AppGroupConfig.groupId)
+        let defaults = AppGroupDefaults.shared
         let warning = loadPercent(
             from: defaults,
             key: makeWarningKey(provider: provider, windowKind: windowKind),
@@ -174,13 +212,13 @@ enum UsageStatusThresholdStore {
         for provider: UsageProvider,
         windowKind: UsageWindowKind
     ) {
-        let defaults = UserDefaults(suiteName: AppGroupConfig.groupId)
+        let defaults = AppGroupDefaults.shared
         defaults?.set(thresholds.warningPercent, forKey: makeWarningKey(provider: provider, windowKind: windowKind))
         defaults?.set(thresholds.dangerPercent, forKey: makeDangerKey(provider: provider, windowKind: windowKind))
     }
 
     static func bumpRevision() {
-        let defaults = UserDefaults(suiteName: AppGroupConfig.groupId)
+        let defaults = AppGroupDefaults.shared
         defaults?.set(Date().timeIntervalSince1970, forKey: revisionKey)
     }
 
@@ -248,7 +286,7 @@ enum RefreshIntervalConfig {
     ///   - key: The UserDefaults key for the interval setting
     /// - Returns: The stored interval, or defaultMinutes if not set
     static func loadMinutes(
-        from defaults: UserDefaults? = UserDefaults(suiteName: AppGroupConfig.groupId),
+        from defaults: UserDefaults? = AppGroupDefaults.shared,
         key: String
     ) -> Int {
         // Fall back to defaults when shared defaults are unavailable.
@@ -274,7 +312,7 @@ struct RefreshIntervalAccessor {
     /// The refresh interval in minutes
     var refreshIntervalMinutes: Int {
         RefreshIntervalConfig.loadMinutes(
-            from: UserDefaults(suiteName: AppGroupConfig.groupId),
+            from: AppGroupDefaults.shared,
             key: key
         )
     }
@@ -324,27 +362,116 @@ enum TokenUsageRefreshConfig {
 
 /// Resolves language codes for localization
 enum LanguageCodeResolver {
-    /// Returns the system's preferred language code (ja or en)
-    static func systemLanguageCode(preferredLanguages: [String] = Locale.preferredLanguages) -> String {
-        // Pick the first preferred language and normalize to supported codes.
-        let preferredLanguage = preferredLanguages.first ?? LocalizationConfig.englishLanguageCode
-        if preferredLanguage.hasPrefix(LocalizationConfig.japaneseLanguageCode) {
-            return LocalizationConfig.japaneseLanguageCode
-        }
-        return LocalizationConfig.englishLanguageCode
+    /// Returns the supported language codes from the bundle (excluding Base).
+    static func supportedLanguageCodes(from bundle: Bundle = .main) -> [String] {
+        let normalizedCodes = bundle.localizations
+            .map { normalizeLanguageCode($0) }
+            .filter { $0.caseInsensitiveCompare("Base") != .orderedSame }
+        return dedupeLanguageCodes(normalizedCodes)
     }
 
-    /// Returns the effective language code for a given raw value, falling back to system language
-    static func effectiveLanguageCode(for rawValue: String?) -> String {
-        // Respect explicit selection when available; otherwise use system setting.
-        switch rawValue {
-        case LocalizationConfig.japaneseLanguageCode:
-            return LocalizationConfig.japaneseLanguageCode
-        case LocalizationConfig.englishLanguageCode:
-            return LocalizationConfig.englishLanguageCode
-        default:
-            return systemLanguageCode()
+    /// Returns the system's preferred language code from the supported set.
+    static func systemLanguageCode(
+        preferredLanguages: [String] = Locale.preferredLanguages,
+        supportedLanguageCodes: [String] = supportedLanguageCodes()
+    ) -> String {
+        let supported = supportedLanguageCodes
+        if supported.isEmpty {
+            return LocalizationConfig.fallbackLanguageCode
         }
+        for preferredLanguage in preferredLanguages {
+            if let match = matchLanguageCode(
+                for: preferredLanguage,
+                supportedLanguageCodes: supported
+            ) {
+                return match
+            }
+        }
+        return supported.first ?? LocalizationConfig.fallbackLanguageCode
+    }
+
+    /// Returns the effective language code for a given raw value.
+    static func effectiveLanguageCode(
+        for rawValue: String?,
+        preferredLanguages: [String] = Locale.preferredLanguages,
+        supportedLanguageCodes: [String] = supportedLanguageCodes()
+    ) -> String {
+        let supported = supportedLanguageCodes
+        if supported.isEmpty {
+            return LocalizationConfig.fallbackLanguageCode
+        }
+        guard let rawValue, !rawValue.isEmpty else {
+            return systemLanguageCode(
+                preferredLanguages: preferredLanguages,
+                supportedLanguageCodes: supported
+            )
+        }
+        if rawValue == LocalizationConfig.systemLanguageCode {
+            return systemLanguageCode(
+                preferredLanguages: preferredLanguages,
+                supportedLanguageCodes: supported
+            )
+        }
+        if let match = matchLanguageCode(for: rawValue, supportedLanguageCodes: supported) {
+            return match
+        }
+        return systemLanguageCode(
+            preferredLanguages: preferredLanguages,
+            supportedLanguageCodes: supported
+        )
+    }
+
+    /// Returns the supported language code for a raw value, if available.
+    static func resolveSupportedLanguageCode(
+        for rawValue: String,
+        supportedLanguageCodes: [String] = supportedLanguageCodes()
+    ) -> String? {
+        matchLanguageCode(for: rawValue, supportedLanguageCodes: supportedLanguageCodes)
+    }
+
+    private static func matchLanguageCode(
+        for rawValue: String,
+        supportedLanguageCodes: [String]
+    ) -> String? {
+        let normalizedRawValue = normalizeLanguageCode(rawValue)
+        if let exactMatch = supportedLanguageCodes.first(
+            where: { $0.caseInsensitiveCompare(normalizedRawValue) == .orderedSame }
+        ) {
+            return exactMatch
+        }
+        let rawBase = extractBaseLanguageCode(normalizedRawValue).lowercased()
+        if let baseMatch = supportedLanguageCodes.first(
+            where: { extractBaseLanguageCode($0).lowercased() == rawBase }
+        ) {
+            return baseMatch
+        }
+        return nil
+    }
+
+    private static func normalizeLanguageCode(_ code: String) -> String {
+        code.replacingOccurrences(of: "_", with: "-")
+    }
+
+    private static func extractBaseLanguageCode(_ code: String) -> String {
+        let normalized = normalizeLanguageCode(code)
+        guard let base = normalized.split(separator: "-").first else {
+            return normalized
+        }
+        return String(base)
+    }
+
+    private static func dedupeLanguageCodes(_ codes: [String]) -> [String] {
+        var seen = Set<String>()
+        var result: [String] = []
+        for code in codes {
+            let lowered = code.lowercased()
+            if seen.contains(lowered) {
+                continue
+            }
+            seen.insert(lowered)
+            result.append(code)
+        }
+        return result
     }
 }
 
@@ -536,6 +663,39 @@ struct UsageSnapshot: Codable, SnapshotData {
     let primaryWindow: UsageWindow?
     /// Weekly usage window
     let secondaryWindow: UsageWindow?
+    /// Display mode used by UI when rendering this snapshot
+    let displayMode: UsageDisplayModeRaw
+
+    init(
+        provider: UsageProvider,
+        fetchedAt: Date,
+        primaryWindow: UsageWindow?,
+        secondaryWindow: UsageWindow?,
+        displayMode: UsageDisplayModeRaw = .used
+    ) {
+        self.provider = provider
+        self.fetchedAt = fetchedAt
+        self.primaryWindow = primaryWindow
+        self.secondaryWindow = secondaryWindow
+        self.displayMode = displayMode
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case provider
+        case fetchedAt
+        case primaryWindow
+        case secondaryWindow
+        case displayMode
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        provider = try container.decode(UsageProvider.self, forKey: .provider)
+        fetchedAt = try container.decode(Date.self, forKey: .fetchedAt)
+        primaryWindow = try container.decodeIfPresent(UsageWindow.self, forKey: .primaryWindow)
+        secondaryWindow = try container.decodeIfPresent(UsageWindow.self, forKey: .secondaryWindow)
+        displayMode = try container.decodeIfPresent(UsageDisplayModeRaw.self, forKey: .displayMode) ?? .used
+    }
 }
 
 // MARK: - Storage Protocols

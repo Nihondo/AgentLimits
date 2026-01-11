@@ -6,35 +6,30 @@ import SwiftUI
 import Combine
 import WidgetKit
 
-/// Supported app languages
-enum AppLanguage: String, CaseIterable, Identifiable {
-    case system
-    case japanese = "ja"
-    case english = "en"
+/// Represents a language option for the app menu.
+struct AppLanguageOption: Identifiable, Hashable {
+    let rawValue: String
+
+    static var system: AppLanguageOption {
+        AppLanguageOption(rawValue: LocalizationConfig.systemLanguageCode)
+    }
 
     var id: String { rawValue }
 
-    var displayName: String {
-        switch self {
-        case .system:
-            return String(localized: "menu.language.system")
-        case .japanese:
-            return "日本語"
-        case .english:
-            return "English"
-        }
+    var isSystem: Bool {
+        rawValue == LocalizationConfig.systemLanguageCode
     }
 
-    /// Returns the effective language code, resolving "system" to actual system language
-    var effectiveLanguageCode: String {
-        switch self {
-        case .system:
-            return LanguageCodeResolver.systemLanguageCode()
-        case .japanese:
-            return LocalizationConfig.japaneseLanguageCode
-        case .english:
-            return LocalizationConfig.englishLanguageCode
+    var displayName: String {
+        if isSystem {
+            return String(localized: "menu.language.system")
         }
+        return Locale.current.localizedString(forIdentifier: rawValue) ?? rawValue
+    }
+
+    /// Returns the effective language code, resolving "system" to actual system language.
+    var effectiveLanguageCode: String {
+        LanguageCodeResolver.effectiveLanguageCode(for: rawValue)
     }
 }
 
@@ -45,7 +40,7 @@ final class LanguageManager: ObservableObject {
     private static let languageKey = AppGroupConfig.appLanguageKey
     private let sharedDefaults: UserDefaults?
 
-    @Published private(set) var currentLanguage: AppLanguage {
+    @Published private(set) var currentLanguage: AppLanguageOption {
         didSet {
             saveLanguage(currentLanguage)
             updateBundle()
@@ -55,15 +50,25 @@ final class LanguageManager: ObservableObject {
     private(set) var localizedBundle: Bundle = .main
 
     private init() {
-        self.sharedDefaults = UserDefaults(suiteName: AppGroupConfig.groupId)
+        self.sharedDefaults = AppGroupDefaults.shared
         self.currentLanguage = Self.loadLanguage(from: sharedDefaults)
         updateBundle()
     }
 
     /// Sets the current language and reloads widget timelines
-    func setLanguage(_ language: AppLanguage) {
+    func setLanguage(_ language: AppLanguageOption) {
         currentLanguage = language
         WidgetCenter.shared.reloadAllTimelines()
+    }
+
+    /// Returns the available language options for the menu.
+    var availableLanguages: [AppLanguageOption] {
+        let supportedLanguageCodes = LanguageCodeResolver.supportedLanguageCodes()
+        let options = supportedLanguageCodes.map { AppLanguageOption(rawValue: $0) }
+        let sortedOptions = options.sorted {
+            $0.displayName.localizedCaseInsensitiveCompare($1.displayName) == .orderedAscending
+        }
+        return [AppLanguageOption.system] + sortedOptions
     }
 
     /// Returns localized string for the given key
@@ -77,16 +82,26 @@ final class LanguageManager: ObservableObject {
         return String(format: format, arguments: arguments)
     }
 
-    private func saveLanguage(_ language: AppLanguage) {
+    private func saveLanguage(_ language: AppLanguageOption) {
         sharedDefaults?.set(language.rawValue, forKey: Self.languageKey)
     }
 
-    private static func loadLanguage(from defaults: UserDefaults?) -> AppLanguage {
+    private static func loadLanguage(from defaults: UserDefaults?) -> AppLanguageOption {
         guard let rawValue = defaults?.string(forKey: languageKey),
-              let language = AppLanguage(rawValue: rawValue) else {
+              !rawValue.isEmpty else {
             return .system
         }
-        return language
+        if rawValue == LocalizationConfig.systemLanguageCode {
+            return .system
+        }
+        if let resolvedLanguageCode = LanguageCodeResolver.resolveSupportedLanguageCode(for: rawValue) {
+            if resolvedLanguageCode != rawValue {
+                defaults?.set(resolvedLanguageCode, forKey: languageKey)
+            }
+            return AppLanguageOption(rawValue: resolvedLanguageCode)
+        }
+        defaults?.set(LocalizationConfig.systemLanguageCode, forKey: languageKey)
+        return .system
     }
 
     private func updateBundle() {

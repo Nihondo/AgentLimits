@@ -115,7 +115,10 @@ struct SettingsTabView: View {
             .transition(.opacity)
             .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: selectedTab)
         }
-        .frame(minWidth: 550, minHeight: 500)
+        .frame(
+            minWidth: DesignTokens.WindowSize.minWidth,
+            minHeight: DesignTokens.WindowSize.minHeight
+        )
         .navigationTitle(selectedTab.title)
         .onAppear {
             configureWindowButtons()
@@ -131,10 +134,11 @@ struct SettingsTabView: View {
     }
 
     private func selectTab(_ tab: SettingsTab) {
+        let animation = Animation.easeInOut(duration: 0.15)
         if reduceMotion {
             selectedTabRaw = tab.rawValue
         } else {
-            withAnimation(.easeInOut(duration: 0.15)) {
+            withAnimation(animation) {
                 selectedTabRaw = tab.rawValue
             }
         }

@@ -6,20 +6,35 @@ import Foundation
 
 // MARK: - Provider State
 
+/// Last fetch outcome for usage data.
+enum ProviderFetchStatus {
+    case notFetched
+    case success(Date)
+    case failure(String)
+}
+
 /// Internal state for each provider
 struct ProviderState {
     var snapshot: UsageSnapshot?
     var statusMessage: String
     var isFetching: Bool
     var isAutoRefreshEnabled: Bool?
+    var lastFetchStatus: ProviderFetchStatus
 
     /// Creates a default state with optional snapshot
     static func initial(snapshot: UsageSnapshot? = nil) -> ProviderState {
-        ProviderState(
+        let fetchStatus: ProviderFetchStatus
+        if let snapshot {
+            fetchStatus = .success(snapshot.fetchedAt)
+        } else {
+            fetchStatus = .notFetched
+        }
+        return ProviderState(
             snapshot: snapshot,
-            statusMessage: "status.notFetched".localized(),
+            statusMessage: snapshot == nil ? "status.notFetched".localized() : "status.updated".localized(),
             isFetching: false,
-            isAutoRefreshEnabled: nil
+            isAutoRefreshEnabled: nil,
+            lastFetchStatus: fetchStatus
         )
     }
 }
@@ -45,15 +60,11 @@ final class ProviderStateManager {
     }
 
     /// Initializes with cached snapshots from store
-    func loadCachedSnapshots(
-        from store: UsageSnapshotStore,
-        displayMode: UsageDisplayMode
-    ) {
+    func loadCachedSnapshots(from store: UsageSnapshotStore) {
         for provider in UsageProvider.allCases {
             if let cachedSnapshot = store.loadSnapshot(for: provider) {
-                // Normalize cached snapshots to used% for internal state.
-                let normalizedSnapshot = cachedSnapshot.makeSnapshot(from: displayMode, to: .used)
-                states[provider] = .initial(snapshot: normalizedSnapshot)
+                // Keep stored used% intact and use snapshot display mode as-is.
+                states[provider] = .initial(snapshot: cachedSnapshot)
             }
         }
     }
@@ -72,6 +83,15 @@ final class ProviderStateManager {
             if let snapshot = state.snapshot {
                 result[provider] = snapshot
             }
+        }
+        return result
+    }
+
+    /// Returns fetch status for all providers
+    var allFetchStatuses: [UsageProvider: ProviderFetchStatus] {
+        var result: [UsageProvider: ProviderFetchStatus] = [:]
+        for (provider, state) in states {
+            result[provider] = state.lastFetchStatus
         }
         return result
     }
@@ -110,6 +130,15 @@ final class ProviderStateManager {
         states[provider] = state
     }
 
+    /// Updates last fetch status for a provider
+    func setFetchStatus(_ status: ProviderFetchStatus, for provider: UsageProvider) {
+        // Update last fetch status for provider.
+        var state = getState(for: provider)
+        state.lastFetchStatus = status
+        states[provider] = state
+        onStateChange?()
+    }
+
     /// Updates auto-refresh enabled status for a provider
     func setAutoRefreshEnabled(_ enabled: Bool?, for provider: UsageProvider) {
         // Update auto-refresh flag for provider.
@@ -126,6 +155,7 @@ final class ProviderStateManager {
         // Store snapshot and mark auto-refresh as enabled.
         var state = getState(for: provider)
         state.snapshot = snapshot
+        state.lastFetchStatus = .success(snapshot.fetchedAt)
         state.isAutoRefreshEnabled = true
         states[provider] = state
         onStateChange?()

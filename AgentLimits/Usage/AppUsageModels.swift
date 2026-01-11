@@ -1,7 +1,7 @@
 // MARK: - AppUsageModels.swift
 // UI-facing usage display helpers and UserDefaults keys.
 // Handles percent conversion between "used" and "remaining" modes and
-// provides snapshot/window helpers for toggling display modes.
+// provides snapshot helpers for toggling display modes.
 
 import Foundation
 
@@ -47,37 +47,39 @@ enum UsageDisplayMode: String, Codable, CaseIterable, Identifiable {
     }
 }
 
-extension UsageWindow {
-    /// Returns a copy converted to the target display mode (from used)
-    func makeWindow(for displayMode: UsageDisplayMode) -> UsageWindow {
-        makeWindow(from: .used, to: displayMode)
+extension UsageDisplayMode {
+    /// Maps app display mode to the shared raw mode stored in snapshots.
+    func makeDisplayModeRaw() -> UsageDisplayModeRaw {
+        switch self {
+        case .used:
+            return .used
+        case .remaining:
+            return .remaining
+        }
     }
+}
 
-    /// Returns a copy converted between two display modes
-    func makeWindow(from sourceMode: UsageDisplayMode, to targetMode: UsageDisplayMode) -> UsageWindow {
-        let displayPercent = targetMode.convertPercent(usedPercent, from: sourceMode)
-        return UsageWindow(
-            kind: kind,
-            usedPercent: displayPercent,
-            resetAt: resetAt,
-            limitWindowSeconds: limitWindowSeconds
-        )
+extension UsageDisplayModeRaw {
+    /// Maps a shared raw mode to the app display mode.
+    func makeDisplayMode() -> UsageDisplayMode {
+        switch self {
+        case .used:
+            return .used
+        case .remaining:
+            return .remaining
+        }
     }
 }
 
 extension UsageSnapshot {
-    /// Returns a copy converted to the target display mode (from used)
+    /// Returns a copy with the display mode updated (used percent remains intact).
     func makeSnapshot(for displayMode: UsageDisplayMode) -> UsageSnapshot {
-        makeSnapshot(from: .used, to: displayMode)
-    }
-
-    /// Returns a copy converted between two display modes
-    func makeSnapshot(from sourceMode: UsageDisplayMode, to targetMode: UsageDisplayMode) -> UsageSnapshot {
         UsageSnapshot(
             provider: provider,
             fetchedAt: fetchedAt,
-            primaryWindow: primaryWindow?.makeWindow(from: sourceMode, to: targetMode),
-            secondaryWindow: secondaryWindow?.makeWindow(from: sourceMode, to: targetMode)
+            primaryWindow: primaryWindow,
+            secondaryWindow: secondaryWindow,
+            displayMode: displayMode.makeDisplayModeRaw()
         )
     }
 }

@@ -9,6 +9,7 @@
 "menu.displayMode" = "Display Mode";
 "menu.displayMode.used" = "Usage rate";
 "menu.displayMode.remaining" = "Remaining rate";
+"menu.about" = "About AgentLimits";
 "menu.quit" = "Quit";
 "menu.language" = "Language";
 "menu.language.system" = "System";
@@ -28,10 +29,12 @@
 "content.clearDataConfirmAction" = "Clear";
 "content.clearDataCancel" = "Cancel";
 "content.provider" = "Service";
+"content.usageSummary" = "Status";
 "content.latestUsage" = "Latest Usage";
 "content.5hours" = "5 Hours";
 "content.week" = "Week";
 "content.updated" = "Updated:";
+"usage.updated" = "Updated: ";
 "content.notFetched" = "Not fetched. Please login below.";
 "content.reset" = "Reset:";
 "content.popupClose" = "Close";
@@ -72,6 +75,7 @@
 "wakeUp.title" = "Wake up Schedule";
 "wakeUp.description" = "Calls CLI at scheduled times to start 5-hour sessions";
 "wakeUp.provider" = "Service";
+"wakeUp.schedule" = "Schedule";
 "wakeUp.enabled" = "Enable schedule";
 "wakeUp.selectHours" = "Select hours to run (multiple)";
 "wakeUp.selectedHours" = "Selected:";
@@ -96,8 +100,10 @@
 "menu.thresholdSettings" = "Threshold Notification Settings...";
 "notification.windowTitle" = "Threshold Notification Settings";
 "notification.title" = "Usage Rate Threshold Notification";
-"notification.description" = "Notifies when usage rate exceeds threshold";
+"notification.description" = "Configure notification thresholds and usage colors";
 "notification.provider" = "Service";
+"notification.thresholds" = "Thresholds";
+"notification.colors" = "Colors";
 "notification.authorization" = "Notification permission required";
 "notification.requestAuth" = "Request Permission";
 "notification.primaryWindow" = "5-Hour Limit";
@@ -119,6 +125,7 @@
 "ccusage.windowTitle" = "ccusage Settings";
 "ccusage.title" = "Token Usage Tracking(ccusage)";
 "ccusage.description" = "Fetch token usage and costs using ccusage CLI";
+"ccusage.settings" = "Settings";
 "ccusage.enabled" = "Enable periodic fetch";
 "ccusage.command" = "Command";
 "ccusage.additionalArgs" = "Additional Arguments";
@@ -138,7 +145,7 @@
 
 /* Advanced Settings */
 "advancedSettings.title" = "Advanced Settings";
-"advancedSettings.description" = "Customize CLI paths and usage colors.";
+"advancedSettings.description" = "Customize CLI paths, scripts, and widget actions.";
 "cliPaths.sectionTitle" = "CLI Command Paths";
 "cliPaths.description" = "Specify full paths for codex, claude, and npx. Leave blank to use PATH lookup.";
 "cliPaths.codex" = "codex path";
@@ -160,3 +167,17 @@
 "cliColors.red" = "Usage rate (danger)";
 "cliColors.note" = "Changes apply to widgets and the menu bar.";
 "cliColors.reset" = "Reset to Defaults";
+
+/* Scripts */
+"scripts.title" = "Bundled Scripts";
+"scripts.claudeCode.title" = "Claude Code Status Line Script";
+"scripts.claudeCode.note" = "Use this script with Claude Code's status line feature to display usage rates.";
+"scripts.copy" = "Copy Path";
+"scripts.copied" = "Copied!";
+"scripts.notFound" = "Script not found in bundle";
+
+/* Widget Tap Action */
+"widgetTapAction.title" = "Widget Tap Action";
+"widgetTapAction.openWebsite" = "Open Website";
+"widgetTapAction.refreshData" = "Refresh Data";
+"widgetTapAction.note" = "Choose what happens when you tap a widget";

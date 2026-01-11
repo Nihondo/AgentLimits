@@ -16,27 +16,49 @@ private enum WindowId {
 
 /// Handles agentlimits:// URL scheme for widget tap actions
 private enum DeepLinkHandler {
-    /// Opens the usage settings page for the specified provider
+    /// Handles widget tap action based on user settings
+    @MainActor
     static func handleURL(_ url: URL) {
         guard url.scheme == "agentlimits",
               let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
             return
         }
 
+        let providerValue = components.queryItems?.first { $0.name == "provider" }?.value
+
         switch url.host {
         case "open-usage":
-            // Existing usage limit widget
-            if let providerValue = components.queryItems?.first(where: { $0.name == "provider" })?.value,
-               let provider = UsageProvider(rawValue: providerValue) {
-                NSWorkspace.shared.open(provider.usageURL)
-            }
+            guard let providerValue,
+                  let provider = UsageProvider(rawValue: providerValue) else { return }
+            performTapAction(
+                openURL: { provider.usageURL },
+                refresh: { await AppSharedState.shared.viewModel.refreshNow(for: provider) }
+            )
         case "open-token-usage":
-            // Token usage widget (ccusage) - open ccusage site
-            if let url = CCUsageLinks.siteURL {
-                NSWorkspace.shared.open(url)
-            }
+            guard let providerValue,
+                  let provider = TokenUsageProvider(rawValue: providerValue) else { return }
+            performTapAction(
+                openURL: { CCUsageLinks.siteURL },
+                refresh: { await AppSharedState.shared.tokenUsageViewModel.refreshNow(for: provider) }
+            )
         default:
             break
+        }
+    }
+
+    /// Executes the appropriate tap action based on user settings
+    @MainActor
+    private static func performTapAction(
+        openURL: () -> URL?,
+        refresh: @escaping () async -> Void
+    ) {
+        switch WidgetTapActionStore.loadAction() {
+        case .openWebsite:
+            if let url = openURL() {
+                NSWorkspace.shared.open(url)
+            }
+        case .refreshData:
+            Task { await refresh() }
         }
     }
 }
@@ -64,7 +86,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 @main
 struct AgentLimitsApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
-    @StateObject private var appState = AppSharedState()
+
+    private var appState: AppSharedState { AppSharedState.shared }
 
     var body: some Scene {
         MenuBarExtra {
@@ -97,7 +120,7 @@ private struct MenuBarLabelView: View {
     @AppStorage(UserDefaultsKeys.menuBarStatusCodexEnabled) private var codexEnabled = false
     @AppStorage(UserDefaultsKeys.menuBarStatusClaudeEnabled) private var claudeEnabled = false
     @AppStorage(UserDefaultsKeys.displayMode) private var displayMode: UsageDisplayMode = .used
-    @AppStorage(UsageStatusThresholdStore.revisionKey, store: UserDefaults(suiteName: AppGroupConfig.groupId))
+    @AppStorage(UsageStatusThresholdStore.revisionKey, store: AppGroupDefaults.shared)
     private var thresholdRevision: Double = 0
     @State private var renderedImage: NSImage?
     @Environment(\.colorScheme) private var colorScheme
@@ -235,11 +258,11 @@ private struct MenuBarPercentLineView: View {
     let primaryWindow: UsageWindow?
     let secondaryWindow: UsageWindow?
     let displayMode: UsageDisplayMode
-    @AppStorage(UsageColorKeys.statusGreen, store: UserDefaults(suiteName: AppGroupConfig.groupId))
+    @AppStorage(UsageColorKeys.statusGreen, store: AppGroupDefaults.shared)
     private var statusGreenHex: String = ""
-    @AppStorage(UsageColorKeys.statusOrange, store: UserDefaults(suiteName: AppGroupConfig.groupId))
+    @AppStorage(UsageColorKeys.statusOrange, store: AppGroupDefaults.shared)
     private var statusOrangeHex: String = ""
-    @AppStorage(UsageColorKeys.statusRed, store: UserDefaults(suiteName: AppGroupConfig.groupId))
+    @AppStorage(UsageColorKeys.statusRed, store: AppGroupDefaults.shared)
     private var statusRedHex: String = ""
 
     var body: some View {
@@ -264,11 +287,10 @@ private struct MenuBarPercentLineView: View {
 
     private func resolveStatusColor(_ window: UsageWindow?, windowKind: UsageWindowKind) -> Color {
         guard let window else { return .secondary }
-        let percent = displayMode.displayPercent(from: window.usedPercent)
         let thresholds = UsageStatusThresholdStore.loadThresholds(for: provider, windowKind: windowKind)
         let level = UsageStatusLevelResolver.level(
-            for: percent,
-            isRemainingMode: displayMode == .remaining,
+            for: window.usedPercent,
+            isRemainingMode: false,
             warningThreshold: thresholds.warningPercent,
             dangerThreshold: thresholds.dangerPercent
         )
@@ -291,6 +313,25 @@ private struct MenuBarPercentLineView: View {
 
 // MARK: - Menu Bar Content
 
+/// A label that shows a checkmark when selected
+private struct CheckmarkLabel: View {
+    let title: String
+    let isSelected: Bool
+
+    init(_ title: String, isSelected: Bool) {
+        self.title = title
+        self.isSelected = isSelected
+    }
+
+    var body: some View {
+        if isSelected {
+            Label(title, systemImage: "checkmark")
+        } else {
+            Text(title)
+        }
+    }
+}
+
 /// Menu bar dropdown content with settings, display mode, and language options
 private struct MenuBarContentView: View {
     @AppStorage(UserDefaultsKeys.displayMode) private var displayMode: UsageDisplayMode = .used
@@ -306,66 +347,19 @@ private struct MenuBarContentView: View {
         } label: {
             Label("menu.openSettings".localized(), systemImage: "gear")
         }
-        Divider() // ------------------------
-        Menu {
-            Button {
-                displayMode = .used
-            } label: {
-                if displayMode == .used {
-                    Label("menu.displayMode.used".localized(), systemImage: "checkmark")
-                } else {
-                    Text("menu.displayMode.used".localized())
-                }
-            }
-            Button {
-                displayMode = .remaining
-            } label: {
-                if displayMode == .remaining {
-                    Label("menu.displayMode.remaining".localized(), systemImage: "checkmark")
-                } else {
-                    Text("menu.displayMode.remaining".localized())
-                }
-            }
-        } label: {
-            Label("menu.displayMode".localized(), systemImage: "eye")
-        }
-        Menu {
-            ForEach(AppLanguage.allCases) { language in
-                Button {
-                    languageManager.setLanguage(language)
-                } label: {
-                    if languageManager.currentLanguage == language {
-                        Label(language.displayName, systemImage: "checkmark")
-                    } else {
-                        Text(language.displayName)
-                    }
-                }
-            }
-        } label: {
-            Label("menu.language".localized(), systemImage: "globe")
-        }
-        Menu {
-            ForEach(UsageProvider.allCases) { provider in
-                Button("\(provider.displayName) " + "menu.wakeUpNow".localized()) {
-                    Task {
-                        await WakeUpScheduler.shared.triggerWakeUp(for: provider)
-                    }
-                }
-            }
-        } label: {
-            Label("menu.wakeUp".localized(), systemImage: "alarm")
-        }
-        Divider() // ------------------------
+        Divider()
+        displayModeMenu
+        languageMenu
+        wakeUpMenu
+        Divider()
+        loginAtStartupButton
+        Divider()
         Button {
-            loginItemManager.setEnabled(!loginItemManager.isEnabled)
+            presentAboutPanel()
         } label: {
-            if loginItemManager.isEnabled {
-                Label("wakeUp.startAtLogin".localized(), systemImage: "checkmark")
-            } else {
-                Text("wakeUp.startAtLogin".localized())
-            }
+            Label("menu.about".localized(), systemImage: "info.circle")
         }
-        Divider() // ------------------------
+        Divider()
         Button {
             NSApplication.shared.terminate(nil)
         } label: {
@@ -379,5 +373,85 @@ private struct MenuBarContentView: View {
             appState.startBackgroundRefresh()
             loginItemManager.updateStatus()
         }
+    }
+
+    // MARK: - Menu Sections
+
+    private var displayModeMenu: some View {
+        Menu {
+            Button { displayMode = .used } label: {
+                CheckmarkLabel("menu.displayMode.used".localized(), isSelected: displayMode == .used)
+            }
+            Button { displayMode = .remaining } label: {
+                CheckmarkLabel("menu.displayMode.remaining".localized(), isSelected: displayMode == .remaining)
+            }
+        } label: {
+            Label("menu.displayMode".localized(), systemImage: "eye")
+        }
+    }
+
+    private var languageMenu: some View {
+        Menu {
+            let languages = languageManager.availableLanguages
+            if let systemLanguage = languages.first {
+                Button { languageManager.setLanguage(systemLanguage) } label: {
+                    CheckmarkLabel(systemLanguage.displayName, isSelected: languageManager.currentLanguage == systemLanguage)
+                }
+            }
+            if languages.count > 1 {
+                Divider()
+                ForEach(languages.dropFirst()) { language in
+                    Button { languageManager.setLanguage(language) } label: {
+                        CheckmarkLabel(language.displayName, isSelected: languageManager.currentLanguage == language)
+                    }
+                }
+            }
+        } label: {
+            Label("menu.language".localized(), systemImage: "globe")
+        }
+    }
+
+    private var wakeUpMenu: some View {
+        Menu {
+            ForEach(UsageProvider.allCases) { provider in
+                Button("\(provider.displayName) " + "menu.wakeUpNow".localized()) {
+                    Task { await WakeUpScheduler.shared.triggerWakeUp(for: provider) }
+                }
+            }
+        } label: {
+            Label("menu.wakeUp".localized(), systemImage: "alarm")
+        }
+    }
+
+    private var loginAtStartupButton: some View {
+        Button { loginItemManager.setEnabled(!loginItemManager.isEnabled) } label: {
+            CheckmarkLabel("wakeUp.startAtLogin".localized(), isSelected: loginItemManager.isEnabled)
+        }
+    }
+
+    private func presentAboutPanel() {
+        let options: [NSApplication.AboutPanelOptionKey: Any] = [
+            .credits: makeAboutCredits()
+        ]
+        NSApp.orderFrontStandardAboutPanel(options: options)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
+    private func makeAboutCredits() -> NSAttributedString {
+        let copyright = resolveAboutCopyright()
+        let repositoryURLString = "https://github.com/Nihondo/AgentLimits"
+        let creditsText = "\(copyright)\nGitHub: \(repositoryURLString)"
+        let attributed = NSMutableAttributedString(string: creditsText)
+        let linkRange = (creditsText as NSString).range(of: repositoryURLString)
+        attributed.addAttribute(.link, value: repositoryURLString, range: linkRange)
+        return attributed
+    }
+
+    private func resolveAboutCopyright() -> String {
+        if let value = Bundle.main.object(forInfoDictionaryKey: "NSHumanReadableCopyright") as? String,
+           !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return value
+        }
+        return "Copyright © 2025-2026 Nihondo"
     }
 }

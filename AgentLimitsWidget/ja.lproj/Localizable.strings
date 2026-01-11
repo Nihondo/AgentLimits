@@ -5,16 +5,12 @@
 "widget.5hourLimit" = "5時間の使用制限";
 "widget.weeklyLimit" = "週間の使用制限";
 "widget.reset" = "リセット時間";
-"widget.updated" = "更新:";
+"widget.updatedAt" = "更新時刻:";
 "error.appGroupUnavailable" = "App Group が利用できません。Signing & Capabilities を確認してください。";
 "error.readFailed" = "データの読み込みに失敗しました";
 "error.decodeFailed" = "データの解析に失敗しました";
 
-/* Relative Time */
-"time.withinMinute" = "1分以内";
-"time.minutesAgo" = "%d分前";
-"time.hoursAgo" = "%d時間前";
-"time.daysAgo" = "%d日前";
+/* Reset Time */
 "time.minutesLater" = "%d分後";
 "time.hoursLater" = "%@時間後";
 "time.daysLater" = "%d日後";

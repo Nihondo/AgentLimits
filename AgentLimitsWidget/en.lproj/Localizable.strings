@@ -5,16 +5,12 @@
 "widget.5hourLimit" = "5-Hour Limit";
 "widget.weeklyLimit" = "Weekly Limit";
 "widget.reset" = "Resets at";
-"widget.updated" = "Updated:";
+"widget.updatedAt" = "Updated at:";
 "error.appGroupUnavailable" = "App Group unavailable. Check Signing & Capabilities.";
 "error.readFailed" = "Failed to read data";
 "error.decodeFailed" = "Failed to decode data";
 
-/* Relative Time */
-"time.withinMinute" = "Within 1 min";
-"time.minutesAgo" = "%d min ago";
-"time.hoursAgo" = "%d hours ago";
-"time.daysAgo" = "%d days ago";
+/* Reset Time */
 "time.minutesLater" = "In %d min";
 "time.hoursLater" = "In %@ hours";
 "time.daysLater" = "In %d days";

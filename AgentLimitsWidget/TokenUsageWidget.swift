@@ -126,12 +126,9 @@ struct TokenUsageWidgetEntryView: View {
                     }
 
                     // Last updated
-                    HStack(spacing: 2) {
-                        Text("widget.updated".widgetLocalized())
-                        Text(WidgetRelativeTimeFormatter.makeRelativeUpdatedText(since: snapshot.fetchedAt))
-                    }
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    Text("\("widget.updatedAt".widgetLocalized()) \(WidgetUpdateTimeFormatter.formatUpdateTime(since: snapshot.fetchedAt))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
                 .padding(.top, 2)
             } else {
@@ -170,12 +167,9 @@ struct TokenUsageWidgetEntryView: View {
                         )
                     }
 
-                    HStack(spacing: 2) {
-                        Text("widget.updated".widgetLocalized())
-                        Text(WidgetRelativeTimeFormatter.makeRelativeUpdatedText(since: snapshot.fetchedAt))
-                    }
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    Text("\("widget.updatedAt".widgetLocalized()) \(WidgetUpdateTimeFormatter.formatUpdateTime(since: snapshot.fetchedAt))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 } else {
                     notFetchedView
                 }

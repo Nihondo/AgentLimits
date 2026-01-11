@@ -30,7 +30,7 @@ enum UsageColorSettings {
 
     /// Returns whether donut colors should follow usage status.
     static func loadDonutUseStatus() -> Bool {
-        let defaults = UserDefaults(suiteName: AppGroupConfig.groupId)
+        let defaults = AppGroupDefaults.shared
         return defaults?.bool(forKey: UsageColorKeys.donutUseStatus) ?? false
     }
 
@@ -56,7 +56,7 @@ enum UsageColorSettings {
 
     /// Saves the usage-status flag for donut coloring.
     static func saveDonutUseStatus(_ value: Bool) {
-        let defaults = UserDefaults(suiteName: AppGroupConfig.groupId)
+        let defaults = AppGroupDefaults.shared
         defaults?.set(value, forKey: UsageColorKeys.donutUseStatus)
     }
 
@@ -77,7 +77,7 @@ enum UsageColorSettings {
 
     /// Clears stored overrides to restore defaults.
     static func resetToDefaults() {
-        let defaults = UserDefaults(suiteName: AppGroupConfig.groupId)
+        let defaults = AppGroupDefaults.shared
         defaults?.removeObject(forKey: UsageColorKeys.donut)
         defaults?.removeObject(forKey: UsageColorKeys.donutUseStatus)
         defaults?.removeObject(forKey: UsageColorKeys.statusGreen)
@@ -86,14 +86,14 @@ enum UsageColorSettings {
     }
 
     private static func loadColor(forKey key: String, defaultColor: Color) -> Color {
-        let defaults = UserDefaults(suiteName: AppGroupConfig.groupId)
+        let defaults = AppGroupDefaults.shared
         let storedValue = defaults?.string(forKey: key)
         return ColorHexCodec.resolveColor(from: storedValue, defaultColor: defaultColor)
     }
 
     private static func saveColor(_ color: Color, forKey key: String) {
         guard let hexValue = ColorHexCodec.hexString(from: color) else { return }
-        let defaults = UserDefaults(suiteName: AppGroupConfig.groupId)
+        let defaults = AppGroupDefaults.shared
         defaults?.set(hexValue, forKey: key)
     }
 }

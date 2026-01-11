@@ -111,7 +111,7 @@ final class CCUsageFetcher {
         // Load per-provider settings and build CLI command for this month.
         let settings = settingsStore.loadSettings()[provider] ?? .defaultSettings(for: provider)
         let startOfMonth = calculateStartOfMonth()
-        let command = buildCommand(settings: settings, startDate: startOfMonth)
+        let command = settings.makeCLICommand(startDate: startOfMonth)
         // Execute CLI and parse JSON response into snapshot.
         let jsonData = try await executeCLI(command: command)
         return try parseResponse(jsonData: jsonData, provider: provider)
@@ -125,14 +125,6 @@ final class CCUsageFetcher {
     private func calculateStartOfMonth() -> String {
         // Delegate to shared month-start resolver for consistency.
         MonthStartDateResolver.calculateStartOfMonthString()
-    }
-
-    /// Builds the full CLI command with arguments
-    private func buildCommand(settings: CCUsageSettings, startDate: String) -> String {
-        // Append start date and JSON output flag for consistent parsing.
-        var cmd = settings.cliCommand
-        cmd += " -s \(startDate) -j"
-        return cmd
     }
 
     /// Executes the CLI command and returns the JSON output.

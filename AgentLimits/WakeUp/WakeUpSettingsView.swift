@@ -17,44 +17,51 @@ struct WakeUpSettingsView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        SettingsScrollContainer {
             headerView
-            Divider()
 
-            providerPicker
-            scheduleSection
-            Divider()
-            statusSection
+            Form {
+                SettingsFormSection {
+                    LabeledContent("wakeUp.provider".localized()) {
+                        providerPicker
+                    }
+                }
 
-            Spacer()
+                SettingsFormSection(title: "wakeUp.schedule".localized()) {
+                    scheduleSection
+                }
+
+                SettingsFormSection(title: "wakeUp.status".localized()) {
+                    statusSection
+                    lastResultView
+                }
+            }
+            .formStyle(.grouped)
         }
-        .padding()
         .frame(minWidth: 400, minHeight: 500)
     }
 
     // MARK: - Header
 
     private var headerView: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("wakeUp.title".localized())
-                .font(.title2)
-                .bold()
-            Text("wakeUp.description".localized())
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        }
+        SettingsHeaderView(
+            titleText: "wakeUp.title".localized(),
+            descriptionText: "wakeUp.description".localized()
+        )
     }
 
     // MARK: - Provider Picker
 
     private var providerPicker: some View {
-        Picker("wakeUp.provider".localized(), selection: $selectedProvider) {
+        Picker("", selection: $selectedProvider) {
             ForEach(UsageProvider.allCases) { provider in
                 Text(provider.displayName).tag(provider)
             }
         }
         .pickerStyle(.segmented)
         .frame(maxWidth: 260)
+        .labelsHidden()
+        .accessibilityLabel(Text("wakeUp.provider".localized()))
     }
 
     // MARK: - Schedule Section
@@ -88,25 +95,19 @@ struct WakeUpSettingsView: View {
     // MARK: - Status Section
 
     private var statusSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("wakeUp.status".localized())
-                .font(.headline)
-
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
             ForEach(UsageProvider.allCases) { provider in
                 providerStatusRow(for: provider)
             }
-
-            lastResultView
         }
     }
 
     private func providerStatusRow(for provider: UsageProvider) -> some View {
-        HStack {
-            Circle()
-                .fill(statusColor(for: provider))
-                .frame(width: 8, height: 8)
-            Text(provider.displayName)
-                .font(.body)
+        HStack(spacing: DesignTokens.Spacing.small) {
+            SettingsStatusIndicator(
+                text: provider.displayName,
+                level: statusLevel(for: provider)
+            )
             Spacer()
 
             if let schedule = scheduler.schedules[provider],
@@ -147,14 +148,14 @@ struct WakeUpSettingsView: View {
 
     // MARK: - Helpers
 
-    private func statusColor(for provider: UsageProvider) -> Color {
+    private func statusLevel(for provider: UsageProvider) -> SettingsStatusLevel {
         // Gray when disabled/no hours, green when installed, orange when pending install.
         guard let schedule = scheduler.schedules[provider],
               schedule.isEnabled,
               !schedule.enabledHours.isEmpty else {
-            return .gray
+            return .inactive
         }
-        return scheduler.isLaunchAgentInstalled(for: provider) ? .green : .orange
+        return scheduler.isLaunchAgentInstalled(for: provider) ? .success : .warning
     }
 
     private func scheduleText(for schedule: WakeUpSchedule) -> String {
@@ -180,7 +181,7 @@ private struct ProviderScheduleView: View {
     let onTestWakeUp: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.medium) {
             Toggle("wakeUp.enabled".localized(), isOn: enabledBinding)
 
             if schedule.isEnabled {
@@ -205,29 +206,33 @@ private struct ProviderScheduleView: View {
                     }
                 )
 
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
                     Text("wakeUp.command".localized())
                         .font(.body)
                         .foregroundStyle(.secondary)
                     Text(schedule.cliCommand)
                         .font(.system(.footnote, design: .monospaced))
                         .foregroundStyle(.primary)
-                        .padding(6)
+                        .padding(DesignTokens.Spacing.small)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(Color.secondary.opacity(0.1))
-                        .cornerRadius(4)
+                        .cornerRadius(DesignTokens.CornerRadius.small)
                         .textSelection(.enabled)
                 }
 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("wakeUp.additionalArgs".localized())
-                        .font(.body)
-                        .foregroundStyle(.secondary)
-                    TextField("wakeUp.additionalArgsPlaceholder".localized(), text: additionalArgsBinding)
-                        .textFieldStyle(.roundedBorder)
+                LabeledContent("wakeUp.additionalArgs".localized()) {
+                    TextField(
+                        "",
+                        text: additionalArgsBinding,
+                        prompt: Text("wakeUp.additionalArgsPlaceholder".localized())
+                    )
+                    .textFieldStyle(.roundedBorder)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityLabel(Text("wakeUp.additionalArgs".localized()))
                 }
 
-                HStack {
+                HStack(spacing: DesignTokens.Spacing.small) {
                     Text("wakeUp.selectedHours".localized())
                         .font(.footnote)
                         .foregroundStyle(.secondary)
@@ -236,11 +241,12 @@ private struct ProviderScheduleView: View {
                         .foregroundStyle(.secondary)
                 }
 
-                HStack {
+                HStack(spacing: DesignTokens.Spacing.small) {
                     Button("wakeUp.testNow".localized()) {
                         onTestWakeUp()
                     }
                     .disabled(isTestRunning)
+                    .settingsButtonStyle(.secondary)
 
                     if isTestRunning {
                         ProgressView()
@@ -249,9 +255,6 @@ private struct ProviderScheduleView: View {
                 }
             }
         }
-        .padding()
-        .background(.thinMaterial)
-        .cornerRadius(8)
     }
 
     private var enabledBinding: Binding<Bool> {
@@ -295,7 +298,7 @@ private struct HourGridView: View {
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 4), count: 6)
 
     var body: some View {
-        LazyVGrid(columns: columns, spacing: 4) {
+        LazyVGrid(columns: columns, spacing: DesignTokens.Spacing.small) {
             ForEach(0..<24, id: \.self) { hour in
                 Button {
                     onToggle(hour)
@@ -303,7 +306,7 @@ private struct HourGridView: View {
                     Text(String(format: "%02d", hour))
                         .font(.system(.footnote, design: .monospaced))
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 6)
+                        .padding(.vertical, DesignTokens.Spacing.small)
                         .background(
                             selectedHours.contains(hour)
                                 ? Color.accentColor
@@ -312,9 +315,12 @@ private struct HourGridView: View {
                         .foregroundColor(
                             selectedHours.contains(hour) ? .white : .primary
                         )
-                        .cornerRadius(4)
+                        .cornerRadius(DesignTokens.CornerRadius.small)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(Text("wakeUp.hour".localized(hour)))
+                .accessibilityValue(Text(selectedHours.contains(hour) ? "wakeUp.selected".localized() : "wakeUp.notSelected".localized()))
+                .accessibilityAddTraits(selectedHours.contains(hour) ? .isSelected : [])
             }
         }
     }

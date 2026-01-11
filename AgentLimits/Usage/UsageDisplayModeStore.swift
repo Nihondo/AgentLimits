@@ -1,12 +1,12 @@
 // MARK: - UsageDisplayModeStore.swift
-// Persists display mode preference and rewrites saved snapshots for widgets.
+// Persists display mode preference and updates snapshot display-mode markers.
 // Ensures widgets and app show consistent percent values across mode changes.
 
 import Foundation
 import OSLog
 import WidgetKit
 
-/// Manages persisted display mode and rewrites stored snapshots when toggled
+/// Manages persisted display mode and updates stored snapshot markers when toggled
 final class UsageDisplayModeStore {
     private let store: UsageSnapshotStore
     private let userDefaults: UserDefaults
@@ -15,7 +15,7 @@ final class UsageDisplayModeStore {
     init(
         store: UsageSnapshotStore = UsageSnapshotStore.shared,
         userDefaults: UserDefaults = .standard,
-        appGroupDefaults: UserDefaults? = UserDefaults(suiteName: AppGroupConfig.groupId)
+        appGroupDefaults: UserDefaults? = AppGroupDefaults.shared
     ) {
         self.store = store
         self.userDefaults = userDefaults
@@ -38,19 +38,16 @@ final class UsageDisplayModeStore {
         appGroupDefaults?.set(displayMode.rawValue, forKey: SharedUserDefaultsKeys.cachedDisplayMode)
     }
 
-    /// Converts stored snapshots to the new display mode and refreshes widgets
+    /// Updates stored snapshots with the new display mode and refreshes widgets
     func applyDisplayMode(_ displayMode: UsageDisplayMode) {
         let cachedMode = loadCachedDisplayMode() ?? .used
-        guard cachedMode != displayMode else {
-            // Still persist the cached mode for consistency.
-            saveCachedDisplayMode(displayMode)
-            return
-        }
+        let rawMode = displayMode.makeDisplayModeRaw()
 
         for provider in UsageProvider.allCases {
             guard let snapshot = store.loadSnapshot(for: provider) else { continue }
-            // Convert stored snapshot between used/remaining modes.
-            let convertedSnapshot = snapshot.makeSnapshot(from: cachedMode, to: displayMode)
+            if cachedMode == displayMode, snapshot.displayMode == rawMode { continue }
+            // Update snapshot display mode without modifying used percent.
+            let convertedSnapshot = snapshot.makeSnapshot(for: displayMode)
             do {
                 try store.saveSnapshot(convertedSnapshot)
                 WidgetCenter.shared.reloadTimelines(ofKind: provider.widgetKind)
@@ -59,7 +56,7 @@ final class UsageDisplayModeStore {
             }
         }
 
-        // Update cached mode after rewriting snapshots.
+        // Update cached mode after updating snapshots.
         saveCachedDisplayMode(displayMode)
     }
 

@@ -14,7 +14,7 @@ struct CCUsageSettingsView: View {
     @State private var selectedProvider: TokenUsageProvider = .codex
     @AppStorage(
         AppGroupConfig.tokenUsageRefreshIntervalMinutesKey,
-        store: UserDefaults(suiteName: AppGroupConfig.groupId)
+        store: AppGroupDefaults.shared
     ) private var refreshIntervalMinutes: Int = RefreshIntervalConfig.defaultMinutes
 
     init(viewModel: TokenUsageViewModel) {
@@ -22,23 +22,33 @@ struct CCUsageSettingsView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        SettingsScrollContainer {
             headerView
-            Divider()
 
-            providerPickerRow
-            settingsSection
-            Divider()
-            statusSection
-            Divider()
-            creditsSection
+            Form {
+                SettingsFormSection {
+                    LabeledContent("ccusage.provider".localized()) {
+                        providerPicker
+                    }
+                    LabeledContent("refreshInterval.label".localized()) {
+                        RefreshIntervalPickerRow(showsLabel: false, refreshIntervalMinutes: $refreshIntervalMinutes)
+                    }
+                }
 
-            Spacer()
-        }
-        .padding()
-        .frame(minWidth: 400, minHeight: 500)
-        .onAppear {
-            refreshIntervalMinutes = RefreshIntervalConfig.normalizedMinutes(refreshIntervalMinutes)
+                SettingsFormSection(title: "ccusage.settings".localized()) {
+                    settingsSection
+                }
+
+                SettingsFormSection(title: "ccusage.status".localized()) {
+                    statusSection
+                    lastResultView
+                }
+
+                SettingsFormSection(footerText: "ccusage.credits.body".localized()) {
+                    creditsSection
+                }
+            }
+            .formStyle(.grouped)
         }
         .onChange(of: refreshIntervalMinutes) { _, _ in
             viewModel.restartAutoRefresh()
@@ -49,53 +59,24 @@ struct CCUsageSettingsView: View {
     // MARK: - Header
 
     private var headerView: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("ccusage.title".localized())
-                .font(.title2)
-                .bold()
-            Text("ccusage.description".localized())
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        }
+        SettingsHeaderView(
+            titleText: "ccusage.title".localized(),
+            descriptionText: "ccusage.description".localized()
+        )
     }
 
     // MARK: - Provider Picker
 
-    private var providerPickerRow: some View {
-        HStack(spacing: 12) {
-            providerPicker
-            Spacer(minLength: 0)
-            refreshIntervalMenu
-        }
-    }
-
     private var providerPicker: some View {
-        Picker("ccusage.provider".localized(), selection: $selectedProvider) {
+        Picker("", selection: $selectedProvider) {
             ForEach(TokenUsageProvider.allCases) { provider in
                 Text(provider.displayName).tag(provider)
             }
         }
         .pickerStyle(.segmented)
         .frame(maxWidth: 260)
-    }
-
-    private var refreshIntervalMenu: some View {
-        HStack(spacing: 6) {
-            Text("refreshInterval.label".localized())
-                .font(.body)
-                .foregroundStyle(.primary)
-            Picker(
-                "refreshInterval.label".localized(),
-                selection: refreshIntervalBinding
-            ) {
-                ForEach(RefreshIntervalConfig.supportedMinutes, id: \.self) { minutes in
-                    Text("refreshInterval.minutesFormat".localized(minutes))
-                        .tag(minutes)
-                }
-            }
-            .labelsHidden()
-            .pickerStyle(.menu)
-        }
+        .labelsHidden()
+        .accessibilityLabel(Text("ccusage.provider".localized()))
     }
 
     // MARK: - Settings Section
@@ -127,15 +108,10 @@ struct CCUsageSettingsView: View {
     // MARK: - Status Section
 
     private var statusSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("ccusage.status".localized())
-                .font(.headline)
-
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
             ForEach(TokenUsageProvider.allCases) { provider in
                 providerStatusRow(for: provider)
             }
-
-            lastResultView
         }
     }
 
@@ -144,13 +120,9 @@ struct CCUsageSettingsView: View {
     /// Credits section showing links to ccusage website and repository.
     /// Uses pre-validated static URL constants for safety.
     private var creditsSection: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
             Text("ccusage.credits.title".localized())
                 .font(.footnote)
-                .foregroundStyle(.secondary)
-
-            Text("ccusage.credits.body".localized())
-                .font(.caption)
                 .foregroundStyle(.secondary)
 
             if let siteURL = CCUsageLinks.siteURL {
@@ -171,24 +143,13 @@ struct CCUsageSettingsView: View {
         }
     }
 
-    private var refreshIntervalBinding: Binding<Int> {
-        Binding(
-            get: { RefreshIntervalConfig.normalizedMinutes(refreshIntervalMinutes) },
-            set: { newValue in
-                refreshIntervalMinutes = RefreshIntervalConfig.normalizedMinutes(newValue)
-            }
-        )
-    }
-
     private func providerStatusRow(for provider: TokenUsageProvider) -> some View {
-        HStack {
-            Circle()
-                .fill(statusColor(for: provider))
-                .frame(width: 8, height: 8)
-            Text(provider.displayName)
-                .font(.body)
+        HStack(spacing: DesignTokens.Spacing.small) {
+            SettingsStatusIndicator(
+                text: provider.displayName,
+                level: statusLevel(for: provider)
+            )
             Spacer()
-
             if let settings = viewModel.settings[provider], settings.isEnabled {
                 Text(viewModel.statusMessages[provider] ?? "tokenUsage.notFetched".localized())
                     .font(.footnote)
@@ -226,15 +187,15 @@ struct CCUsageSettingsView: View {
 
     // MARK: - Helpers
 
-    private func statusColor(for provider: TokenUsageProvider) -> Color {
+    private func statusLevel(for provider: TokenUsageProvider) -> SettingsStatusLevel {
         // Gray when disabled, green when fetched, orange while enabled but no snapshot yet.
         guard let settings = viewModel.settings[provider], settings.isEnabled else {
-            return .gray
+            return .inactive
         }
         if viewModel.snapshots[provider] != nil {
-            return .green
+            return .success
         }
-        return .orange
+        return .warning
     }
 
 }
@@ -268,12 +229,16 @@ private struct ProviderSettingsView: View {
                         .textSelection(.enabled)
                 }
 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("ccusage.additionalArgs".localized())
-                        .font(.body)
-                        .foregroundStyle(.secondary)
-                    TextField("ccusage.additionalArgsPlaceholder".localized(), text: additionalArgsBinding)
-                        .textFieldStyle(.roundedBorder)
+                LabeledContent("ccusage.additionalArgs".localized()) {
+                    TextField(
+                        "",
+                        text: additionalArgsBinding,
+                        prompt: Text("ccusage.additionalArgsPlaceholder".localized())
+                    )
+                    .textFieldStyle(.roundedBorder)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityLabel(Text("ccusage.additionalArgs".localized()))
                 }
 
                 HStack {
