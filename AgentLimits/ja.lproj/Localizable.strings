@@ -183,3 +183,9 @@
 "widgetTapAction.openWebsite" = "Webサイトを開く";
 "widgetTapAction.refreshData" = "データを再取得";
 "widgetTapAction.note" = "ウィジェットをタップしたときの動作を選択します";
+
+/* Ideal Mode Thresholds */
+"notification.idealModeThresholds" = "目安モード閾値";
+"notification.idealModeThresholds.description" = "「使用率+目安」モードで目安を超過した時の色分け閾値";
+"notification.idealModeThresholds.warning" = "警告（オレンジ）";
+"notification.idealModeThresholds.danger" = "危険（赤）";

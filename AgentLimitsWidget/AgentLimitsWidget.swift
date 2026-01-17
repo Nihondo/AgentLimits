@@ -452,8 +452,10 @@ private enum WidgetUsageColorResolver {
         }
         let level = UsageStatusLevelResolver.levelForIdealMode(
             usedPercent: window.usedPercent,
-            idealPercent: idealPercent
-        )
+            idealPercent: idealPercent,
+                warningDelta: IdealModeThresholdSettings.loadWarningDelta(),
+                dangerDelta: IdealModeThresholdSettings.loadDangerDelta()
+            )
         return statusColor(for: level)
     }
 
@@ -488,7 +490,9 @@ private enum WidgetUsageColorResolver {
             }
             let level = UsageStatusLevelResolver.levelForIdealMode(
                 usedPercent: window.usedPercent,
-                idealPercent: idealPercent
+                idealPercent: idealPercent,
+                warningDelta: IdealModeThresholdSettings.loadWarningDelta(),
+                dangerDelta: IdealModeThresholdSettings.loadDangerDelta()
             )
             return statusColor(for: level)
         }

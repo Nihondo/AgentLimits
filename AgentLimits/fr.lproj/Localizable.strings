@@ -183,3 +183,9 @@
 "widgetTapAction.openWebsite" = "Ouvrir le site web";
 "widgetTapAction.refreshData" = "Actualiser les données";
 "widgetTapAction.note" = "Choisissez l’action au toucher d’un widget";
+
+/* Ideal Mode Thresholds */
+"notification.idealModeThresholds" = "Guideline Mode Thresholds";
+"notification.idealModeThresholds.description" = "Color thresholds when exceeding guideline";
+"notification.idealModeThresholds.warning" = "Warning (Orange)";
+"notification.idealModeThresholds.danger" = "Danger (Red)";

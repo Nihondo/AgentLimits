@@ -183,3 +183,9 @@
 "widgetTapAction.openWebsite" = "開啟網站";
 "widgetTapAction.refreshData" = "重新整理資料";
 "widgetTapAction.note" = "選擇點擊小工具時的動作";
+
+/* Ideal Mode Thresholds */
+"notification.idealModeThresholds" = "Guideline Mode Thresholds";
+"notification.idealModeThresholds.description" = "Color thresholds when exceeding guideline";
+"notification.idealModeThresholds.warning" = "Warning (Orange)";
+"notification.idealModeThresholds.danger" = "Danger (Red)";

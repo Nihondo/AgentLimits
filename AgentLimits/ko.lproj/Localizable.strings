@@ -183,3 +183,9 @@
 "widgetTapAction.openWebsite" = "웹사이트 열기";
 "widgetTapAction.refreshData" = "데이터 새로 고침";
 "widgetTapAction.note" = "위젯을 탭했을 때의 동작을 선택합니다";
+
+/* Ideal Mode Thresholds */
+"notification.idealModeThresholds" = "Guideline Mode Thresholds";
+"notification.idealModeThresholds.description" = "Color thresholds when exceeding guideline";
+"notification.idealModeThresholds.warning" = "Warning (Orange)";
+"notification.idealModeThresholds.danger" = "Danger (Red)";

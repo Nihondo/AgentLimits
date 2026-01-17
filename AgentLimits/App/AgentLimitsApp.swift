@@ -308,7 +308,9 @@ private struct MenuBarPercentLineView: View {
             }
             level = UsageStatusLevelResolver.levelForIdealMode(
                 usedPercent: window.usedPercent,
-                idealPercent: idealPercent
+                idealPercent: idealPercent,
+                warningDelta: IdealModeThresholdSettings.loadWarningDelta(),
+                dangerDelta: IdealModeThresholdSettings.loadDangerDelta()
             )
         } else {
             let thresholds = UsageStatusThresholdStore.loadThresholds(for: provider, windowKind: windowKind)
