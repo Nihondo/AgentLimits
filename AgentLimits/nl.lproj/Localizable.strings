@@ -1,0 +1,183 @@
+/* Tabs */
+"tab.usage" = "Gebruikslimiet";
+"tab.wakeUp" = "Wake Up";
+"tab.notification" = "Melding";
+"tab.advanced" = "Geavanceerd";
+
+/* Menu */
+"menu.openSettings" = "AgentLimits-instellingen...";
+"menu.displayMode" = "Weergavemodus";
+"menu.displayMode.used" = "Gebruikspercentage";
+"menu.displayMode.remaining" = "Resterend percentage";
+"menu.about" = "Over AgentLimits";
+"menu.quit" = "Afsluiten";
+"menu.language" = "Taal";
+"menu.language.system" = "Systeem";
+"menu.language.japanese" = "日本語";
+"menu.language.english" = "English";
+
+/* ContentView */
+"content.login" = "Log in om het huidige gebruikspercentage te bekijken";
+"content.usageLimit" = "Gebruikslimiet";
+"content.autoRefresh" = "Ingelogde services worden elke %d min automatisch ververst.";
+"refreshInterval.label" = "Verversingsinterval";
+"refreshInterval.minutesFormat" = "%d min";
+"content.refreshNow" = "Nu verversen";
+"content.clearData" = "Gegevens wissen";
+"content.clearDataConfirmTitle" = "Gegevens wissen";
+"content.clearDataConfirmMessage" = "Dit verwijdert inloggegevens en website-opslag voor de ingebouwde browser.";
+"content.clearDataConfirmAction" = "Wissen";
+"content.clearDataCancel" = "Annuleren";
+"content.provider" = "Service";
+"content.usageSummary" = "Status";
+"content.latestUsage" = "Laatste gebruik";
+"content.5hours" = "5 uur";
+"content.week" = "Week";
+"content.updated" = "Bijgewerkt:";
+"usage.updated" = "Bijgewerkt: ";
+"content.notFetched" = "Niet opgehaald. Log hieronder in.";
+"content.reset" = "Reset:";
+"content.popupClose" = "Sluiten";
+"settings.showInMenuBar" = "Toon in menubalk";
+
+/* Display Mode */
+"displayMode.used" = "Gebruikspercentage";
+"displayMode.remaining" = "Resterend percentage";
+
+/* Status */
+"status.notFetched" = "Niet opgehaald";
+"status.loadingLogin" = "Inlogpagina laden...";
+"status.updated" = "Bijgewerkt";
+
+/* Errors */
+"error.fetchFailed" = "Ophalen mislukt: %@";
+"error.parseFailed" = "Kon antwoord niet parseren.";
+"error.loginNotLoaded" = "Inlogpagina niet geladen.";
+"error.missingOrg" = "Organisatie-ID kon niet worden opgehaald. Herlaad de gebruikspagina.";
+"error.appGroupUnavailable" = "App Group niet beschikbaar. Controleer Signing & Capabilities.";
+"error.readFailed" = "Lezen van gegevens mislukt";
+"error.decodeFailed" = "Decoderen van gegevens mislukt";
+
+/* Relative Time */
+"time.withinMinute" = "Binnen 1 min";
+"time.minutesAgo" = "%d min geleden";
+"time.hoursAgo" = "%d uur geleden";
+"time.daysAgo" = "%d dagen geleden";
+"time.minutesLater" = "Over %d min";
+"time.hoursLater" = "Over %d uur";
+"time.daysLater" = "Over %d dagen";
+
+/* Wake Up */
+"menu.wakeUp" = "Wake up";
+"menu.wakeUpNow" = " - Nu uitvoeren";
+"menu.wakeUpSettings" = "Wake up-instellingen...";
+"wakeUp.windowTitle" = "Wake up-instellingen";
+"wakeUp.title" = "Wake up-schema";
+"wakeUp.description" = "Roept de CLI op geplande tijden aan om 5-uur sessies te starten";
+"wakeUp.provider" = "Service";
+"wakeUp.schedule" = "Schema";
+"wakeUp.enabled" = "Schema inschakelen";
+"wakeUp.selectHours" = "Selecteer tijden om uit te voeren (meerdere)";
+"wakeUp.selectedHours" = "Geselecteerd:";
+"wakeUp.noHoursSelected" = "Geen";
+"wakeUp.hoursSelected" = "uren geselecteerd";
+"wakeUp.testNow" = "Nu testen";
+"wakeUp.command" = "Opdracht";
+"wakeUp.additionalArgs" = "Aanvullende argumenten";
+"wakeUp.additionalArgsPlaceholder" = "bijv. --model=\"<<model-name>>\"";
+"wakeUp.status" = "Status";
+"wakeUp.nextRun" = "Volgende uitvoering:";
+"wakeUp.notScheduled" = "Niet gepland";
+"wakeUp.lastResult" = "Laatste resultaat:";
+"wakeUp.success" = "Succes";
+"wakeUp.startAtLogin" = "App starten bij inloggen";
+
+/* Login Item */
+"loginItem.requiresApproval" = "Goedkeuring vereist in Systeeminstellingen";
+"loginItem.notFound" = "Login-item niet gevonden";
+
+/* Threshold Notification */
+"menu.thresholdSettings" = "Drempelmeldingsinstellingen...";
+"notification.windowTitle" = "Drempelmeldingsinstellingen";
+"notification.title" = "Melding gebruikspercentagedrempel";
+"notification.description" = "Configureer meldingsdrempels en gebruikskleuren";
+"notification.provider" = "Service";
+"notification.thresholds" = "Drempels";
+"notification.colors" = "Kleuren";
+"notification.authorization" = "Meldingsrechten vereist";
+"notification.requestAuth" = "Toestemming aanvragen";
+"notification.primaryWindow" = "5-uur limiet";
+"notification.secondaryWindow" = "Wekelijkse limiet";
+"notification.enabled" = "Drempelmelding inschakelen";
+"notification.warning" = "Waarschuwingsniveau";
+"notification.danger" = "Gevarenniveau";
+"notification.resetDefaults" = "Standaardwaarden herstellen";
+"notification.threshold" = "Drempel:";
+"notification.alertTitleWarning" = "Waarschuwing gebruikspercentage %@";
+"notification.alertTitleDanger" = "Gevaar gebruikspercentage %@";
+"notification.alertBody5h" = "De 5-uur gebruikslimiet heeft %d%% bereikt";
+"notification.alertBodyWeek" = "De wekelijkse gebruikslimiet heeft %d%% bereikt";
+
+/* ccusage */
+"tab.ccusage" = "ccusage";
+"menu.ccusage" = "ccusage";
+"menu.ccusageSettings" = "ccusage-instellingen...";
+"ccusage.windowTitle" = "ccusage-instellingen";
+"ccusage.title" = "Tokengebruik bijhouden (ccusage)";
+"ccusage.description" = "Tokengebruik en kosten ophalen via de ccusage-CLI";
+"ccusage.settings" = "Instellingen";
+"ccusage.enabled" = "Periodiek ophalen inschakelen";
+"ccusage.command" = "Opdracht";
+"ccusage.additionalArgs" = "Aanvullende argumenten";
+"ccusage.additionalArgsPlaceholder" = "bijv. --timezone <<timezone>>";
+"ccusage.testNow" = "Nu testen";
+"ccusage.status" = "Status";
+"ccusage.lastResult" = "Laatste resultaat:";
+"ccusage.success" = "Succes";
+"tokenUsage.notFetched" = "Niet opgehaald";
+"tokenUsage.updated" = "Bijgewerkt: ";
+"ccusage.provider" = "Service";
+"ccusage.disabled" = "Uitgeschakeld";
+"ccusage.credits.title" = "Credits";
+"ccusage.credits.body" = "Speciale dank aan ryoppippi, de maker van ccusage.";
+"ccusage.credits.site" = "ccusage-website";
+"ccusage.credits.repo" = "GitHub: ryoppippi/ccusage";
+
+/* Advanced Settings */
+"advancedSettings.title" = "Geavanceerde instellingen";
+"advancedSettings.description" = "Pas CLI-paden, scripts en widgetacties aan.";
+"cliPaths.sectionTitle" = "CLI-opdrachtpaden";
+"cliPaths.description" = "Specificeer volledige paden voor codex, claude en npx. Laat leeg om PATH te gebruiken.";
+"cliPaths.codex" = "codex-pad";
+"cliPaths.claude" = "claude-pad";
+"cliPaths.npx" = "npx-pad";
+"cliPaths.codex.placeholder" = "bijv. /opt/homebrew/bin/codex";
+"cliPaths.claude.placeholder" = "bijv. /opt/homebrew/bin/claude";
+"cliPaths.npx.placeholder" = "bijv. /opt/homebrew/bin/npx";
+"cliPaths.note" = "Wijzigingen worden van kracht bij de volgende CLI-uitvoering.";
+"cliPaths.resolvedLabel" = "Opgelost:";
+"cliPaths.notFound" = "Niet gevonden";
+
+/* CLI Colors */
+"cliColors.title" = "Kleuren gebruikspercentage";
+"cliColors.donut" = "Kleur donutgrafiek";
+"cliColors.donutUseStatus" = "Kleuren van gebruikspercentage gebruiken";
+"cliColors.green" = "Gebruikspercentage (normaal)";
+"cliColors.orange" = "Gebruikspercentage (waarschuwing)";
+"cliColors.red" = "Gebruikspercentage (gevaar)";
+"cliColors.note" = "Wijzigingen gelden voor widgets en menubalk.";
+"cliColors.reset" = "Standaardwaarden herstellen";
+
+/* Scripts */
+"scripts.title" = "Meegeleverde scripts";
+"scripts.claudeCode.title" = "Claude Code statusregel-script";
+"scripts.claudeCode.note" = "Gebruik dit script met de statusregel van Claude Code om gebruikspercentages te tonen.";
+"scripts.copy" = "Pad kopiëren";
+"scripts.copied" = "Gekopieerd!";
+"scripts.notFound" = "Script niet gevonden in bundle";
+
+/* Widget Tap Action */
+"widgetTapAction.title" = "Actie bij tikken op widget";
+"widgetTapAction.openWebsite" = "Website openen";
+"widgetTapAction.refreshData" = "Gegevens verversen";
+"widgetTapAction.note" = "Kies wat er gebeurt bij het tikken op een widget";

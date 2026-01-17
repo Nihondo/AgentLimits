@@ -219,6 +219,18 @@
 				en,
 				Base,
 				ja,
+				de,
+				es,
+				fr,
+				"pt-BR",
+				ko,
+				"zh-Hans",
+				"zh-Hant",
+				pl,
+				it,
+				nl,
+				tr,
+				uk,
 			);
 			mainGroup = 42D45B812EF649FD00A51EA8;
 			minimizedProjectReferenceProxies = 1;
@@ -424,7 +436,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.9.6;
+				MARKETING_VERSION = 0.9.7;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dmng.agentlimit.AgentLimit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -465,7 +477,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.9.6;
+				MARKETING_VERSION = 0.9.7;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dmng.agentlimit.AgentLimit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -501,7 +513,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.9.6;
+				MARKETING_VERSION = 0.9.7;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dmng.agentlimit.AgentLimit.AgentLimitWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -536,7 +548,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.9.6;
+				MARKETING_VERSION = 0.9.7;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dmng.agentlimit.AgentLimit.AgentLimitWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

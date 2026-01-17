@@ -1,0 +1,23 @@
+/* Widget */
+"widget.description" = "5 saatlik ve haftalık kullanım oranlarını gösterir.";
+"widget.notFetched" = "Alınmadı";
+"widget.pleaseLogin" = "Uygulamada oturum açın";
+"widget.5hourLimit" = "5 Saatlik Limit";
+"widget.weeklyLimit" = "Haftalık Limit";
+"widget.reset" = "Sıfırlanma zamanı";
+"widget.updatedAt" = "Güncelleme:";
+"error.appGroupUnavailable" = "App Group kullanılamıyor. Signing & Capabilities'i kontrol edin.";
+"error.readFailed" = "Veri okunamadı";
+"error.decodeFailed" = "Veri çözümlenemedi";
+
+/* Reset Time */
+"time.minutesLater" = "%d dk sonra";
+"time.hoursLater" = "%@ saat sonra";
+"time.daysLater" = "%d gün sonra";
+
+/* Token Usage Widget (ccusage) */
+"widget.tokenUsage.today" = "Bugün";
+"widget.tokenUsage.thisWeek" = "Haftalık";
+"widget.tokenUsage.thisMonth" = "Aylık";
+"widget.tokenUsageDescription" = "Token kullanımını ve maliyetleri gösterir.";
+"widget.pleaseOpenApp" = "Lütfen uygulamayı açın";

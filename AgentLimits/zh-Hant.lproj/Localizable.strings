@@ -1,0 +1,183 @@
+/* Tabs */
+"tab.usage" = "使用限制";
+"tab.wakeUp" = "Wake Up";
+"tab.notification" = "通知";
+"tab.advanced" = "進階";
+
+/* Menu */
+"menu.openSettings" = "AgentLimits 設定...";
+"menu.displayMode" = "顯示模式";
+"menu.displayMode.used" = "使用率";
+"menu.displayMode.remaining" = "剩餘率";
+"menu.about" = "關於 AgentLimits";
+"menu.quit" = "結束";
+"menu.language" = "語言";
+"menu.language.system" = "系統";
+"menu.language.japanese" = "日本語";
+"menu.language.english" = "English";
+
+/* ContentView */
+"content.login" = "登入以取得目前使用率";
+"content.usageLimit" = "使用限制";
+"content.autoRefresh" = "已登入的服務每 %d 分鐘自動更新。";
+"refreshInterval.label" = "更新間隔";
+"refreshInterval.minutesFormat" = "%d 分鐘";
+"content.refreshNow" = "立即更新";
+"content.clearData" = "清除資料";
+"content.clearDataConfirmTitle" = "清除資料";
+"content.clearDataConfirmMessage" = "這將移除內建瀏覽器的登入資料與網站儲存。";
+"content.clearDataConfirmAction" = "清除";
+"content.clearDataCancel" = "取消";
+"content.provider" = "服務";
+"content.usageSummary" = "狀態";
+"content.latestUsage" = "最新使用狀況";
+"content.5hours" = "5 小時";
+"content.week" = "週";
+"content.updated" = "更新：";
+"usage.updated" = "更新： ";
+"content.notFetched" = "尚未取得。請在下方登入。";
+"content.reset" = "重置：";
+"content.popupClose" = "關閉";
+"settings.showInMenuBar" = "在選單列顯示";
+
+/* Display Mode */
+"displayMode.used" = "使用率";
+"displayMode.remaining" = "剩餘率";
+
+/* Status */
+"status.notFetched" = "尚未取得";
+"status.loadingLogin" = "正在載入登入頁面...";
+"status.updated" = "已更新";
+
+/* Errors */
+"error.fetchFailed" = "取得失敗：%@";
+"error.parseFailed" = "解析回應失敗。";
+"error.loginNotLoaded" = "登入頁面尚未載入。";
+"error.missingOrg" = "無法取得組織 ID。請重新載入使用頁面。";
+"error.appGroupUnavailable" = "App Group 無法使用。請檢查 Signing & Capabilities。";
+"error.readFailed" = "讀取資料失敗";
+"error.decodeFailed" = "解析資料失敗";
+
+/* Relative Time */
+"time.withinMinute" = "1 分鐘內";
+"time.minutesAgo" = "%d 分鐘前";
+"time.hoursAgo" = "%d 小時前";
+"time.daysAgo" = "%d 天前";
+"time.minutesLater" = "%d 分鐘後";
+"time.hoursLater" = "%d 小時後";
+"time.daysLater" = "%d 天後";
+
+/* Wake Up */
+"menu.wakeUp" = "Wake up";
+"menu.wakeUpNow" = " - 立即執行";
+"menu.wakeUpSettings" = "Wake up 設定...";
+"wakeUp.windowTitle" = "Wake up 設定";
+"wakeUp.title" = "Wake up 排程";
+"wakeUp.description" = "在排定時間呼叫 CLI 以開始 5 小時工作階段";
+"wakeUp.provider" = "服務";
+"wakeUp.schedule" = "排程";
+"wakeUp.enabled" = "啟用排程";
+"wakeUp.selectHours" = "選擇執行時間（可多選）";
+"wakeUp.selectedHours" = "已選擇：";
+"wakeUp.noHoursSelected" = "無";
+"wakeUp.hoursSelected" = "已選擇小時";
+"wakeUp.testNow" = "立即測試";
+"wakeUp.command" = "指令";
+"wakeUp.additionalArgs" = "附加參數";
+"wakeUp.additionalArgsPlaceholder" = "例如：--model=\"<<model-name>>\"";
+"wakeUp.status" = "狀態";
+"wakeUp.nextRun" = "下次執行：";
+"wakeUp.notScheduled" = "未排程";
+"wakeUp.lastResult" = "上次結果：";
+"wakeUp.success" = "成功";
+"wakeUp.startAtLogin" = "登入時啟動 App";
+
+/* Login Item */
+"loginItem.requiresApproval" = "需要在系統設定中核准";
+"loginItem.notFound" = "找不到登入項目";
+
+/* Threshold Notification */
+"menu.thresholdSettings" = "閾值通知設定...";
+"notification.windowTitle" = "閾值通知設定";
+"notification.title" = "使用率閾值通知";
+"notification.description" = "設定通知閾值與使用率顏色";
+"notification.provider" = "服務";
+"notification.thresholds" = "閾值";
+"notification.colors" = "顏色";
+"notification.authorization" = "需要通知權限";
+"notification.requestAuth" = "請求權限";
+"notification.primaryWindow" = "5 小時限制";
+"notification.secondaryWindow" = "每週限制";
+"notification.enabled" = "啟用閾值通知";
+"notification.warning" = "警告等級";
+"notification.danger" = "危險等級";
+"notification.resetDefaults" = "還原預設值";
+"notification.threshold" = "閾值：";
+"notification.alertTitleWarning" = "%@ 使用率警告";
+"notification.alertTitleDanger" = "%@ 使用率危險";
+"notification.alertBody5h" = "5 小時使用限制已達 %d%%";
+"notification.alertBodyWeek" = "每週使用限制已達 %d%%";
+
+/* ccusage */
+"tab.ccusage" = "ccusage";
+"menu.ccusage" = "ccusage";
+"menu.ccusageSettings" = "ccusage 設定...";
+"ccusage.windowTitle" = "ccusage 設定";
+"ccusage.title" = "代幣使用量追蹤（ccusage）";
+"ccusage.description" = "使用 ccusage CLI 取得代幣使用量與費用";
+"ccusage.settings" = "設定";
+"ccusage.enabled" = "啟用定期取得";
+"ccusage.command" = "指令";
+"ccusage.additionalArgs" = "附加參數";
+"ccusage.additionalArgsPlaceholder" = "例如：--timezone <<timezone>>";
+"ccusage.testNow" = "立即測試";
+"ccusage.status" = "狀態";
+"ccusage.lastResult" = "上次結果：";
+"ccusage.success" = "成功";
+"tokenUsage.notFetched" = "尚未取得";
+"tokenUsage.updated" = "更新： ";
+"ccusage.provider" = "服務";
+"ccusage.disabled" = "已停用";
+"ccusage.credits.title" = "致謝";
+"ccusage.credits.body" = "特別感謝 ccusage 作者 ryoppippi。";
+"ccusage.credits.site" = "ccusage 網站";
+"ccusage.credits.repo" = "GitHub: ryoppippi/ccusage";
+
+/* Advanced Settings */
+"advancedSettings.title" = "進階設定";
+"advancedSettings.description" = "自訂 CLI 路徑、腳本與小工具動作。";
+"cliPaths.sectionTitle" = "CLI 指令路徑";
+"cliPaths.description" = "指定 codex、claude、npx 的完整路徑。留空則使用 PATH。";
+"cliPaths.codex" = "codex 路徑";
+"cliPaths.claude" = "claude 路徑";
+"cliPaths.npx" = "npx 路徑";
+"cliPaths.codex.placeholder" = "例如：/opt/homebrew/bin/codex";
+"cliPaths.claude.placeholder" = "例如：/opt/homebrew/bin/claude";
+"cliPaths.npx.placeholder" = "例如：/opt/homebrew/bin/npx";
+"cliPaths.note" = "變更將於下次 CLI 執行時生效。";
+"cliPaths.resolvedLabel" = "已解析：";
+"cliPaths.notFound" = "找不到";
+
+/* CLI Colors */
+"cliColors.title" = "使用率顏色";
+"cliColors.donut" = "甜甜圈圖顏色";
+"cliColors.donutUseStatus" = "使用使用率顏色";
+"cliColors.green" = "使用率（正常）";
+"cliColors.orange" = "使用率（警告）";
+"cliColors.red" = "使用率（危險）";
+"cliColors.note" = "變更會套用到小工具與選單列。";
+"cliColors.reset" = "還原預設值";
+
+/* Scripts */
+"scripts.title" = "隨附腳本";
+"scripts.claudeCode.title" = "Claude Code 狀態列腳本";
+"scripts.claudeCode.note" = "使用此腳本在 Claude Code 的狀態列顯示使用率。";
+"scripts.copy" = "複製路徑";
+"scripts.copied" = "已複製！";
+"scripts.notFound" = "套件中找不到腳本";
+
+/* Widget Tap Action */
+"widgetTapAction.title" = "小工具點擊動作";
+"widgetTapAction.openWebsite" = "開啟網站";
+"widgetTapAction.refreshData" = "重新整理資料";
+"widgetTapAction.note" = "選擇點擊小工具時的動作";

@@ -1,0 +1,23 @@
+/* Widget */
+"widget.description" = "Toont 5-uurs en wekelijkse gebruikspercentages.";
+"widget.notFetched" = "Niet opgehaald";
+"widget.pleaseLogin" = "Log in via de app";
+"widget.5hourLimit" = "5-uurslimiet";
+"widget.weeklyLimit" = "Wekelijkse limiet";
+"widget.reset" = "Reset om";
+"widget.updatedAt" = "Bijgewerkt:";
+"error.appGroupUnavailable" = "App Group niet beschikbaar. Controleer Signing & Capabilities.";
+"error.readFailed" = "Gegevens lezen mislukt";
+"error.decodeFailed" = "Gegevens decoderen mislukt";
+
+/* Reset Time */
+"time.minutesLater" = "Over %d min";
+"time.hoursLater" = "Over %@ uur";
+"time.daysLater" = "Over %d dagen";
+
+/* Token Usage Widget (ccusage) */
+"widget.tokenUsage.today" = "Vandaag";
+"widget.tokenUsage.thisWeek" = "Wekelijks";
+"widget.tokenUsage.thisMonth" = "Maandelijks";
+"widget.tokenUsageDescription" = "Toont tokengebruik en kosten.";
+"widget.pleaseOpenApp" = "Open de app";

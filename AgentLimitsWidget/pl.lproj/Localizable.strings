@@ -1,0 +1,23 @@
+/* Widget */
+"widget.description" = "Wyświetla zużycie 5-godzinne i tygodniowe.";
+"widget.notFetched" = "Nie pobrano";
+"widget.pleaseLogin" = "Zaloguj się w aplikacji";
+"widget.5hourLimit" = "Limit 5-godzinny";
+"widget.weeklyLimit" = "Limit tygodniowy";
+"widget.reset" = "Reset o";
+"widget.updatedAt" = "Zaktualizowano:";
+"error.appGroupUnavailable" = "App Group niedostępna. Sprawdź Signing & Capabilities.";
+"error.readFailed" = "Nie udało się odczytać danych";
+"error.decodeFailed" = "Nie udało się zdekodować danych";
+
+/* Reset Time */
+"time.minutesLater" = "Za %d min";
+"time.hoursLater" = "Za %@ godz.";
+"time.daysLater" = "Za %d dni";
+
+/* Token Usage Widget (ccusage) */
+"widget.tokenUsage.today" = "Dziś";
+"widget.tokenUsage.thisWeek" = "Tydzień";
+"widget.tokenUsage.thisMonth" = "Miesiąc";
+"widget.tokenUsageDescription" = "Pokazuje zużycie tokenów i koszty.";
+"widget.pleaseOpenApp" = "Proszę otworzyć aplikację";

@@ -1,0 +1,23 @@
+/* Widget */
+"widget.description" = "5시간 및 주간 사용률을 표시합니다.";
+"widget.notFetched" = "가져오지 않음";
+"widget.pleaseLogin" = "앱에서 로그인하세요";
+"widget.5hourLimit" = "5시간 제한";
+"widget.weeklyLimit" = "주간 제한";
+"widget.reset" = "재설정 시간";
+"widget.updatedAt" = "업데이트:";
+"error.appGroupUnavailable" = "App Group을 사용할 수 없습니다. Signing & Capabilities를 확인하세요.";
+"error.readFailed" = "데이터 읽기 실패";
+"error.decodeFailed" = "데이터 디코딩 실패";
+
+/* Reset Time */
+"time.minutesLater" = "%d분 후";
+"time.hoursLater" = "%@시간 후";
+"time.daysLater" = "%d일 후";
+
+/* Token Usage Widget (ccusage) */
+"widget.tokenUsage.today" = "오늘";
+"widget.tokenUsage.thisWeek" = "주간";
+"widget.tokenUsage.thisMonth" = "월간";
+"widget.tokenUsageDescription" = "토큰 사용량과 비용을 표시합니다.";
+"widget.pleaseOpenApp" = "앱을 열어주세요";

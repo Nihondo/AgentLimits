@@ -1,0 +1,183 @@
+/* Tabs */
+"tab.usage" = "Kullanım Limiti";
+"tab.wakeUp" = "Wake Up";
+"tab.notification" = "Bildirim";
+"tab.advanced" = "Gelişmiş";
+
+/* Menu */
+"menu.openSettings" = "AgentLimits Ayarları...";
+"menu.displayMode" = "Görüntüleme Modu";
+"menu.displayMode.used" = "Kullanım oranı";
+"menu.displayMode.remaining" = "Kalan oran";
+"menu.about" = "AgentLimits Hakkında";
+"menu.quit" = "Çıkış";
+"menu.language" = "Dil";
+"menu.language.system" = "Sistem";
+"menu.language.japanese" = "日本語";
+"menu.language.english" = "English";
+
+/* ContentView */
+"content.login" = "Güncel kullanım oranını görmek için giriş yapın";
+"content.usageLimit" = "Kullanım Limiti";
+"content.autoRefresh" = "Oturum açmış hizmetler her %d dakikada otomatik yenilenir.";
+"refreshInterval.label" = "Yenileme aralığı";
+"refreshInterval.minutesFormat" = "%d dk";
+"content.refreshNow" = "Şimdi yenile";
+"content.clearData" = "Verileri temizle";
+"content.clearDataConfirmTitle" = "Verileri temizle";
+"content.clearDataConfirmMessage" = "Bu işlem gömülü tarayıcı için giriş verilerini ve site depolamasını kaldırır.";
+"content.clearDataConfirmAction" = "Temizle";
+"content.clearDataCancel" = "İptal";
+"content.provider" = "Hizmet";
+"content.usageSummary" = "Durum";
+"content.latestUsage" = "Son kullanım";
+"content.5hours" = "5 saat";
+"content.week" = "Hafta";
+"content.updated" = "Güncellendi:";
+"usage.updated" = "Güncellendi: ";
+"content.notFetched" = "Getirilemedi. Lütfen aşağıdan giriş yapın.";
+"content.reset" = "Sıfırla:";
+"content.popupClose" = "Kapat";
+"settings.showInMenuBar" = "Menü çubuğunda göster";
+
+/* Display Mode */
+"displayMode.used" = "Kullanım oranı";
+"displayMode.remaining" = "Kalan oran";
+
+/* Status */
+"status.notFetched" = "Getirilemedi";
+"status.loadingLogin" = "Giriş sayfası yükleniyor...";
+"status.updated" = "Güncellendi";
+
+/* Errors */
+"error.fetchFailed" = "Getirilemedi: %@";
+"error.parseFailed" = "Yanıt çözümlenemedi.";
+"error.loginNotLoaded" = "Giriş sayfası yüklenmedi.";
+"error.missingOrg" = "Kuruluş kimliği alınamadı. Kullanım sayfasını yeniden yükleyin.";
+"error.appGroupUnavailable" = "App Group kullanılamıyor. Signing & Capabilities’i kontrol edin.";
+"error.readFailed" = "Veri okunamadı";
+"error.decodeFailed" = "Veri çözümlenemedi";
+
+/* Relative Time */
+"time.withinMinute" = "1 dk içinde";
+"time.minutesAgo" = "%d dk önce";
+"time.hoursAgo" = "%d saat önce";
+"time.daysAgo" = "%d gün önce";
+"time.minutesLater" = "%d dk içinde";
+"time.hoursLater" = "%d saat içinde";
+"time.daysLater" = "%d gün içinde";
+
+/* Wake Up */
+"menu.wakeUp" = "Wake up";
+"menu.wakeUpNow" = " - Şimdi çalıştır";
+"menu.wakeUpSettings" = "Wake up Ayarları...";
+"wakeUp.windowTitle" = "Wake up Ayarları";
+"wakeUp.title" = "Wake up Zamanlaması";
+"wakeUp.description" = "Planlanan saatlerde CLI çağırarak 5 saatlik oturumlar başlatır";
+"wakeUp.provider" = "Hizmet";
+"wakeUp.schedule" = "Zamanlama";
+"wakeUp.enabled" = "Zamanlamayı etkinleştir";
+"wakeUp.selectHours" = "Çalıştırılacak saatleri seçin (çoklu)";
+"wakeUp.selectedHours" = "Seçilen:";
+"wakeUp.noHoursSelected" = "Yok";
+"wakeUp.hoursSelected" = "saat seçildi";
+"wakeUp.testNow" = "Şimdi test et";
+"wakeUp.command" = "Komut";
+"wakeUp.additionalArgs" = "Ek Argümanlar";
+"wakeUp.additionalArgsPlaceholder" = "örn. --model=\"<<model-name>>\"";
+"wakeUp.status" = "Durum";
+"wakeUp.nextRun" = "Sonraki çalıştırma:";
+"wakeUp.notScheduled" = "Planlanmadı";
+"wakeUp.lastResult" = "Son sonuç:";
+"wakeUp.success" = "Başarılı";
+"wakeUp.startAtLogin" = "Girişte uygulamayı başlat";
+
+/* Login Item */
+"loginItem.requiresApproval" = "Sistem Ayarlarında onay gerekir";
+"loginItem.notFound" = "Giriş öğesi bulunamadı";
+
+/* Threshold Notification */
+"menu.thresholdSettings" = "Eşik Bildirim Ayarları...";
+"notification.windowTitle" = "Eşik Bildirim Ayarları";
+"notification.title" = "Kullanım Oranı Eşik Bildirimi";
+"notification.description" = "Bildirim eşiklerini ve kullanım renklerini yapılandırın";
+"notification.provider" = "Hizmet";
+"notification.thresholds" = "Eşikler";
+"notification.colors" = "Renkler";
+"notification.authorization" = "Bildirim izni gerekli";
+"notification.requestAuth" = "İzin iste";
+"notification.primaryWindow" = "5 saatlik limit";
+"notification.secondaryWindow" = "Haftalık limit";
+"notification.enabled" = "Eşik bildirimi etkinleştir";
+"notification.warning" = "Uyarı düzeyi";
+"notification.danger" = "Tehlike düzeyi";
+"notification.resetDefaults" = "Varsayılanlara sıfırla";
+"notification.threshold" = "Eşik:";
+"notification.alertTitleWarning" = "%@ kullanım oranı uyarısı";
+"notification.alertTitleDanger" = "%@ kullanım oranı tehlikesi";
+"notification.alertBody5h" = "5 saatlik kullanım limiti %d%% seviyesine ulaştı";
+"notification.alertBodyWeek" = "Haftalık kullanım limiti %d%% seviyesine ulaştı";
+
+/* ccusage */
+"tab.ccusage" = "ccusage";
+"menu.ccusage" = "ccusage";
+"menu.ccusageSettings" = "ccusage Ayarları...";
+"ccusage.windowTitle" = "ccusage Ayarları";
+"ccusage.title" = "Token kullanım takibi (ccusage)";
+"ccusage.description" = "ccusage CLI ile token kullanımını ve maliyetleri al";
+"ccusage.settings" = "Ayarlar";
+"ccusage.enabled" = "Periyodik getirimi etkinleştir";
+"ccusage.command" = "Komut";
+"ccusage.additionalArgs" = "Ek Argümanlar";
+"ccusage.additionalArgsPlaceholder" = "örn. --timezone <<timezone>>";
+"ccusage.testNow" = "Şimdi test et";
+"ccusage.status" = "Durum";
+"ccusage.lastResult" = "Son sonuç:";
+"ccusage.success" = "Başarılı";
+"tokenUsage.notFetched" = "Getirilemedi";
+"tokenUsage.updated" = "Güncellendi: ";
+"ccusage.provider" = "Hizmet";
+"ccusage.disabled" = "Devre dışı";
+"ccusage.credits.title" = "Teşekkürler";
+"ccusage.credits.body" = "ccusage'nin yaratıcısı ryoppippi'ye özel teşekkürler.";
+"ccusage.credits.site" = "ccusage web sitesi";
+"ccusage.credits.repo" = "GitHub: ryoppippi/ccusage";
+
+/* Advanced Settings */
+"advancedSettings.title" = "Gelişmiş Ayarlar";
+"advancedSettings.description" = "CLI yollarını, betikleri ve widget eylemlerini özelleştirin.";
+"cliPaths.sectionTitle" = "CLI Komut Yolları";
+"cliPaths.description" = "codex, claude ve npx için tam yolları belirtin. Boş bırakılırsa PATH kullanılır.";
+"cliPaths.codex" = "codex yolu";
+"cliPaths.claude" = "claude yolu";
+"cliPaths.npx" = "npx yolu";
+"cliPaths.codex.placeholder" = "örn. /opt/homebrew/bin/codex";
+"cliPaths.claude.placeholder" = "örn. /opt/homebrew/bin/claude";
+"cliPaths.npx.placeholder" = "örn. /opt/homebrew/bin/npx";
+"cliPaths.note" = "Değişiklikler bir sonraki CLI çalıştırmada geçerli olur.";
+"cliPaths.resolvedLabel" = "Çözümlendi:";
+"cliPaths.notFound" = "Bulunamadı";
+
+/* CLI Colors */
+"cliColors.title" = "Kullanım oranı renkleri";
+"cliColors.donut" = "Halka grafik rengi";
+"cliColors.donutUseStatus" = "Kullanım oranı renklerini kullan";
+"cliColors.green" = "Kullanım oranı (normal)";
+"cliColors.orange" = "Kullanım oranı (uyarı)";
+"cliColors.red" = "Kullanım oranı (tehlike)";
+"cliColors.note" = "Değişiklikler widget'lar ve menü çubuğuna uygulanır.";
+"cliColors.reset" = "Varsayılanlara sıfırla";
+
+/* Scripts */
+"scripts.title" = "Dahil edilen betikler";
+"scripts.claudeCode.title" = "Claude Code durum satırı betiği";
+"scripts.claudeCode.note" = "Claude Code durum satırında kullanım oranlarını göstermek için bu betiği kullanın.";
+"scripts.copy" = "Yolu kopyala";
+"scripts.copied" = "Kopyalandı!";
+"scripts.notFound" = "Paket içinde betik bulunamadı";
+
+/* Widget Tap Action */
+"widgetTapAction.title" = "Widget dokunma eylemi";
+"widgetTapAction.openWebsite" = "Web sitesini aç";
+"widgetTapAction.refreshData" = "Verileri yenile";
+"widgetTapAction.note" = "Widget'a dokunulduğunda ne olacağını seçin";

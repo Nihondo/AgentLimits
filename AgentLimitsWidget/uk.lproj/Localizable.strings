@@ -1,0 +1,23 @@
+/* Widget */
+"widget.description" = "Показує 5-годинне та тижневе використання.";
+"widget.notFetched" = "Не отримано";
+"widget.pleaseLogin" = "Увійдіть у застосунок";
+"widget.5hourLimit" = "5-годинний ліміт";
+"widget.weeklyLimit" = "Тижневий ліміт";
+"widget.reset" = "Скидання о";
+"widget.updatedAt" = "Оновлено:";
+"error.appGroupUnavailable" = "App Group недоступна. Перевірте Signing & Capabilities.";
+"error.readFailed" = "Не вдалося прочитати дані";
+"error.decodeFailed" = "Не вдалося декодувати дані";
+
+/* Reset Time */
+"time.minutesLater" = "Через %d хв";
+"time.hoursLater" = "Через %@ год";
+"time.daysLater" = "Через %d днів";
+
+/* Token Usage Widget (ccusage) */
+"widget.tokenUsage.today" = "Сьогодні";
+"widget.tokenUsage.thisWeek" = "Тиждень";
+"widget.tokenUsage.thisMonth" = "Місяць";
+"widget.tokenUsageDescription" = "Показує використання токенів та витрати.";
+"widget.pleaseOpenApp" = "Відкрийте застосунок";

@@ -1,7 +1,7 @@
 /* Widget */
 "widget.description" = "Displays 5-hour and weekly usage rates.";
 "widget.notFetched" = "Not fetched";
-"widget.pleaseLogin" = "Please login in app";
+"widget.pleaseLogin" = "Please log in to the app";
 "widget.5hourLimit" = "5-Hour Limit";
 "widget.weeklyLimit" = "Weekly Limit";
 "widget.reset" = "Resets at";

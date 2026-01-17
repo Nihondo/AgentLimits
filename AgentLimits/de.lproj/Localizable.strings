@@ -1,0 +1,183 @@
+/* Tabs */
+"tab.usage" = "Nutzungslimit";
+"tab.wakeUp" = "Wake Up";
+"tab.notification" = "Benachrichtigung";
+"tab.advanced" = "Erweitert";
+
+/* Menu */
+"menu.openSettings" = "AgentLimits-Einstellungen...";
+"menu.displayMode" = "Anzeigemodus";
+"menu.displayMode.used" = "Nutzungsrate";
+"menu.displayMode.remaining" = "Verbleibende Rate";
+"menu.about" = "Über AgentLimits";
+"menu.quit" = "Beenden";
+"menu.language" = "Sprache";
+"menu.language.system" = "System";
+"menu.language.japanese" = "日本語";
+"menu.language.english" = "English";
+
+/* ContentView */
+"content.login" = "Melden Sie sich an, um die aktuelle Nutzungsrate abzurufen";
+"content.usageLimit" = "Nutzungslimit";
+"content.autoRefresh" = "Angemeldete Dienste werden alle %d Min. automatisch aktualisiert.";
+"refreshInterval.label" = "Aktualisierungsintervall";
+"refreshInterval.minutesFormat" = "%d Min.";
+"content.refreshNow" = "Jetzt aktualisieren";
+"content.clearData" = "Daten löschen";
+"content.clearDataConfirmTitle" = "Daten löschen";
+"content.clearDataConfirmMessage" = "Dies entfernt Anmeldedaten und Website-Daten für den eingebetteten Browser.";
+"content.clearDataConfirmAction" = "Löschen";
+"content.clearDataCancel" = "Abbrechen";
+"content.provider" = "Dienst";
+"content.usageSummary" = "Status";
+"content.latestUsage" = "Neueste Nutzung";
+"content.5hours" = "5 Stunden";
+"content.week" = "Woche";
+"content.updated" = "Aktualisiert:";
+"usage.updated" = "Aktualisiert: ";
+"content.notFetched" = "Nicht abgerufen. Bitte unten anmelden.";
+"content.reset" = "Zurückgesetzt:";
+"content.popupClose" = "Schließen";
+"settings.showInMenuBar" = "In der Menüleiste anzeigen";
+
+/* Display Mode */
+"displayMode.used" = "Nutzungsrate";
+"displayMode.remaining" = "Verbleibende Rate";
+
+/* Status */
+"status.notFetched" = "Nicht abgerufen";
+"status.loadingLogin" = "Anmeldeseite wird geladen...";
+"status.updated" = "Aktualisiert";
+
+/* Errors */
+"error.fetchFailed" = "Abruf fehlgeschlagen: %@";
+"error.parseFailed" = "Antwort konnte nicht analysiert werden.";
+"error.loginNotLoaded" = "Anmeldeseite nicht geladen.";
+"error.missingOrg" = "Organisations-ID konnte nicht abgerufen werden. Bitte die Nutzungsseite neu laden.";
+"error.appGroupUnavailable" = "App Group nicht verfügbar. Prüfen Sie Signing & Capabilities.";
+"error.readFailed" = "Daten konnten nicht gelesen werden";
+"error.decodeFailed" = "Daten konnten nicht dekodiert werden";
+
+/* Relative Time */
+"time.withinMinute" = "Innerhalb von 1 Min.";
+"time.minutesAgo" = "Vor %d Min.";
+"time.hoursAgo" = "Vor %d Std.";
+"time.daysAgo" = "Vor %d Tagen";
+"time.minutesLater" = "In %d Min.";
+"time.hoursLater" = "In %d Std.";
+"time.daysLater" = "In %d Tagen";
+
+/* Wake Up */
+"menu.wakeUp" = "Wake up";
+"menu.wakeUpNow" = " - Jetzt ausführen";
+"menu.wakeUpSettings" = "Wake up-Einstellungen...";
+"wakeUp.windowTitle" = "Wake up-Einstellungen";
+"wakeUp.title" = "Wake up-Zeitplan";
+"wakeUp.description" = "Ruft die CLI zu geplanten Zeiten auf, um 5‑Stunden-Sitzungen zu starten";
+"wakeUp.provider" = "Dienst";
+"wakeUp.schedule" = "Zeitplan";
+"wakeUp.enabled" = "Zeitplan aktivieren";
+"wakeUp.selectHours" = "Ausführungszeiten auswählen (mehrere)";
+"wakeUp.selectedHours" = "Ausgewählt:";
+"wakeUp.noHoursSelected" = "Keine";
+"wakeUp.hoursSelected" = "Stunden ausgewählt";
+"wakeUp.testNow" = "Jetzt testen";
+"wakeUp.command" = "Befehl";
+"wakeUp.additionalArgs" = "Zusätzliche Argumente";
+"wakeUp.additionalArgsPlaceholder" = "z. B. --model=\"<<model-name>>\"";
+"wakeUp.status" = "Status";
+"wakeUp.nextRun" = "Nächste Ausführung:";
+"wakeUp.notScheduled" = "Nicht geplant";
+"wakeUp.lastResult" = "Letztes Ergebnis:";
+"wakeUp.success" = "Erfolg";
+"wakeUp.startAtLogin" = "App beim Anmelden starten";
+
+/* Login Item */
+"loginItem.requiresApproval" = "Genehmigung in den Systemeinstellungen erforderlich";
+"loginItem.notFound" = "Login-Objekt nicht gefunden";
+
+/* Threshold Notification */
+"menu.thresholdSettings" = "Schwellenwert-Benachrichtigung...";
+"notification.windowTitle" = "Schwellenwert-Benachrichtigung";
+"notification.title" = "Benachrichtigung bei Nutzungsrate";
+"notification.description" = "Benachrichtigungsschwellen und Nutzungsfarben konfigurieren";
+"notification.provider" = "Dienst";
+"notification.thresholds" = "Schwellenwerte";
+"notification.colors" = "Farben";
+"notification.authorization" = "Benachrichtigungsberechtigung erforderlich";
+"notification.requestAuth" = "Berechtigung anfordern";
+"notification.primaryWindow" = "5‑Stunden-Limit";
+"notification.secondaryWindow" = "Wöchentliches Limit";
+"notification.enabled" = "Schwellenwert-Benachrichtigung aktivieren";
+"notification.warning" = "Warnstufe";
+"notification.danger" = "Gefahrenstufe";
+"notification.resetDefaults" = "Auf Standard zurücksetzen";
+"notification.threshold" = "Schwellenwert:";
+"notification.alertTitleWarning" = "%@ Nutzungsrate Warnung";
+"notification.alertTitleDanger" = "%@ Nutzungsrate Gefahr";
+"notification.alertBody5h" = "Das 5‑Stunden-Nutzungslimit hat %d%% erreicht";
+"notification.alertBodyWeek" = "Das wöchentliche Nutzungslimit hat %d%% erreicht";
+
+/* ccusage */
+"tab.ccusage" = "ccusage";
+"menu.ccusage" = "ccusage";
+"menu.ccusageSettings" = "ccusage-Einstellungen...";
+"ccusage.windowTitle" = "ccusage-Einstellungen";
+"ccusage.title" = "Token-Nutzungsverfolgung (ccusage)";
+"ccusage.description" = "Token-Nutzung und Kosten mit der ccusage-CLI abrufen";
+"ccusage.settings" = "Einstellungen";
+"ccusage.enabled" = "Regelmäßigen Abruf aktivieren";
+"ccusage.command" = "Befehl";
+"ccusage.additionalArgs" = "Zusätzliche Argumente";
+"ccusage.additionalArgsPlaceholder" = "z. B. --timezone <<timezone>>";
+"ccusage.testNow" = "Jetzt testen";
+"ccusage.status" = "Status";
+"ccusage.lastResult" = "Letztes Ergebnis:";
+"ccusage.success" = "Erfolg";
+"tokenUsage.notFetched" = "Nicht abgerufen";
+"tokenUsage.updated" = "Aktualisiert: ";
+"ccusage.provider" = "Dienst";
+"ccusage.disabled" = "Deaktiviert";
+"ccusage.credits.title" = "Danksagung";
+"ccusage.credits.body" = "Besonderer Dank an ryoppippi, den Ersteller von ccusage.";
+"ccusage.credits.site" = "ccusage-Website";
+"ccusage.credits.repo" = "GitHub: ryoppippi/ccusage";
+
+/* Advanced Settings */
+"advancedSettings.title" = "Erweiterte Einstellungen";
+"advancedSettings.description" = "CLI-Pfade, Skripte und Widget-Aktionen anpassen.";
+"cliPaths.sectionTitle" = "CLI-Befehls-Pfade";
+"cliPaths.description" = "Geben Sie vollständige Pfade für codex, claude und npx an. Leer lassen, um PATH zu verwenden.";
+"cliPaths.codex" = "codex-Pfad";
+"cliPaths.claude" = "claude-Pfad";
+"cliPaths.npx" = "npx-Pfad";
+"cliPaths.codex.placeholder" = "z. B. /opt/homebrew/bin/codex";
+"cliPaths.claude.placeholder" = "z. B. /opt/homebrew/bin/claude";
+"cliPaths.npx.placeholder" = "z. B. /opt/homebrew/bin/npx";
+"cliPaths.note" = "Änderungen werden beim nächsten CLI-Aufruf wirksam.";
+"cliPaths.resolvedLabel" = "Aufgelöst:";
+"cliPaths.notFound" = "Nicht gefunden";
+
+/* CLI Colors */
+"cliColors.title" = "Nutzungsfarben";
+"cliColors.donut" = "Donut-Diagrammfarbe";
+"cliColors.donutUseStatus" = "Nutzungsfarben verwenden";
+"cliColors.green" = "Nutzungsrate (normal)";
+"cliColors.orange" = "Nutzungsrate (Warnung)";
+"cliColors.red" = "Nutzungsrate (Gefahr)";
+"cliColors.note" = "Änderungen gelten für Widgets und Menüleiste.";
+"cliColors.reset" = "Auf Standard zurücksetzen";
+
+/* Scripts */
+"scripts.title" = "Mitgelieferte Skripte";
+"scripts.claudeCode.title" = "Claude Code Statuszeilen-Skript";
+"scripts.claudeCode.note" = "Dieses Skript zeigt Nutzungsraten in der Statuszeile von Claude Code an.";
+"scripts.copy" = "Pfad kopieren";
+"scripts.copied" = "Kopiert!";
+"scripts.notFound" = "Skript nicht im Bundle gefunden";
+
+/* Widget Tap Action */
+"widgetTapAction.title" = "Aktion beim Tippen auf Widget";
+"widgetTapAction.openWebsite" = "Website öffnen";
+"widgetTapAction.refreshData" = "Daten aktualisieren";
+"widgetTapAction.note" = "Wählen Sie, was beim Tippen auf ein Widget passiert";

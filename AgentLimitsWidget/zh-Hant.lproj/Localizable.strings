@@ -1,0 +1,23 @@
+/* Widget */
+"widget.description" = "顯示5小時和每週使用率。";
+"widget.notFetched" = "未取得";
+"widget.pleaseLogin" = "請在應用程式中登入";
+"widget.5hourLimit" = "5小時限額";
+"widget.weeklyLimit" = "每週限額";
+"widget.reset" = "重置於";
+"widget.updatedAt" = "更新於:";
+"error.appGroupUnavailable" = "App Group不可用。請檢查簽名與能力設定。";
+"error.readFailed" = "讀取資料失敗";
+"error.decodeFailed" = "解碼資料失敗";
+
+/* Reset Time */
+"time.minutesLater" = "%d分鐘後";
+"time.hoursLater" = "%@小時後";
+"time.daysLater" = "%d天後";
+
+/* Token Usage Widget (ccusage) */
+"widget.tokenUsage.today" = "今日";
+"widget.tokenUsage.thisWeek" = "本週";
+"widget.tokenUsage.thisMonth" = "本月";
+"widget.tokenUsageDescription" = "顯示 Token 使用量和費用。";
+"widget.pleaseOpenApp" = "請開啟應用程式";

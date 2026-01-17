@@ -1,0 +1,23 @@
+/* Widget */
+"widget.description" = "显示5小时和每周使用率。";
+"widget.notFetched" = "未获取";
+"widget.pleaseLogin" = "请在应用中登录";
+"widget.5hourLimit" = "5小时限额";
+"widget.weeklyLimit" = "每周限额";
+"widget.reset" = "重置于";
+"widget.updatedAt" = "更新于:";
+"error.appGroupUnavailable" = "App Group不可用。请检查签名与能力设置。";
+"error.readFailed" = "读取数据失败";
+"error.decodeFailed" = "解码数据失败";
+
+/* Reset Time */
+"time.minutesLater" = "%d分钟后";
+"time.hoursLater" = "%@小时后";
+"time.daysLater" = "%d天后";
+
+/* Token Usage Widget (ccusage) */
+"widget.tokenUsage.today" = "今日";
+"widget.tokenUsage.thisWeek" = "本周";
+"widget.tokenUsage.thisMonth" = "本月";
+"widget.tokenUsageDescription" = "显示令牌使用量和费用。";
+"widget.pleaseOpenApp" = "请打开应用";

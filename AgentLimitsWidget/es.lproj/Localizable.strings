@@ -1,0 +1,23 @@
+/* Widget */
+"widget.description" = "Muestra las tasas de uso de 5 horas y semanales.";
+"widget.notFetched" = "No obtenido";
+"widget.pleaseLogin" = "Inicie sesión en la app";
+"widget.5hourLimit" = "Límite de 5 horas";
+"widget.weeklyLimit" = "Límite semanal";
+"widget.reset" = "Se reinicia a las";
+"widget.updatedAt" = "Actualizado:";
+"error.appGroupUnavailable" = "App Group no disponible. Verifique Signing & Capabilities.";
+"error.readFailed" = "Error al leer datos";
+"error.decodeFailed" = "Error al decodificar datos";
+
+/* Reset Time */
+"time.minutesLater" = "En %d min";
+"time.hoursLater" = "En %@ horas";
+"time.daysLater" = "En %d días";
+
+/* Token Usage Widget (ccusage) */
+"widget.tokenUsage.today" = "Hoy";
+"widget.tokenUsage.thisWeek" = "Semanal";
+"widget.tokenUsage.thisMonth" = "Mensual";
+"widget.tokenUsageDescription" = "Muestra el uso de tokens y costos.";
+"widget.pleaseOpenApp" = "Por favor abra la app";

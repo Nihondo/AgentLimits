@@ -1,0 +1,183 @@
+/* Tabs */
+"tab.usage" = "Ліміт використання";
+"tab.wakeUp" = "Wake Up";
+"tab.notification" = "Сповіщення";
+"tab.advanced" = "Розширено";
+
+/* Menu */
+"menu.openSettings" = "Налаштування AgentLimits...";
+"menu.displayMode" = "Режим відображення";
+"menu.displayMode.used" = "Рівень використання";
+"menu.displayMode.remaining" = "Залишок";
+"menu.about" = "Про AgentLimits";
+"menu.quit" = "Вийти";
+"menu.language" = "Мова";
+"menu.language.system" = "Система";
+"menu.language.japanese" = "日本語";
+"menu.language.english" = "English";
+
+/* ContentView */
+"content.login" = "Увійдіть, щоб отримати поточний рівень використання";
+"content.usageLimit" = "Ліміт використання";
+"content.autoRefresh" = "Увійдені сервіси автоматично оновлюються кожні %d хв.";
+"refreshInterval.label" = "Інтервал оновлення";
+"refreshInterval.minutesFormat" = "%d хв";
+"content.refreshNow" = "Оновити зараз";
+"content.clearData" = "Очистити дані";
+"content.clearDataConfirmTitle" = "Очистити дані";
+"content.clearDataConfirmMessage" = "Це видалить дані входу та сховище сайтів для вбудованого браузера.";
+"content.clearDataConfirmAction" = "Очистити";
+"content.clearDataCancel" = "Скасувати";
+"content.provider" = "Сервіс";
+"content.usageSummary" = "Статус";
+"content.latestUsage" = "Останнє використання";
+"content.5hours" = "5 годин";
+"content.week" = "Тиждень";
+"content.updated" = "Оновлено:";
+"usage.updated" = "Оновлено: ";
+"content.notFetched" = "Не отримано. Будь ласка, увійдіть нижче.";
+"content.reset" = "Скидання:";
+"content.popupClose" = "Закрити";
+"settings.showInMenuBar" = "Показувати в рядку меню";
+
+/* Display Mode */
+"displayMode.used" = "Рівень використання";
+"displayMode.remaining" = "Залишок";
+
+/* Status */
+"status.notFetched" = "Не отримано";
+"status.loadingLogin" = "Завантаження сторінки входу...";
+"status.updated" = "Оновлено";
+
+/* Errors */
+"error.fetchFailed" = "Не вдалося отримати: %@";
+"error.parseFailed" = "Не вдалося розібрати відповідь.";
+"error.loginNotLoaded" = "Сторінка входу не завантажена.";
+"error.missingOrg" = "Не вдалося отримати ID організації. Перезавантажте сторінку використання.";
+"error.appGroupUnavailable" = "App Group недоступна. Перевірте Signing & Capabilities.";
+"error.readFailed" = "Не вдалося прочитати дані";
+"error.decodeFailed" = "Не вдалося декодувати дані";
+
+/* Relative Time */
+"time.withinMinute" = "Протягом 1 хв";
+"time.minutesAgo" = "%d хв тому";
+"time.hoursAgo" = "%d год тому";
+"time.daysAgo" = "%d дн тому";
+"time.minutesLater" = "Через %d хв";
+"time.hoursLater" = "Через %d год";
+"time.daysLater" = "Через %d дн";
+
+/* Wake Up */
+"menu.wakeUp" = "Wake up";
+"menu.wakeUpNow" = " - Запустити зараз";
+"menu.wakeUpSettings" = "Налаштування Wake up...";
+"wakeUp.windowTitle" = "Налаштування Wake up";
+"wakeUp.title" = "Розклад Wake up";
+"wakeUp.description" = "Викликає CLI у запланований час для запуску 5‑годинних сесій";
+"wakeUp.provider" = "Сервіс";
+"wakeUp.schedule" = "Розклад";
+"wakeUp.enabled" = "Увімкнути розклад";
+"wakeUp.selectHours" = "Оберіть години запуску (можна кілька)";
+"wakeUp.selectedHours" = "Вибрано:";
+"wakeUp.noHoursSelected" = "Немає";
+"wakeUp.hoursSelected" = "годин вибрано";
+"wakeUp.testNow" = "Перевірити зараз";
+"wakeUp.command" = "Команда";
+"wakeUp.additionalArgs" = "Додаткові аргументи";
+"wakeUp.additionalArgsPlaceholder" = "напр. --model=\"<<model-name>>\"";
+"wakeUp.status" = "Статус";
+"wakeUp.nextRun" = "Наступний запуск:";
+"wakeUp.notScheduled" = "Не заплановано";
+"wakeUp.lastResult" = "Останній результат:";
+"wakeUp.success" = "Успішно";
+"wakeUp.startAtLogin" = "Запускати застосунок при вході";
+
+/* Login Item */
+"loginItem.requiresApproval" = "Потрібне схвалення в Налаштуваннях системи";
+"loginItem.notFound" = "Елемент входу не знайдено";
+
+/* Threshold Notification */
+"menu.thresholdSettings" = "Налаштування порогових сповіщень...";
+"notification.windowTitle" = "Налаштування порогових сповіщень";
+"notification.title" = "Порогові сповіщення рівня використання";
+"notification.description" = "Налаштуйте пороги сповіщень і кольори використання";
+"notification.provider" = "Сервіс";
+"notification.thresholds" = "Пороги";
+"notification.colors" = "Кольори";
+"notification.authorization" = "Потрібен дозвіл на сповіщення";
+"notification.requestAuth" = "Запросити дозвіл";
+"notification.primaryWindow" = "Ліміт 5 годин";
+"notification.secondaryWindow" = "Тижневий ліміт";
+"notification.enabled" = "Увімкнути порогові сповіщення";
+"notification.warning" = "Рівень попередження";
+"notification.danger" = "Рівень небезпеки";
+"notification.resetDefaults" = "Скинути до стандартних";
+"notification.threshold" = "Поріг:";
+"notification.alertTitleWarning" = "Попередження рівня використання %@";
+"notification.alertTitleDanger" = "Небезпека рівня використання %@";
+"notification.alertBody5h" = "Ліміт використання 5 годин досяг %d%%";
+"notification.alertBodyWeek" = "Тижневий ліміт використання досяг %d%%";
+
+/* ccusage */
+"tab.ccusage" = "ccusage";
+"menu.ccusage" = "ccusage";
+"menu.ccusageSettings" = "Налаштування ccusage...";
+"ccusage.windowTitle" = "Налаштування ccusage";
+"ccusage.title" = "Відстеження використання токенів (ccusage)";
+"ccusage.description" = "Отримуйте використання токенів і витрати через CLI ccusage";
+"ccusage.settings" = "Налаштування";
+"ccusage.enabled" = "Увімкнути періодичне отримання";
+"ccusage.command" = "Команда";
+"ccusage.additionalArgs" = "Додаткові аргументи";
+"ccusage.additionalArgsPlaceholder" = "напр. --timezone <<timezone>>";
+"ccusage.testNow" = "Перевірити зараз";
+"ccusage.status" = "Статус";
+"ccusage.lastResult" = "Останній результат:";
+"ccusage.success" = "Успішно";
+"tokenUsage.notFetched" = "Не отримано";
+"tokenUsage.updated" = "Оновлено: ";
+"ccusage.provider" = "Сервіс";
+"ccusage.disabled" = "Вимкнено";
+"ccusage.credits.title" = "Подяки";
+"ccusage.credits.body" = "Особлива подяка ryoppippi, творцю ccusage.";
+"ccusage.credits.site" = "Сайт ccusage";
+"ccusage.credits.repo" = "GitHub: ryoppippi/ccusage";
+
+/* Advanced Settings */
+"advancedSettings.title" = "Розширені налаштування";
+"advancedSettings.description" = "Налаштуйте шляхи CLI, скрипти та дії віджетів.";
+"cliPaths.sectionTitle" = "Шляхи команд CLI";
+"cliPaths.description" = "Вкажіть повні шляхи для codex, claude і npx. Залиште порожнім, щоб використовувати PATH.";
+"cliPaths.codex" = "шлях codex";
+"cliPaths.claude" = "шлях claude";
+"cliPaths.npx" = "шлях npx";
+"cliPaths.codex.placeholder" = "напр. /opt/homebrew/bin/codex";
+"cliPaths.claude.placeholder" = "напр. /opt/homebrew/bin/claude";
+"cliPaths.npx.placeholder" = "напр. /opt/homebrew/bin/npx";
+"cliPaths.note" = "Зміни набудуть чинності під час наступного запуску CLI.";
+"cliPaths.resolvedLabel" = "Визначено:";
+"cliPaths.notFound" = "Не знайдено";
+
+/* CLI Colors */
+"cliColors.title" = "Кольори рівня використання";
+"cliColors.donut" = "Колір кільцевої діаграми";
+"cliColors.donutUseStatus" = "Використовувати кольори рівня використання";
+"cliColors.green" = "Рівень використання (норма)";
+"cliColors.orange" = "Рівень використання (попередження)";
+"cliColors.red" = "Рівень використання (небезпека)";
+"cliColors.note" = "Зміни застосовуються до віджетів і рядка меню.";
+"cliColors.reset" = "Скинути до стандартних";
+
+/* Scripts */
+"scripts.title" = "Вбудовані скрипти";
+"scripts.claudeCode.title" = "Скрипт рядка стану Claude Code";
+"scripts.claudeCode.note" = "Використовуйте цей скрипт у рядку стану Claude Code для показу рівнів використання.";
+"scripts.copy" = "Копіювати шлях";
+"scripts.copied" = "Скопійовано!";
+"scripts.notFound" = "Скрипт не знайдено в пакеті";
+
+/* Widget Tap Action */
+"widgetTapAction.title" = "Дія при торканні віджета";
+"widgetTapAction.openWebsite" = "Відкрити сайт";
+"widgetTapAction.refreshData" = "Оновити дані";
+"widgetTapAction.note" = "Виберіть, що відбудеться при торканні віджета";

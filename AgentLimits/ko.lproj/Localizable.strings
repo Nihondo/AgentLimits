@@ -1,0 +1,183 @@
+/* Tabs */
+"tab.usage" = "사용 제한";
+"tab.wakeUp" = "Wake Up";
+"tab.notification" = "알림";
+"tab.advanced" = "고급";
+
+/* Menu */
+"menu.openSettings" = "AgentLimits 설정...";
+"menu.displayMode" = "표시 모드";
+"menu.displayMode.used" = "사용률";
+"menu.displayMode.remaining" = "잔여 사용률";
+"menu.about" = "AgentLimits 정보";
+"menu.quit" = "종료";
+"menu.language" = "언어";
+"menu.language.system" = "시스템";
+"menu.language.japanese" = "日本語";
+"menu.language.english" = "English";
+
+/* ContentView */
+"content.login" = "로그인하여 현재 사용률을 가져오세요";
+"content.usageLimit" = "사용 제한";
+"content.autoRefresh" = "로그인된 서비스는 %d분마다 자동으로 업데이트됩니다.";
+"refreshInterval.label" = "새로 고침 간격";
+"refreshInterval.minutesFormat" = "%d분";
+"content.refreshNow" = "지금 새로 고침";
+"content.clearData" = "데이터 지우기";
+"content.clearDataConfirmTitle" = "데이터 지우기";
+"content.clearDataConfirmMessage" = "내장 브라우저의 로그인 데이터와 웹사이트 저장소를 제거합니다.";
+"content.clearDataConfirmAction" = "지우기";
+"content.clearDataCancel" = "취소";
+"content.provider" = "서비스";
+"content.usageSummary" = "상태";
+"content.latestUsage" = "최신 사용량";
+"content.5hours" = "5시간";
+"content.week" = "주";
+"content.updated" = "업데이트:";
+"usage.updated" = "업데이트: ";
+"content.notFetched" = "가져오지 못했습니다. 아래에서 로그인하세요.";
+"content.reset" = "재설정:";
+"content.popupClose" = "닫기";
+"settings.showInMenuBar" = "메뉴 막대에 표시";
+
+/* Display Mode */
+"displayMode.used" = "사용률";
+"displayMode.remaining" = "잔여 사용률";
+
+/* Status */
+"status.notFetched" = "가져오지 못함";
+"status.loadingLogin" = "로그인 페이지를 불러오는 중...";
+"status.updated" = "업데이트됨";
+
+/* Errors */
+"error.fetchFailed" = "가져오기 실패: %@";
+"error.parseFailed" = "응답 파싱에 실패했습니다.";
+"error.loginNotLoaded" = "로그인 페이지가 로드되지 않았습니다.";
+"error.missingOrg" = "조직 ID를 가져올 수 없습니다. 사용량 페이지를 다시 로드하세요.";
+"error.appGroupUnavailable" = "App Group을 사용할 수 없습니다. Signing & Capabilities를 확인하세요.";
+"error.readFailed" = "데이터 읽기 실패";
+"error.decodeFailed" = "데이터 디코딩 실패";
+
+/* Relative Time */
+"time.withinMinute" = "1분 이내";
+"time.minutesAgo" = "%d분 전";
+"time.hoursAgo" = "%d시간 전";
+"time.daysAgo" = "%d일 전";
+"time.minutesLater" = "%d분 후";
+"time.hoursLater" = "%d시간 후";
+"time.daysLater" = "%d일 후";
+
+/* Wake Up */
+"menu.wakeUp" = "Wake up";
+"menu.wakeUpNow" = " - 지금 실행";
+"menu.wakeUpSettings" = "Wake up 설정...";
+"wakeUp.windowTitle" = "Wake up 설정";
+"wakeUp.title" = "Wake up 스케줄";
+"wakeUp.description" = "예약된 시간에 CLI를 호출하여 5시간 세션을 시작합니다";
+"wakeUp.provider" = "서비스";
+"wakeUp.schedule" = "스케줄";
+"wakeUp.enabled" = "스케줄 사용";
+"wakeUp.selectHours" = "실행할 시간을 선택(복수 가능)";
+"wakeUp.selectedHours" = "선택됨:";
+"wakeUp.noHoursSelected" = "없음";
+"wakeUp.hoursSelected" = "시간 선택됨";
+"wakeUp.testNow" = "지금 테스트 실행";
+"wakeUp.command" = "명령";
+"wakeUp.additionalArgs" = "추가 인수";
+"wakeUp.additionalArgsPlaceholder" = "예: --model=\"<<model-name>>\"";
+"wakeUp.status" = "상태";
+"wakeUp.nextRun" = "다음 실행:";
+"wakeUp.notScheduled" = "예약되지 않음";
+"wakeUp.lastResult" = "마지막 결과:";
+"wakeUp.success" = "성공";
+"wakeUp.startAtLogin" = "로그인 시 앱 시작";
+
+/* Login Item */
+"loginItem.requiresApproval" = "시스템 설정에서 승인 필요";
+"loginItem.notFound" = "로그인 항목을 찾을 수 없습니다";
+
+/* Threshold Notification */
+"menu.thresholdSettings" = "임계값 알림 설정...";
+"notification.windowTitle" = "임계값 알림 설정";
+"notification.title" = "사용률 임계값 알림";
+"notification.description" = "알림 임계값과 사용률 색상을 설정합니다";
+"notification.provider" = "서비스";
+"notification.thresholds" = "임계값";
+"notification.colors" = "색상";
+"notification.authorization" = "알림 권한 필요";
+"notification.requestAuth" = "권한 요청";
+"notification.primaryWindow" = "5시간 제한";
+"notification.secondaryWindow" = "주간 제한";
+"notification.enabled" = "임계값 알림 사용";
+"notification.warning" = "경고 수준";
+"notification.danger" = "위험 수준";
+"notification.resetDefaults" = "기본값으로 재설정";
+"notification.threshold" = "임계값:";
+"notification.alertTitleWarning" = "%@ 사용률 경고";
+"notification.alertTitleDanger" = "%@ 사용률 위험";
+"notification.alertBody5h" = "5시간 사용 제한이 %d%%에 도달했습니다";
+"notification.alertBodyWeek" = "주간 사용 제한이 %d%%에 도달했습니다";
+
+/* ccusage */
+"tab.ccusage" = "ccusage";
+"menu.ccusage" = "ccusage";
+"menu.ccusageSettings" = "ccusage 설정...";
+"ccusage.windowTitle" = "ccusage 설정";
+"ccusage.title" = "토큰 사용량 추적(ccusage)";
+"ccusage.description" = "ccusage CLI를 사용하여 토큰 사용량과 비용을 가져옵니다";
+"ccusage.settings" = "설정";
+"ccusage.enabled" = "정기 가져오기 사용";
+"ccusage.command" = "명령";
+"ccusage.additionalArgs" = "추가 인수";
+"ccusage.additionalArgsPlaceholder" = "예: --timezone <<timezone>>";
+"ccusage.testNow" = "지금 테스트 실행";
+"ccusage.status" = "상태";
+"ccusage.lastResult" = "마지막 결과:";
+"ccusage.success" = "성공";
+"tokenUsage.notFetched" = "가져오지 못함";
+"tokenUsage.updated" = "업데이트: ";
+"ccusage.provider" = "서비스";
+"ccusage.disabled" = "비활성화";
+"ccusage.credits.title" = "크레딧";
+"ccusage.credits.body" = "ccusage 제작자 ryoppippi에게 특별한 감사를 전합니다.";
+"ccusage.credits.site" = "ccusage 웹사이트";
+"ccusage.credits.repo" = "GitHub: ryoppippi/ccusage";
+
+/* Advanced Settings */
+"advancedSettings.title" = "고급 설정";
+"advancedSettings.description" = "CLI 경로, 스크립트, 위젯 동작을 사용자 지정합니다.";
+"cliPaths.sectionTitle" = "CLI 명령 경로";
+"cliPaths.description" = "codex, claude, npx의 전체 경로를 지정하세요. 비워두면 PATH를 사용합니다.";
+"cliPaths.codex" = "codex 경로";
+"cliPaths.claude" = "claude 경로";
+"cliPaths.npx" = "npx 경로";
+"cliPaths.codex.placeholder" = "예: /opt/homebrew/bin/codex";
+"cliPaths.claude.placeholder" = "예: /opt/homebrew/bin/claude";
+"cliPaths.npx.placeholder" = "예: /opt/homebrew/bin/npx";
+"cliPaths.note" = "변경 사항은 다음 CLI 실행부터 적용됩니다.";
+"cliPaths.resolvedLabel" = "해결됨:";
+"cliPaths.notFound" = "찾을 수 없음";
+
+/* CLI Colors */
+"cliColors.title" = "사용률 색상";
+"cliColors.donut" = "도넛 차트 색상";
+"cliColors.donutUseStatus" = "사용률 색상을 사용";
+"cliColors.green" = "사용률(정상)";
+"cliColors.orange" = "사용률(경고)";
+"cliColors.red" = "사용률(위험)";
+"cliColors.note" = "변경 사항은 위젯과 메뉴 막대에 적용됩니다.";
+"cliColors.reset" = "기본값으로 재설정";
+
+/* Scripts */
+"scripts.title" = "번들 스크립트";
+"scripts.claudeCode.title" = "Claude Code 상태 표시줄 스크립트";
+"scripts.claudeCode.note" = "Claude Code 상태 표시줄 기능에서 사용률을 표시하는 데 사용합니다.";
+"scripts.copy" = "경로 복사";
+"scripts.copied" = "복사됨!";
+"scripts.notFound" = "번들에서 스크립트를 찾을 수 없습니다";
+
+/* Widget Tap Action */
+"widgetTapAction.title" = "위젯 탭 동작";
+"widgetTapAction.openWebsite" = "웹사이트 열기";
+"widgetTapAction.refreshData" = "데이터 새로 고침";
+"widgetTapAction.note" = "위젯을 탭했을 때의 동작을 선택합니다";
