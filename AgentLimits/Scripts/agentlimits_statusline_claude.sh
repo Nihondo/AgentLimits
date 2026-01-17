@@ -254,12 +254,15 @@ secondary_window_seconds=$(echo "$json_data" | jq -r '.secondaryWindow.limitWind
 fetched_at=$(echo "$json_data" | jq -r '.fetchedAt // empty')
 snapshot_display_mode=$(echo "$json_data" | jq -r '.displayMode // empty')
 
-# Resolve effective display mode (override > snapshot > app)
-# Determine effective display mode (override takes precedence)
+# Resolve effective display mode (override > app > snapshot)
 if [[ -n "$DISPLAY_MODE_OVERRIDE" ]]; then
     EFFECTIVE_DISPLAY_MODE="$DISPLAY_MODE_OVERRIDE"
-else
+elif [[ -n "$APP_DISPLAY_MODE" ]]; then
     EFFECTIVE_DISPLAY_MODE="$APP_DISPLAY_MODE"
+elif [[ -n "$snapshot_display_mode" ]]; then
+    EFFECTIVE_DISPLAY_MODE="$snapshot_display_mode"
+else
+    EFFECTIVE_DISPLAY_MODE="used"
 fi
 
 if [[ -n "$DISPLAY_MODE_OVERRIDE" ]]; then
@@ -311,7 +314,7 @@ calculate_ideal_percent() {
     reset_ts=$(date -j -f "%Y-%m-%dT%H:%M:%S%z" "$clean_date" +"%s" 2>/dev/null)
     
     if [[ -z "$reset_ts" || ! "$reset_ts" =~ ^[0-9]+$ ]]; then
-        echo "50"  # Fallback to 50%
+        echo ""  # Return empty when resetAt is unavailable
         return
     fi
     
@@ -397,12 +400,20 @@ if [[ "$EFFECTIVE_DISPLAY_MODE" == "usedWithIdeal" ]]; then
     primary_ideal_int=$(calculate_ideal_percent "$primary_reset_at" "$primary_window_seconds")
     secondary_ideal_int=$(calculate_ideal_percent "$secondary_reset_at" "$secondary_window_seconds")
     
-    # Use ideal mode status calculation
-    primary_status=$(get_ideal_status_level "$primary_used_int" "$primary_ideal_int" "$IDEAL_WARNING_DELTA" "$IDEAL_DANGER_DELTA")
-    secondary_status=$(get_ideal_status_level "$secondary_used_int" "$secondary_ideal_int" "$IDEAL_WARNING_DELTA" "$IDEAL_DANGER_DELTA")
+    # Use ideal mode status calculation only if ideal percent is available
+    if [[ -n "$primary_ideal_int" ]]; then
+        primary_status=$(get_ideal_status_level "$primary_used_int" "$primary_ideal_int" "$IDEAL_WARNING_DELTA" "$IDEAL_DANGER_DELTA")
+    else
+        primary_status=$(get_status_level "$primary_used_int" "$PRIMARY_WARNING" "$PRIMARY_DANGER")
+    fi
+    if [[ -n "$secondary_ideal_int" ]]; then
+        secondary_status=$(get_ideal_status_level "$secondary_used_int" "$secondary_ideal_int" "$IDEAL_WARNING_DELTA" "$IDEAL_DANGER_DELTA")
+    else
+        secondary_status=$(get_status_level "$secondary_used_int" "$SECONDARY_WARNING" "$SECONDARY_DANGER")
+    fi
     
-    debug_log "ideal_mode.primary used=${primary_used_int} ideal=${primary_ideal_int} status=${primary_status}"
-    debug_log "ideal_mode.secondary used=${secondary_used_int} ideal=${secondary_ideal_int} status=${secondary_status}"
+    debug_log "ideal_mode.primary used=${primary_used_int} ideal=${primary_ideal_int:-N/A} status=${primary_status}"
+    debug_log "ideal_mode.secondary used=${secondary_used_int} ideal=${secondary_ideal_int:-N/A} status=${secondary_status}"
 else
     primary_status=$(get_status_level "$primary_used_int" "$PRIMARY_WARNING" "$PRIMARY_DANGER")
     secondary_status=$(get_status_level "$secondary_used_int" "$SECONDARY_WARNING" "$SECONDARY_DANGER")
@@ -435,9 +446,17 @@ secondary_color=$(get_status_color "$secondary_status")
 
 # Format percentage text based on display mode
 if [[ "$EFFECTIVE_DISPLAY_MODE" == "usedWithIdeal" ]]; then
-    # Show used(ideal)% format
-    primary_text="${primary_used_int}(${primary_ideal_int})%"
-    secondary_text="${secondary_used_int}(${secondary_ideal_int})%"
+    # Show used(ideal)% format, or just used% if ideal is unavailable
+    if [[ -n "$primary_ideal_int" ]]; then
+        primary_text="${primary_used_int}(${primary_ideal_int})%"
+    else
+        primary_text="${primary_used_int}%"
+    fi
+    if [[ -n "$secondary_ideal_int" ]]; then
+        secondary_text="${secondary_used_int}(${secondary_ideal_int})%"
+    else
+        secondary_text="${secondary_used_int}%"
+    fi
 else
     primary_text="${primary_percent_int}%"
     secondary_text="${secondary_percent_int}%"
