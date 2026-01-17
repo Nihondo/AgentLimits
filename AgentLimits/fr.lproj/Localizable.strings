@@ -10,7 +10,7 @@
 "menu.displayMode.used" = "Taux d’utilisation";
 "menu.displayMode.remaining" = "Taux restant";
 "menu.displayMode.ideal" = "Repère";
-"menu.displayMode.usedWithIdeal" = "Utilisation + Repèree";
+"menu.displayMode.usedWithIdeal" = "Utilisation + Repère";
 "menu.about" = "À propos d’AgentLimits";
 "menu.quit" = "Quitter";
 "menu.language" = "Langue";
@@ -46,7 +46,7 @@
 "displayMode.used" = "Taux d’utilisation";
 "displayMode.remaining" = "Taux restant";
 "displayMode.ideal" = "Repère";
-"displayMode.usedWithIdeal" = "Utilisation + Repèree";
+"displayMode.usedWithIdeal" = "Utilisation + Repère";
 
 /* Status */
 "status.notFetched" = "Non récupéré";

@@ -701,6 +701,7 @@ extension UsageWindow {
     /// Returns nil if resetAt is unavailable.
     func calculateIdealUsagePercent() -> Double? {
         guard let resetAt = resetAt else { return nil }
+        guard limitWindowSeconds > 0 else { return nil }
         
         let now = Date()
         let windowStart = resetAt.addingTimeInterval(-limitWindowSeconds)
