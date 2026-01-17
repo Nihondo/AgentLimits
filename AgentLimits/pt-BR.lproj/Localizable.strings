@@ -9,6 +9,8 @@
 "menu.displayMode" = "Modo de exibição";
 "menu.displayMode.used" = "Taxa de uso";
 "menu.displayMode.remaining" = "Taxa restante";
+"menu.displayMode.ideal" = "Referência";
+"menu.displayMode.usedWithIdeal" = "Uso + Referência";
 "menu.about" = "Sobre o AgentLimits";
 "menu.quit" = "Sair";
 "menu.language" = "Idioma";
@@ -43,6 +45,8 @@
 /* Display Mode */
 "displayMode.used" = "Taxa de uso";
 "displayMode.remaining" = "Taxa restante";
+"displayMode.ideal" = "Referência";
+"displayMode.usedWithIdeal" = "Uso + Referência";
 
 /* Status */
 "status.notFetched" = "Não obtido";

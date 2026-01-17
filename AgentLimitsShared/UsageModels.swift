@@ -103,15 +103,34 @@ enum CLICommandPathResolver {
 enum UsageDisplayModeRaw: String, Codable {
     case used
     case remaining
+    case ideal
+    case usedWithIdeal
 
     /// Returns the display percentage based on the stored used percent.
     func makeDisplayPercent(from usedPercent: Double) -> Double {
         let value: Double
         switch self {
-        case .used:
+        case .used, .usedWithIdeal:
             value = usedPercent
         case .remaining:
             value = 100 - usedPercent
+        case .ideal:
+            // For ideal mode without window context, return usedPercent as fallback
+            value = usedPercent
+        }
+        return max(0, min(100, value))
+    }
+
+    /// Returns the display percentage based on the stored used percent and optional window for time-based calculation.
+    func makeDisplayPercent(from usedPercent: Double, window: UsageWindow?) -> Double {
+        let value: Double
+        switch self {
+        case .used, .usedWithIdeal:
+            value = usedPercent
+        case .remaining:
+            value = 100 - usedPercent
+        case .ideal:
+            value = window?.calculateIdealUsagePercent() ?? 0
         }
         return max(0, min(100, value))
     }
@@ -164,6 +183,29 @@ enum UsageStatusLevelResolver {
         if clamped >= Double(usedDanger) { return .red }
         if clamped >= Double(usedWarning) { return .orange }
         return .green
+    }
+
+    /// Returns the status level for ideal mode based on comparison between actual and ideal usage.
+    /// - Parameters:
+    ///   - usedPercent: Actual usage percentage (0-100).
+    ///   - idealPercent: Ideal usage percentage based on elapsed time (0-100).
+    ///   - warningDelta: Delta threshold for warning state (default: 0 - any excess).
+    ///   - dangerDelta: Delta threshold for danger state (default: 10%).
+    static func levelForIdealMode(
+        usedPercent: Double,
+        idealPercent: Double,
+        warningDelta: Double = 0,
+        dangerDelta: Double = 10
+    ) -> UsageStatusLevel {
+        let diff = usedPercent - idealPercent
+        
+        if diff >= dangerDelta {
+            return .red      // Significantly exceeds ideal (10%+)
+        } else if diff > warningDelta {
+            return .orange   // Exceeds ideal
+        } else {
+            return .green    // At or below ideal
+        }
     }
 
     private static func clampThreshold(_ value: Int) -> Int {
@@ -652,6 +694,21 @@ struct UsageWindow: Codable {
     let resetAt: Date?
     /// Duration of the window in seconds
     let limitWindowSeconds: TimeInterval
+}
+
+extension UsageWindow {
+    /// Calculates the ideal usage percentage based on elapsed time within the window.
+    /// Returns nil if resetAt is unavailable.
+    func calculateIdealUsagePercent() -> Double? {
+        guard let resetAt = resetAt else { return nil }
+        
+        let now = Date()
+        let windowStart = resetAt.addingTimeInterval(-limitWindowSeconds)
+        let elapsed = now.timeIntervalSince(windowStart)
+        
+        let idealPercent = (elapsed / limitWindowSeconds) * 100
+        return max(0, min(100, idealPercent))
+    }
 }
 
 /// A snapshot of usage data for a provider at a specific point in time

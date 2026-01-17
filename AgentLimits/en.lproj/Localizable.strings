@@ -9,6 +9,8 @@
 "menu.displayMode" = "Display Mode";
 "menu.displayMode.used" = "Usage rate";
 "menu.displayMode.remaining" = "Remaining rate";
+"menu.displayMode.ideal" = "Guideline";
+"menu.displayMode.usedWithIdeal" = "Usage + Guideline";
 "menu.about" = "About AgentLimits";
 "menu.quit" = "Quit";
 "menu.language" = "Language";
@@ -43,6 +45,8 @@
 /* Display Mode */
 "displayMode.used" = "Usage rate";
 "displayMode.remaining" = "Remaining rate";
+"displayMode.ideal" = "Guideline";
+"displayMode.usedWithIdeal" = "Usage + Guideline";
 
 /* Status */
 "status.notFetched" = "Not fetched";

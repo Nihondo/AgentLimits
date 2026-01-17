@@ -238,7 +238,9 @@ private struct UsageDonutColumnView: View {
                 centerLabel: centerLabel,
                 displayPercent: displayPercent,
                 usedPercent: window?.usedPercent,
-                size: donutSize
+                size: donutSize,
+                displayMode: displayMode,
+                window: window
             )
             Text(percentText)
                 .font(.title3)
@@ -254,12 +256,15 @@ private struct UsageDonutColumnView: View {
     }
 
     private var statusColor: Color {
-        WidgetUsageColorResolver.statusColor(for: window, provider: provider, windowKind: windowKind)
+        if displayMode == .ideal {
+            return WidgetUsageColorResolver.statusColorForIdealMode(for: window)
+        }
+        return WidgetUsageColorResolver.statusColor(for: window, provider: provider, windowKind: windowKind)
     }
 
     private var displayPercent: Double? {
         guard let window else { return nil }
-        return displayMode.makeDisplayPercent(from: window.usedPercent)
+        return displayMode.makeDisplayPercent(from: window.usedPercent, window: window)
     }
 }
 
@@ -270,6 +275,8 @@ private struct UsageDonutView: View {
     let displayPercent: Double?
     let usedPercent: Double?
     let size: CGFloat
+    let displayMode: UsageDisplayModeRaw
+    let window: UsageWindow?
 
     private var progress: Double {
         let value = (displayPercent ?? 0) / 100
@@ -284,13 +291,7 @@ private struct UsageDonutView: View {
                 .trim(from: 0, to: progress)
                 .stroke(style: StrokeStyle(lineWidth: 8, lineCap: .butt))
                 .rotationEffect(.degrees(-90))
-                .foregroundStyle(
-                    WidgetUsageColorResolver.donutRingColor(
-                        usedPercent: usedPercent,
-                        provider: provider,
-                        windowKind: windowKind
-                    )
-                )
+                .foregroundStyle(ringColor)
             Text(centerLabel)
                 .font(.title3)
                 .fontWeight(.bold)
@@ -298,6 +299,17 @@ private struct UsageDonutView: View {
         .frame(width: size, height: size)
         .accessibilityLabel(centerLabel)
         .accessibilityValue(UsagePercentFormatter.formatPercentText(displayPercent, placeholder: "0%"))
+    }
+
+    private var ringColor: Color {
+        if displayMode == .ideal {
+            return WidgetUsageColorResolver.donutRingColorForIdealMode(window: window)
+        }
+        return WidgetUsageColorResolver.donutRingColor(
+            usedPercent: usedPercent,
+            provider: provider,
+            windowKind: windowKind
+        )
     }
 }
 
@@ -431,6 +443,20 @@ private enum WidgetUsageColorResolver {
         }
     }
 
+    static func statusColorForIdealMode(
+        for window: UsageWindow?
+    ) -> Color {
+        guard let window else { return .secondary }
+        guard let idealPercent = window.calculateIdealUsagePercent() else {
+            return .secondary
+        }
+        let level = UsageStatusLevelResolver.levelForIdealMode(
+            usedPercent: window.usedPercent,
+            idealPercent: idealPercent
+        )
+        return statusColor(for: level)
+    }
+
     static func donutRingColor(
         usedPercent: Double?,
         provider: UsageProvider,
@@ -445,6 +471,24 @@ private enum WidgetUsageColorResolver {
                 isRemainingMode: false,
                 warningThreshold: thresholds.warningPercent,
                 dangerThreshold: thresholds.dangerPercent
+            )
+            return statusColor(for: level)
+        }
+        return resolveStoredColor(for: UsageColorKeys.donut, defaultColor: .accentColor)
+    }
+
+    static func donutRingColorForIdealMode(
+        window: UsageWindow?
+    ) -> Color {
+        let defaults = AppGroupDefaults.shared
+        let useStatusColor = defaults?.bool(forKey: UsageColorKeys.donutUseStatus) ?? false
+        if useStatusColor, let window {
+            guard let idealPercent = window.calculateIdealUsagePercent() else {
+                return resolveStoredColor(for: UsageColorKeys.donut, defaultColor: .accentColor)
+            }
+            let level = UsageStatusLevelResolver.levelForIdealMode(
+                usedPercent: window.usedPercent,
+                idealPercent: idealPercent
             )
             return statusColor(for: level)
         }

@@ -9,6 +9,8 @@
 "menu.displayMode" = "Anzeigemodus";
 "menu.displayMode.used" = "Nutzungsrate";
 "menu.displayMode.remaining" = "Verbleibende Rate";
+"menu.displayMode.ideal" = "Richtwert";
+"menu.displayMode.usedWithIdeal" = "Nutzung + Richtwert";
 "menu.about" = "Über AgentLimits";
 "menu.quit" = "Beenden";
 "menu.language" = "Sprache";
@@ -43,6 +45,8 @@
 /* Display Mode */
 "displayMode.used" = "Nutzungsrate";
 "displayMode.remaining" = "Verbleibende Rate";
+"displayMode.ideal" = "Richtwert";
+"displayMode.usedWithIdeal" = "Nutzung + Richtwert";
 
 /* Status */
 "status.notFetched" = "Nicht abgerufen";

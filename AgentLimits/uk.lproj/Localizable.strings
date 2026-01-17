@@ -9,6 +9,8 @@
 "menu.displayMode" = "Режим відображення";
 "menu.displayMode.used" = "Рівень використання";
 "menu.displayMode.remaining" = "Залишок";
+"menu.displayMode.ideal" = "Орієнтир";
+"menu.displayMode.usedWithIdeal" = "Використання + Орієнтир";
 "menu.about" = "Про AgentLimits";
 "menu.quit" = "Вийти";
 "menu.language" = "Мова";
@@ -43,6 +45,8 @@
 /* Display Mode */
 "displayMode.used" = "Рівень використання";
 "displayMode.remaining" = "Залишок";
+"displayMode.ideal" = "Орієнтир";
+"displayMode.usedWithIdeal" = "Використання + Орієнтир";
 
 /* Status */
 "status.notFetched" = "Не отримано";
