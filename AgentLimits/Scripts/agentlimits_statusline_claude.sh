@@ -9,6 +9,7 @@
 #   ./agentlimits_statusline_claude.sh -en       # Force English
 #   ./agentlimits_statusline_claude.sh -r        # Force remaining mode
 #   ./agentlimits_statusline_claude.sh -u        # Force used mode
+#   ./agentlimits_statusline_claude.sh -i        # Force used+ideal mode
 #   ./agentlimits_statusline_claude.sh -d        # Debug output
 
 set -euo pipefail
@@ -187,6 +188,10 @@ while [[ $# -gt 0 ]]; do
             DISPLAY_MODE_OVERRIDE="used"
             shift
             ;;
+        -i|--ideal)
+            DISPLAY_MODE_OVERRIDE="usedWithIdeal"
+            shift
+            ;;
         -d|--debug)
             DEBUG=true
             shift
@@ -250,6 +255,13 @@ fetched_at=$(echo "$json_data" | jq -r '.fetchedAt // empty')
 snapshot_display_mode=$(echo "$json_data" | jq -r '.displayMode // empty')
 
 # Resolve effective display mode (override > snapshot > app)
+# Determine effective display mode (override takes precedence)
+if [[ -n "$DISPLAY_MODE_OVERRIDE" ]]; then
+    EFFECTIVE_DISPLAY_MODE="$DISPLAY_MODE_OVERRIDE"
+else
+    EFFECTIVE_DISPLAY_MODE="$APP_DISPLAY_MODE"
+fi
+
 if [[ -n "$DISPLAY_MODE_OVERRIDE" ]]; then
     DISPLAY_MODE="$DISPLAY_MODE_OVERRIDE"
 elif [[ "$snapshot_display_mode" == "remaining" ]]; then
@@ -380,7 +392,7 @@ ANSI_RED=$(hex_to_ansi "$COLOR_RED")
 
 # Determine status levels based on USED percentages (before display mode conversion)
 # For usedWithIdeal mode, use comparison-based logic
-if [[ "$APP_DISPLAY_MODE" == "usedWithIdeal" ]]; then
+if [[ "$EFFECTIVE_DISPLAY_MODE" == "usedWithIdeal" ]]; then
     # Calculate ideal percentages
     primary_ideal_int=$(calculate_ideal_percent "$primary_reset_at" "$primary_window_seconds")
     secondary_ideal_int=$(calculate_ideal_percent "$secondary_reset_at" "$secondary_window_seconds")
@@ -422,7 +434,7 @@ primary_color=$(get_status_color "$primary_status")
 secondary_color=$(get_status_color "$secondary_status")
 
 # Format percentage text based on display mode
-if [[ "$APP_DISPLAY_MODE" == "usedWithIdeal" ]]; then
+if [[ "$EFFECTIVE_DISPLAY_MODE" == "usedWithIdeal" ]]; then
     # Show used(ideal)% format
     primary_text="${primary_used_int}(${primary_ideal_int})%"
     secondary_text="${secondary_used_int}(${secondary_ideal_int})%"
