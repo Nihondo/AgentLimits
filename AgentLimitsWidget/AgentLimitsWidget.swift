@@ -256,7 +256,7 @@ private struct UsageDonutColumnView: View {
     }
 
     private var statusColor: Color {
-        if displayMode == .ideal || displayMode == .usedWithIdeal {
+        if displayMode == .usedWithIdeal {
             return WidgetUsageColorResolver.statusColorForIdealMode(for: window)
         }
         return WidgetUsageColorResolver.statusColor(for: window, provider: provider, windowKind: windowKind)
@@ -302,7 +302,7 @@ private struct UsageDonutView: View {
     }
 
     private var ringColor: Color {
-        if displayMode == .ideal || displayMode == .usedWithIdeal {
+        if displayMode == .usedWithIdeal {
             return WidgetUsageColorResolver.donutRingColorForIdealMode(window: window)
         }
         return WidgetUsageColorResolver.donutRingColor(

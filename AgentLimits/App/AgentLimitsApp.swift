@@ -302,7 +302,7 @@ private struct MenuBarPercentLineView: View {
     private func resolveStatusColor(_ window: UsageWindow?, windowKind: UsageWindowKind) -> Color {
         guard let window else { return .secondary }
         let level: UsageStatusLevel
-        if displayMode == .ideal || displayMode == .usedWithIdeal {
+        if displayMode == .usedWithIdeal {
             guard let idealPercent = window.calculateIdealUsagePercent() else {
                 return .secondary
             }
@@ -409,7 +409,6 @@ private struct MenuBarContentView: View {
             }
             Button { displayMode = .remaining } label: {
                 CheckmarkLabel("menu.displayMode.remaining".localized(), isSelected: displayMode == .remaining)
-            }
             }
             Button { displayMode = .usedWithIdeal } label: {
                 CheckmarkLabel("menu.displayMode.usedWithIdeal".localized(), isSelected: displayMode == .usedWithIdeal)
