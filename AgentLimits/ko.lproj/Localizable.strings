@@ -9,7 +9,6 @@
 "menu.displayMode" = "표시 모드";
 "menu.displayMode.used" = "사용률";
 "menu.displayMode.remaining" = "잔여 사용률";
-"menu.displayMode.ideal" = "기준";
 "menu.displayMode.usedWithIdeal" = "사용률 + 기준";
 "menu.about" = "AgentLimits 정보";
 "menu.quit" = "종료";
@@ -45,7 +44,6 @@
 /* Display Mode */
 "displayMode.used" = "사용률";
 "displayMode.remaining" = "잔여 사용률";
-"displayMode.ideal" = "기준";
 "displayMode.usedWithIdeal" = "사용률 + 기준";
 
 /* Status */

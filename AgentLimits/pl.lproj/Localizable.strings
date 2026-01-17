@@ -9,7 +9,6 @@
 "menu.displayMode" = "Tryb wyświetlania";
 "menu.displayMode.used" = "Wskaźnik użycia";
 "menu.displayMode.remaining" = "Pozostały wskaźnik";
-"menu.displayMode.ideal" = "Wzorzec";
 "menu.displayMode.usedWithIdeal" = "Użycie + Wzorzec";
 "menu.about" = "O AgentLimits";
 "menu.quit" = "Zakończ";
@@ -45,7 +44,6 @@
 /* Display Mode */
 "displayMode.used" = "Wskaźnik użycia";
 "displayMode.remaining" = "Pozostały wskaźnik";
-"displayMode.ideal" = "Wzorzec";
 "displayMode.usedWithIdeal" = "Użycie + Wzorzec";
 
 /* Status */

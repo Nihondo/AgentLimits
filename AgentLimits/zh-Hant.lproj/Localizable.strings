@@ -9,7 +9,6 @@
 "menu.displayMode" = "顯示模式";
 "menu.displayMode.used" = "使用率";
 "menu.displayMode.remaining" = "剩餘率";
-"menu.displayMode.ideal" = "參考值";
 "menu.displayMode.usedWithIdeal" = "使用率 + 參考";
 "menu.about" = "關於 AgentLimits";
 "menu.quit" = "結束";
@@ -45,7 +44,6 @@
 /* Display Mode */
 "displayMode.used" = "使用率";
 "displayMode.remaining" = "剩餘率";
-"displayMode.ideal" = "參考值";
 "displayMode.usedWithIdeal" = "使用率 + 參考";
 
 /* Status */

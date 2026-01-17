@@ -9,7 +9,6 @@
 "menu.displayMode" = "Görüntüleme Modu";
 "menu.displayMode.used" = "Kullanım oranı";
 "menu.displayMode.remaining" = "Kalan oran";
-"menu.displayMode.ideal" = "Referans";
 "menu.displayMode.usedWithIdeal" = "Kullanım + Referans";
 "menu.about" = "AgentLimits Hakkında";
 "menu.quit" = "Çıkış";
@@ -45,7 +44,6 @@
 /* Display Mode */
 "displayMode.used" = "Kullanım oranı";
 "displayMode.remaining" = "Kalan oran";
-"displayMode.ideal" = "Referans";
 "displayMode.usedWithIdeal" = "Kullanım + Referans";
 
 /* Status */

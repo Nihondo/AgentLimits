@@ -17,7 +17,6 @@ enum UserDefaultsKeys {
 enum UsageDisplayMode: String, Codable, CaseIterable, Identifiable {
     case used
     case remaining
-    case ideal
     case usedWithIdeal
 
     var id: String { rawValue }
@@ -29,8 +28,6 @@ enum UsageDisplayMode: String, Codable, CaseIterable, Identifiable {
             return "displayMode.used".localized()
         case .remaining:
             return "displayMode.remaining".localized()
-        case .ideal:
-            return "displayMode.ideal".localized()
         case .usedWithIdeal:
             return "displayMode.usedWithIdeal".localized()
         }
@@ -48,8 +45,6 @@ enum UsageDisplayMode: String, Codable, CaseIterable, Identifiable {
             return max(0, min(100, usedPercent))
         case .remaining:
             return max(0, min(100, 100 - usedPercent))
-        case .ideal:
-            return window?.calculateIdealUsagePercent() ?? 0
         }
     }
 
@@ -58,10 +53,10 @@ enum UsageDisplayMode: String, Codable, CaseIterable, Identifiable {
         let value: Double
         if sourceMode == self {
             value = percent
-        } else if self == .ideal || self == .usedWithIdeal {
+        } else if self == .usedWithIdeal {
             // Ideal mode doesn't convert from other modes
             value = percent
-        } else if sourceMode == .ideal || sourceMode == .usedWithIdeal {
+        } else if sourceMode == .usedWithIdeal {
             // Converting from ideal to used/remaining doesn't make sense
             value = percent
         } else {
@@ -79,8 +74,6 @@ extension UsageDisplayMode {
             return .used
         case .remaining:
             return .remaining
-        case .ideal:
-            return .ideal
         case .usedWithIdeal:
             return .usedWithIdeal
         }
@@ -95,8 +88,6 @@ extension UsageDisplayModeRaw {
             return .used
         case .remaining:
             return .remaining
-        case .ideal:
-            return .ideal
         case .usedWithIdeal:
             return .usedWithIdeal
         }

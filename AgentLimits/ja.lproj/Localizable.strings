@@ -9,7 +9,6 @@
 "menu.displayMode" = "表示モード";
 "menu.displayMode.used" = "使用率";
 "menu.displayMode.remaining" = "残り使用率";
-"menu.displayMode.ideal" = "目安";
 "menu.displayMode.usedWithIdeal" = "使用率 + 目安";
 "menu.about" = "AgentLimitsについて";
 "menu.quit" = "終了";
@@ -45,7 +44,6 @@
 /* Display Mode */
 "displayMode.used" = "使用率";
 "displayMode.remaining" = "残り使用率";
-"displayMode.ideal" = "目安";
 "displayMode.usedWithIdeal" = "使用率 + 目安";
 
 /* Status */

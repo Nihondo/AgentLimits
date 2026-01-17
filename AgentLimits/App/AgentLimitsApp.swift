@@ -410,8 +410,6 @@ private struct MenuBarContentView: View {
             Button { displayMode = .remaining } label: {
                 CheckmarkLabel("menu.displayMode.remaining".localized(), isSelected: displayMode == .remaining)
             }
-            Button { displayMode = .ideal } label: {
-                CheckmarkLabel("menu.displayMode.ideal".localized(), isSelected: displayMode == .ideal)
             }
             Button { displayMode = .usedWithIdeal } label: {
                 CheckmarkLabel("menu.displayMode.usedWithIdeal".localized(), isSelected: displayMode == .usedWithIdeal)

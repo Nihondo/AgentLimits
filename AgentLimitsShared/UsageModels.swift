@@ -103,7 +103,6 @@ enum CLICommandPathResolver {
 enum UsageDisplayModeRaw: String, Codable {
     case used
     case remaining
-    case ideal
     case usedWithIdeal
 
     /// Returns the display percentage based on the stored used percent.
@@ -114,9 +113,6 @@ enum UsageDisplayModeRaw: String, Codable {
             value = usedPercent
         case .remaining:
             value = 100 - usedPercent
-        case .ideal:
-            // For ideal mode without window context, return usedPercent as fallback
-            value = usedPercent
         }
         return max(0, min(100, value))
     }
@@ -129,8 +125,6 @@ enum UsageDisplayModeRaw: String, Codable {
             value = usedPercent
         case .remaining:
             value = 100 - usedPercent
-        case .ideal:
-            value = window?.calculateIdealUsagePercent() ?? 0
         }
         return max(0, min(100, value))
     }

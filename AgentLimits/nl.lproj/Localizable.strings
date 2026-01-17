@@ -9,7 +9,6 @@
 "menu.displayMode" = "Weergavemodus";
 "menu.displayMode.used" = "Gebruikspercentage";
 "menu.displayMode.remaining" = "Resterend percentage";
-"menu.displayMode.ideal" = "Richtlijn";
 "menu.displayMode.usedWithIdeal" = "Gebruik + Richtlijn";
 "menu.about" = "Over AgentLimits";
 "menu.quit" = "Afsluiten";
@@ -45,7 +44,6 @@
 /* Display Mode */
 "displayMode.used" = "Gebruikspercentage";
 "displayMode.remaining" = "Resterend percentage";
-"displayMode.ideal" = "Richtlijn";
 "displayMode.usedWithIdeal" = "Gebruik + Richtlijn";
 
 /* Status */

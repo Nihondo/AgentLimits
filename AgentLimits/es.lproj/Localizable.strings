@@ -9,7 +9,6 @@
 "menu.displayMode" = "Modo de visualización";
 "menu.displayMode.used" = "Tasa de uso";
 "menu.displayMode.remaining" = "Tasa restante";
-"menu.displayMode.ideal" = "Referencia";
 "menu.displayMode.usedWithIdeal" = "Uso + Referencia";
 "menu.about" = "Acerca de AgentLimits";
 "menu.quit" = "Salir";
@@ -45,7 +44,6 @@
 /* Display Mode */
 "displayMode.used" = "Tasa de uso";
 "displayMode.remaining" = "Tasa restante";
-"displayMode.ideal" = "Referencia";
 "displayMode.usedWithIdeal" = "Uso + Referencia";
 
 /* Status */
