@@ -9,6 +9,7 @@
 "menu.displayMode" = "Режим відображення";
 "menu.displayMode.used" = "Рівень використання";
 "menu.displayMode.remaining" = "Залишок";
+"menu.displayMode.usedWithIdeal" = "Використання + Орієнтир";
 "menu.about" = "Про AgentLimits";
 "menu.quit" = "Вийти";
 "menu.language" = "Мова";
@@ -43,6 +44,7 @@
 /* Display Mode */
 "displayMode.used" = "Рівень використання";
 "displayMode.remaining" = "Залишок";
+"displayMode.usedWithIdeal" = "Використання + Орієнтир";
 
 /* Status */
 "status.notFetched" = "Не отримано";
@@ -181,3 +183,9 @@
 "widgetTapAction.openWebsite" = "Відкрити сайт";
 "widgetTapAction.refreshData" = "Оновити дані";
 "widgetTapAction.note" = "Виберіть, що відбудеться при торканні віджета";
+
+/* Ideal Mode Thresholds */
+"notification.idealModeThresholds" = "Guideline Mode Thresholds";
+"notification.idealModeThresholds.description" = "Color thresholds when exceeding guideline";
+"notification.idealModeThresholds.warning" = "Warning (Orange)";
+"notification.idealModeThresholds.danger" = "Danger (Red)";

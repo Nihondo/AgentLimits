@@ -59,6 +59,11 @@ struct ThresholdSettingsView: View {
                     }
                 }
 
+
+                SettingsFormSection(title: "notification.idealModeThresholds".localized()) {
+                    IdealModeThresholdSection()
+                }
+
                 SettingsFormSection(title: "notification.colors".localized()) {
                     UsageColorSettingsSection()
                 }
@@ -351,4 +356,83 @@ private struct UsageColorSettingsSection: View {
 
 #Preview {
     ThresholdSettingsView(manager: .shared)
+}
+
+// MARK: - Ideal Mode Threshold Section
+
+private struct IdealModeThresholdSection: View {
+    @State private var warningDelta: Double = IdealModeThresholdSettings.loadWarningDelta()
+    @State private var dangerDelta: Double = IdealModeThresholdSettings.loadDangerDelta()
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("notification.idealModeThresholds.description".localized())
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("notification.idealModeThresholds.warning".localized())
+                    Spacer()
+                    Text("+\(Int(warningDelta))%")
+                        .foregroundColor(.orange)
+                        .monospacedDigit()
+                        .frame(width: 50, alignment: .trailing)
+                }
+                Slider(value: $warningDelta, in: 0...50, step: 1)
+                    .accessibilityLabel("notification.idealModeThresholds.warning".localized())
+                    .accessibilityValue(Text("+\(Int(warningDelta))%"))
+            }
+
+            Divider()
+
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("notification.idealModeThresholds.danger".localized())
+                    Spacer()
+                    Text("+\(Int(dangerDelta))%")
+                        .foregroundColor(.red)
+                        .monospacedDigit()
+                        .frame(width: 50, alignment: .trailing)
+                }
+                Slider(value: $dangerDelta, in: 1...50, step: 1)
+                    .accessibilityLabel("notification.idealModeThresholds.danger".localized())
+                    .accessibilityValue(Text("+\(Int(dangerDelta))%"))
+            }
+
+            Divider()
+            HStack {
+                Spacer()
+                Button("cliColors.reset".localized()) {
+                    warningDelta = IdealModeThresholdSettings.defaultWarningDelta
+                    dangerDelta = IdealModeThresholdSettings.defaultDangerDelta
+                    IdealModeThresholdSettings.resetToDefaults()
+                    reloadUsageTimelines()
+                }
+            }
+        }
+        .padding()
+        .background(.thinMaterial)
+        .cornerRadius(8)
+        .onChange(of: warningDelta) { _, newValue in
+            // Ensure warning <= danger
+            if newValue >= dangerDelta {
+                dangerDelta = min(newValue + 1, 50)
+            }
+            IdealModeThresholdSettings.saveWarningDelta(newValue)
+            reloadUsageTimelines()
+        }
+        .onChange(of: dangerDelta) { _, newValue in
+            // Ensure danger > warning
+            if newValue <= warningDelta {
+                warningDelta = max(newValue - 1, 0)
+            }
+            IdealModeThresholdSettings.saveDangerDelta(newValue)
+            reloadUsageTimelines()
+        }
+    }
+
+    private func reloadUsageTimelines() {
+        WidgetCenter.shared.reloadAllTimelines()
+    }
 }
