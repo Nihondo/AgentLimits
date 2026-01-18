@@ -384,7 +384,7 @@ private struct UsageWindowRow: View {
     }
 
     private var windowPercentText: String {
-        let percent = window.map { displayMode.displayPercent(from: $0.usedPercent) }
+        let percent = window.map { displayMode.displayPercent(from: $0.usedPercent, window: $0) }
         return UsagePercentFormatter.formatPercentText(percent)
     }
 }

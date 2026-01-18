@@ -9,6 +9,7 @@
 "menu.displayMode" = "表示モード";
 "menu.displayMode.used" = "使用率";
 "menu.displayMode.remaining" = "残り使用率";
+"menu.displayMode.usedWithIdeal" = "使用率 + 目安";
 "menu.about" = "AgentLimitsについて";
 "menu.quit" = "終了";
 "menu.language" = "言語";
@@ -43,6 +44,7 @@
 /* Display Mode */
 "displayMode.used" = "使用率";
 "displayMode.remaining" = "残り使用率";
+"displayMode.usedWithIdeal" = "使用率 + 目安";
 
 /* Status */
 "status.notFetched" = "未取得";
@@ -181,3 +183,9 @@
 "widgetTapAction.openWebsite" = "Webサイトを開く";
 "widgetTapAction.refreshData" = "データを再取得";
 "widgetTapAction.note" = "ウィジェットをタップしたときの動作を選択します";
+
+/* Ideal Mode Thresholds */
+"notification.idealModeThresholds" = "目安モード閾値";
+"notification.idealModeThresholds.description" = "「使用率+目安」モードで目安を超過した時の色分け閾値";
+"notification.idealModeThresholds.warning" = "警告（オレンジ）";
+"notification.idealModeThresholds.danger" = "危険（赤）";

@@ -281,19 +281,46 @@ private struct MenuBarPercentLineView: View {
     }
 
     private func formatPercentText(_ window: UsageWindow?) -> String {
-        let percent = window.map { displayMode.displayPercent(from: $0.usedPercent) }
+        guard let window else {
+            return UsagePercentFormatter.formatPercentText(nil)
+        }
+        
+        if displayMode == .usedWithIdeal {
+            let usedPercent = Int(window.usedPercent.rounded())
+            if let idealPercent = window.calculateIdealUsagePercent() {
+                let idealInt = Int(idealPercent.rounded())
+                return "\(usedPercent)(\(idealInt))%"
+            } else {
+                return "\(usedPercent)%"
+            }
+        }
+        
+        let percent = displayMode.displayPercent(from: window.usedPercent, window: window)
         return UsagePercentFormatter.formatPercentText(percent)
     }
 
     private func resolveStatusColor(_ window: UsageWindow?, windowKind: UsageWindowKind) -> Color {
         guard let window else { return .secondary }
-        let thresholds = UsageStatusThresholdStore.loadThresholds(for: provider, windowKind: windowKind)
-        let level = UsageStatusLevelResolver.level(
-            for: window.usedPercent,
-            isRemainingMode: false,
-            warningThreshold: thresholds.warningPercent,
-            dangerThreshold: thresholds.dangerPercent
-        )
+        let level: UsageStatusLevel
+        if displayMode == .usedWithIdeal {
+            guard let idealPercent = window.calculateIdealUsagePercent() else {
+                return .secondary
+            }
+            level = UsageStatusLevelResolver.levelForIdealMode(
+                usedPercent: window.usedPercent,
+                idealPercent: idealPercent,
+                warningDelta: IdealModeThresholdSettings.loadWarningDelta(),
+                dangerDelta: IdealModeThresholdSettings.loadDangerDelta()
+            )
+        } else {
+            let thresholds = UsageStatusThresholdStore.loadThresholds(for: provider, windowKind: windowKind)
+            level = UsageStatusLevelResolver.level(
+                for: window.usedPercent,
+                isRemainingMode: false,
+                warningThreshold: thresholds.warningPercent,
+                dangerThreshold: thresholds.dangerPercent
+            )
+        }
         switch level {
         case .green:
             return resolveStoredColor(from: statusGreenHex, defaultColor: .green)
@@ -384,6 +411,9 @@ private struct MenuBarContentView: View {
             }
             Button { displayMode = .remaining } label: {
                 CheckmarkLabel("menu.displayMode.remaining".localized(), isSelected: displayMode == .remaining)
+            }
+            Button { displayMode = .usedWithIdeal } label: {
+                CheckmarkLabel("menu.displayMode.usedWithIdeal".localized(), isSelected: displayMode == .usedWithIdeal)
             }
         } label: {
             Label("menu.displayMode".localized(), systemImage: "eye")

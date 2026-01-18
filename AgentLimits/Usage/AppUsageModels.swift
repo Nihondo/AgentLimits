@@ -17,6 +17,7 @@ enum UserDefaultsKeys {
 enum UsageDisplayMode: String, Codable, CaseIterable, Identifiable {
     case used
     case remaining
+    case usedWithIdeal
 
     var id: String { rawValue }
 
@@ -27,6 +28,8 @@ enum UsageDisplayMode: String, Codable, CaseIterable, Identifiable {
             return "displayMode.used".localized()
         case .remaining:
             return "displayMode.remaining".localized()
+        case .usedWithIdeal:
+            return "displayMode.usedWithIdeal".localized()
         }
     }
 
@@ -35,10 +38,26 @@ enum UsageDisplayMode: String, Codable, CaseIterable, Identifiable {
         convertPercent(usedPercent, from: .used)
     }
 
+    /// Converts a used-percent value into the current display mode's value with optional window for ideal calculation
+    func displayPercent(from usedPercent: Double, window: UsageWindow?) -> Double {
+        switch self {
+        case .used, .usedWithIdeal:
+            return max(0, min(100, usedPercent))
+        case .remaining:
+            return max(0, min(100, 100 - usedPercent))
+        }
+    }
+
     /// Converts a percentage from a source mode to a target mode (clamped 0-100)
     func convertPercent(_ percent: Double, from sourceMode: UsageDisplayMode) -> Double {
         let value: Double
         if sourceMode == self {
+            value = percent
+        } else if self == .usedWithIdeal {
+            // Ideal mode doesn't convert from other modes
+            value = percent
+        } else if sourceMode == .usedWithIdeal {
+            // Converting from ideal to used/remaining doesn't make sense
             value = percent
         } else {
             value = 100 - percent
@@ -55,6 +74,8 @@ extension UsageDisplayMode {
             return .used
         case .remaining:
             return .remaining
+        case .usedWithIdeal:
+            return .usedWithIdeal
         }
     }
 }
@@ -67,6 +88,8 @@ extension UsageDisplayModeRaw {
             return .used
         case .remaining:
             return .remaining
+        case .usedWithIdeal:
+            return .usedWithIdeal
         }
     }
 }

@@ -166,3 +166,53 @@ enum ColorHexCodec {
         #endif
     }
 }
+
+// MARK: - Ideal Mode Threshold Settings
+
+/// UserDefaults keys for ideal mode threshold customization.
+enum IdealModeThresholdKeys {
+    static let warningDelta = "ideal_mode_warning_delta"
+    static let dangerDelta = "ideal_mode_danger_delta"
+}
+
+/// Settings for ideal mode color thresholds (excess percentage).
+enum IdealModeThresholdSettings {
+    /// Default warning delta (orange when exceeding ideal by this amount)
+    static let defaultWarningDelta: Double = 0
+
+    /// Default danger delta (red when exceeding ideal by this amount)
+    static let defaultDangerDelta: Double = 10
+
+    /// Loads the warning delta (excess % to trigger orange).
+    static func loadWarningDelta() -> Double {
+        let defaults = AppGroupDefaults.shared
+        let value = defaults?.object(forKey: IdealModeThresholdKeys.warningDelta) as? Double
+        return value ?? defaultWarningDelta
+    }
+
+    /// Loads the danger delta (excess % to trigger red).
+    static func loadDangerDelta() -> Double {
+        let defaults = AppGroupDefaults.shared
+        let value = defaults?.object(forKey: IdealModeThresholdKeys.dangerDelta) as? Double
+        return value ?? defaultDangerDelta
+    }
+
+    /// Saves the warning delta.
+    static func saveWarningDelta(_ value: Double) {
+        let defaults = AppGroupDefaults.shared
+        defaults?.set(value, forKey: IdealModeThresholdKeys.warningDelta)
+    }
+
+    /// Saves the danger delta.
+    static func saveDangerDelta(_ value: Double) {
+        let defaults = AppGroupDefaults.shared
+        defaults?.set(value, forKey: IdealModeThresholdKeys.dangerDelta)
+    }
+
+    /// Resets to default values.
+    static func resetToDefaults() {
+        let defaults = AppGroupDefaults.shared
+        defaults?.removeObject(forKey: IdealModeThresholdKeys.warningDelta)
+        defaults?.removeObject(forKey: IdealModeThresholdKeys.dangerDelta)
+    }
+}

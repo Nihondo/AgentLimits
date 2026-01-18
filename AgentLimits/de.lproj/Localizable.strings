@@ -9,6 +9,7 @@
 "menu.displayMode" = "Anzeigemodus";
 "menu.displayMode.used" = "Nutzungsrate";
 "menu.displayMode.remaining" = "Verbleibende Rate";
+"menu.displayMode.usedWithIdeal" = "Nutzung + Richtwert";
 "menu.about" = "Über AgentLimits";
 "menu.quit" = "Beenden";
 "menu.language" = "Sprache";
@@ -43,6 +44,7 @@
 /* Display Mode */
 "displayMode.used" = "Nutzungsrate";
 "displayMode.remaining" = "Verbleibende Rate";
+"displayMode.usedWithIdeal" = "Nutzung + Richtwert";
 
 /* Status */
 "status.notFetched" = "Nicht abgerufen";
@@ -181,3 +183,9 @@
 "widgetTapAction.openWebsite" = "Website öffnen";
 "widgetTapAction.refreshData" = "Daten aktualisieren";
 "widgetTapAction.note" = "Wählen Sie, was beim Tippen auf ein Widget passiert";
+
+/* Ideal Mode Thresholds */
+"notification.idealModeThresholds" = "Guideline Mode Thresholds";
+"notification.idealModeThresholds.description" = "Color thresholds when exceeding guideline";
+"notification.idealModeThresholds.warning" = "Warning (Orange)";
+"notification.idealModeThresholds.danger" = "Danger (Red)";
