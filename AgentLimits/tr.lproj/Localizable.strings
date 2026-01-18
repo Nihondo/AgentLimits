@@ -9,7 +9,8 @@
 "menu.displayMode" = "Görüntüleme Modu";
 "menu.displayMode.used" = "Kullanım oranı";
 "menu.displayMode.remaining" = "Kalan oran";
-"menu.displayMode.usedWithIdeal" = "Kullanım + Referans";
+"menu.displayMode.usedWithPacemaker" = "Kullanım + Referans";
+"menu.showPacemakerValue" = "Pacemaker değerini göster";
 "menu.about" = "AgentLimits Hakkında";
 "menu.quit" = "Çıkış";
 "menu.language" = "Dil";
@@ -44,7 +45,7 @@
 /* Display Mode */
 "displayMode.used" = "Kullanım oranı";
 "displayMode.remaining" = "Kalan oran";
-"displayMode.usedWithIdeal" = "Kullanım + Referans";
+"displayMode.usedWithPacemaker" = "Kullanım + Referans";
 
 /* Status */
 "status.notFetched" = "Getirilemedi";
@@ -170,6 +171,11 @@
 "cliColors.note" = "Değişiklikler widget'lar ve menü çubuğuna uygulanır.";
 "cliColors.reset" = "Varsayılanlara sıfırla";
 
+/* Pacemaker Colors */
+"cliColors.pacemaker" = "Pacemaker";
+"cliColors.pacemakerRing" = "Halka Rengi (Widget)";
+"cliColors.pacemakerText" = "Metin Rengi (Menü Çubuğu)";
+
 /* Scripts */
 "scripts.title" = "Dahil edilen betikler";
 "scripts.claudeCode.title" = "Claude Code durum satırı betiği";
@@ -184,8 +190,8 @@
 "widgetTapAction.refreshData" = "Verileri yenile";
 "widgetTapAction.note" = "Widget'a dokunulduğunda ne olacağını seçin";
 
-/* Ideal Mode Thresholds */
-"notification.idealModeThresholds" = "Guideline Mode Thresholds";
-"notification.idealModeThresholds.description" = "Color thresholds when exceeding guideline";
-"notification.idealModeThresholds.warning" = "Warning (Orange)";
-"notification.idealModeThresholds.danger" = "Danger (Red)";
+/* Pacemaker Mode Thresholds */
+"notification.pacemakerThresholds" = "Pacemaker Mode Thresholds";
+"notification.pacemakerThresholds.description" = "Color thresholds when exceeding pacemaker";
+"notification.pacemakerThresholds.warning" = "Warning (Orange)";
+"notification.pacemakerThresholds.danger" = "Danger (Red)";

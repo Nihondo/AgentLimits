@@ -9,7 +9,8 @@
 "menu.displayMode" = "표시 모드";
 "menu.displayMode.used" = "사용률";
 "menu.displayMode.remaining" = "잔여 사용률";
-"menu.displayMode.usedWithIdeal" = "사용률 + 기준";
+"menu.displayMode.usedWithPacemaker" = "사용률 + 기준";
+"menu.showPacemakerValue" = "페이스메이커 값 표시";
 "menu.about" = "AgentLimits 정보";
 "menu.quit" = "종료";
 "menu.language" = "언어";
@@ -44,7 +45,7 @@
 /* Display Mode */
 "displayMode.used" = "사용률";
 "displayMode.remaining" = "잔여 사용률";
-"displayMode.usedWithIdeal" = "사용률 + 기준";
+"displayMode.usedWithPacemaker" = "사용률 + 기준";
 
 /* Status */
 "status.notFetched" = "가져오지 못함";
@@ -170,6 +171,11 @@
 "cliColors.note" = "변경 사항은 위젯과 메뉴 막대에 적용됩니다.";
 "cliColors.reset" = "기본값으로 재설정";
 
+/* Pacemaker Colors */
+"cliColors.pacemaker" = "페이스메이커";
+"cliColors.pacemakerRing" = "링 색상 (위젯)";
+"cliColors.pacemakerText" = "텍스트 색상 (메뉴 막대)";
+
 /* Scripts */
 "scripts.title" = "번들 스크립트";
 "scripts.claudeCode.title" = "Claude Code 상태 표시줄 스크립트";
@@ -184,8 +190,8 @@
 "widgetTapAction.refreshData" = "데이터 새로 고침";
 "widgetTapAction.note" = "위젯을 탭했을 때의 동작을 선택합니다";
 
-/* Ideal Mode Thresholds */
-"notification.idealModeThresholds" = "Guideline Mode Thresholds";
-"notification.idealModeThresholds.description" = "Color thresholds when exceeding guideline";
-"notification.idealModeThresholds.warning" = "Warning (Orange)";
-"notification.idealModeThresholds.danger" = "Danger (Red)";
+/* Pacemaker Mode Thresholds */
+"notification.pacemakerThresholds" = "Pacemaker Mode Thresholds";
+"notification.pacemakerThresholds.description" = "Color thresholds when exceeding pacemaker";
+"notification.pacemakerThresholds.warning" = "Warning (Orange)";
+"notification.pacemakerThresholds.danger" = "Danger (Red)";

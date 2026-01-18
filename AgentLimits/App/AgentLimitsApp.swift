@@ -89,6 +89,10 @@ struct AgentLimitsApp: App {
 
     private var appState: AppSharedState { AppSharedState.shared }
 
+    init() {
+        Self.migrateIdealToPacemakerKeys()
+    }
+
     var body: some Scene {
         MenuBarExtra {
             MenuBarContentView()
@@ -109,6 +113,27 @@ struct AgentLimitsApp: App {
         .handlesExternalEvents(matching: [])
         .commandsRemoved()
     }
+
+    private static func migrateIdealToPacemakerKeys() {
+        guard let defaults = AppGroupDefaults.shared else { return }
+
+        let oldWarningKey = "ideal_mode_warning_delta"
+        let oldDangerKey = "ideal_mode_danger_delta"
+
+        if let oldWarning = defaults.object(forKey: oldWarningKey) as? Double {
+            if defaults.object(forKey: PacemakerThresholdKeys.warningDelta) == nil {
+                defaults.set(oldWarning, forKey: PacemakerThresholdKeys.warningDelta)
+            }
+            defaults.removeObject(forKey: oldWarningKey)
+        }
+
+        if let oldDanger = defaults.object(forKey: oldDangerKey) as? Double {
+            if defaults.object(forKey: PacemakerThresholdKeys.dangerDelta) == nil {
+                defaults.set(oldDanger, forKey: PacemakerThresholdKeys.dangerDelta)
+            }
+            defaults.removeObject(forKey: oldDangerKey)
+        }
+    }
 }
 
 // MARK: - Menu Bar Label
@@ -120,6 +145,9 @@ private struct MenuBarLabelView: View {
     @AppStorage(UserDefaultsKeys.menuBarStatusCodexEnabled) private var codexEnabled = false
     @AppStorage(UserDefaultsKeys.menuBarStatusClaudeEnabled) private var claudeEnabled = false
     @AppStorage(UserDefaultsKeys.displayMode) private var displayMode: UsageDisplayMode = .used
+    @AppStorage(UserDefaultsKeys.menuBarShowPacemakerValue) private var showPacemakerValue = true
+    @AppStorage(UsageColorKeys.pacemakerText, store: AppGroupDefaults.shared)
+    private var pacemakerTextHex: String = ""
     @AppStorage(UsageStatusThresholdStore.revisionKey, store: AppGroupDefaults.shared)
     private var thresholdRevision: Double = 0
     @State private var renderedImage: NSImage?
@@ -151,6 +179,12 @@ private struct MenuBarLabelView: View {
             scheduleImageUpdate()
         }
         .onChange(of: displayMode) { _, _ in
+            scheduleImageUpdate()
+        }
+        .onChange(of: showPacemakerValue) { _, _ in
+            scheduleImageUpdate()
+        }
+        .onChange(of: pacemakerTextHex) { _, _ in
             scheduleImageUpdate()
         }
         .onChange(of: colorScheme) { _, _ in
@@ -258,21 +292,23 @@ private struct MenuBarPercentLineView: View {
     let primaryWindow: UsageWindow?
     let secondaryWindow: UsageWindow?
     let displayMode: UsageDisplayMode
+    @AppStorage(UserDefaultsKeys.menuBarShowPacemakerValue)
+    private var showPacemakerValue: Bool = true
     @AppStorage(UsageColorKeys.statusGreen, store: AppGroupDefaults.shared)
     private var statusGreenHex: String = ""
     @AppStorage(UsageColorKeys.statusOrange, store: AppGroupDefaults.shared)
     private var statusOrangeHex: String = ""
     @AppStorage(UsageColorKeys.statusRed, store: AppGroupDefaults.shared)
     private var statusRedHex: String = ""
+    @AppStorage(UsageColorKeys.pacemakerText, store: AppGroupDefaults.shared)
+    private var pacemakerTextHex: String = ""
 
     var body: some View {
         HStack(spacing: 2) {
-            Text(formatPercentText(primaryWindow))
-                .foregroundColor(resolveStatusColor(primaryWindow, windowKind: .primary))
+            percentTextView(primaryWindow, windowKind: .primary)
             Text("/")
                 .foregroundStyle(.secondary)
-            Text(formatPercentText(secondaryWindow))
-                .foregroundColor(resolveStatusColor(secondaryWindow, windowKind: .secondary))
+            percentTextView(secondaryWindow, windowKind: .secondary)
         }
         .font(.system(size: 13.5, weight: .semibold, design: .monospaced))
         .monospacedDigit()
@@ -280,37 +316,45 @@ private struct MenuBarPercentLineView: View {
         .minimumScaleFactor(0.8)
     }
 
-    private func formatPercentText(_ window: UsageWindow?) -> String {
-        guard let window else {
-            return UsagePercentFormatter.formatPercentText(nil)
-        }
-        
-        if displayMode == .usedWithIdeal {
-            let usedPercent = Int(window.usedPercent.rounded())
-            if let idealPercent = window.calculateIdealUsagePercent() {
-                let idealInt = Int(idealPercent.rounded())
-                return "\(usedPercent)(\(idealInt))%"
+    @ViewBuilder
+    private func percentTextView(_ window: UsageWindow?, windowKind: UsageWindowKind) -> some View {
+        if let window {
+            if displayMode == .usedWithPacemaker {
+                let usedPercent = Int(window.usedPercent.rounded())
+                let usedText = Text("\(usedPercent)")
+                    .foregroundColor(resolveStatusColor(window, windowKind: windowKind))
+                if showPacemakerValue, let pacemakerPercent = window.calculatePacemakerPercent() {
+                    let pacemakerInt = Int(pacemakerPercent.rounded())
+                    let pacemakerText = Text("(\(pacemakerInt))%")
+                        .foregroundColor(resolvePacemakerTextColor())
+                    usedText + pacemakerText
+                } else {
+                    Text("\(usedPercent)%")
+                        .foregroundColor(resolveStatusColor(window, windowKind: windowKind))
+                }
             } else {
-                return "\(usedPercent)%"
+                let percent = displayMode.displayPercent(from: window.usedPercent, window: window)
+                Text(UsagePercentFormatter.formatPercentText(percent))
+                    .foregroundColor(resolveStatusColor(window, windowKind: windowKind))
             }
+        } else {
+            Text(UsagePercentFormatter.formatPercentText(nil))
+                .foregroundStyle(.secondary)
         }
-        
-        let percent = displayMode.displayPercent(from: window.usedPercent, window: window)
-        return UsagePercentFormatter.formatPercentText(percent)
     }
 
     private func resolveStatusColor(_ window: UsageWindow?, windowKind: UsageWindowKind) -> Color {
         guard let window else { return .secondary }
         let level: UsageStatusLevel
-        if displayMode == .usedWithIdeal {
-            guard let idealPercent = window.calculateIdealUsagePercent() else {
+        if displayMode == .usedWithPacemaker {
+            guard let pacemakerPercent = window.calculatePacemakerPercent() else {
                 return .secondary
             }
-            level = UsageStatusLevelResolver.levelForIdealMode(
+            level = UsageStatusLevelResolver.levelForPacemakerMode(
                 usedPercent: window.usedPercent,
-                idealPercent: idealPercent,
-                warningDelta: IdealModeThresholdSettings.loadWarningDelta(),
-                dangerDelta: IdealModeThresholdSettings.loadDangerDelta()
+                pacemakerPercent: pacemakerPercent,
+                warningDelta: PacemakerThresholdSettings.loadWarningDelta(),
+                dangerDelta: PacemakerThresholdSettings.loadDangerDelta()
             )
         } else {
             let thresholds = UsageStatusThresholdStore.loadThresholds(for: provider, windowKind: windowKind)
@@ -329,6 +373,10 @@ private struct MenuBarPercentLineView: View {
         case .red:
             return resolveStoredColor(from: statusRedHex, defaultColor: .red)
         }
+    }
+
+    private func resolvePacemakerTextColor() -> Color {
+        resolveStoredColor(from: pacemakerTextHex, defaultColor: .secondary)
     }
 
     private func resolveStoredColor(from storedValue: String, defaultColor: Color) -> Color {
@@ -362,6 +410,7 @@ private struct CheckmarkLabel: View {
 /// Menu bar dropdown content with settings, display mode, and language options
 private struct MenuBarContentView: View {
     @AppStorage(UserDefaultsKeys.displayMode) private var displayMode: UsageDisplayMode = .used
+    @AppStorage(UserDefaultsKeys.menuBarShowPacemakerValue) private var showPacemakerValue = true
     @Environment(\.openWindow) private var openWindow
     @EnvironmentObject private var appState: AppSharedState
     @ObservedObject private var languageManager = LanguageManager.shared
@@ -412,8 +461,12 @@ private struct MenuBarContentView: View {
             Button { displayMode = .remaining } label: {
                 CheckmarkLabel("menu.displayMode.remaining".localized(), isSelected: displayMode == .remaining)
             }
-            Button { displayMode = .usedWithIdeal } label: {
-                CheckmarkLabel("menu.displayMode.usedWithIdeal".localized(), isSelected: displayMode == .usedWithIdeal)
+            Button { displayMode = .usedWithPacemaker } label: {
+                CheckmarkLabel("menu.displayMode.usedWithPacemaker".localized(), isSelected: displayMode == .usedWithPacemaker)
+            }
+            Divider()
+            Button { showPacemakerValue.toggle() } label: {
+                CheckmarkLabel("menu.showPacemakerValue".localized(), isSelected: showPacemakerValue)
             }
         } label: {
             Label("menu.displayMode".localized(), systemImage: "eye")

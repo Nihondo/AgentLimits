@@ -9,7 +9,8 @@
 "menu.displayMode" = "顯示模式";
 "menu.displayMode.used" = "使用率";
 "menu.displayMode.remaining" = "剩餘率";
-"menu.displayMode.usedWithIdeal" = "使用率 + 參考";
+"menu.displayMode.usedWithPacemaker" = "使用率 + 參考";
+"menu.showPacemakerValue" = "顯示節拍器值";
 "menu.about" = "關於 AgentLimits";
 "menu.quit" = "結束";
 "menu.language" = "語言";
@@ -44,7 +45,7 @@
 /* Display Mode */
 "displayMode.used" = "使用率";
 "displayMode.remaining" = "剩餘率";
-"displayMode.usedWithIdeal" = "使用率 + 參考";
+"displayMode.usedWithPacemaker" = "使用率 + 參考";
 
 /* Status */
 "status.notFetched" = "尚未取得";
@@ -170,6 +171,11 @@
 "cliColors.note" = "變更會套用到小工具與選單列。";
 "cliColors.reset" = "還原預設值";
 
+/* Pacemaker Colors */
+"cliColors.pacemaker" = "節拍器";
+"cliColors.pacemakerRing" = "環形顏色（小工具）";
+"cliColors.pacemakerText" = "文字顏色（選單列）";
+
 /* Scripts */
 "scripts.title" = "隨附腳本";
 "scripts.claudeCode.title" = "Claude Code 狀態列腳本";
@@ -184,8 +190,8 @@
 "widgetTapAction.refreshData" = "重新整理資料";
 "widgetTapAction.note" = "選擇點擊小工具時的動作";
 
-/* Ideal Mode Thresholds */
-"notification.idealModeThresholds" = "Guideline Mode Thresholds";
-"notification.idealModeThresholds.description" = "Color thresholds when exceeding guideline";
-"notification.idealModeThresholds.warning" = "Warning (Orange)";
-"notification.idealModeThresholds.danger" = "Danger (Red)";
+/* Pacemaker Mode Thresholds */
+"notification.pacemakerThresholds" = "Pacemaker Mode Thresholds";
+"notification.pacemakerThresholds.description" = "Color thresholds when exceeding pacemaker";
+"notification.pacemakerThresholds.warning" = "Warning (Orange)";
+"notification.pacemakerThresholds.danger" = "Danger (Red)";

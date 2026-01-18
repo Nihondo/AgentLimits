@@ -9,7 +9,8 @@
 "menu.displayMode" = "Режим відображення";
 "menu.displayMode.used" = "Рівень використання";
 "menu.displayMode.remaining" = "Залишок";
-"menu.displayMode.usedWithIdeal" = "Використання + Орієнтир";
+"menu.displayMode.usedWithPacemaker" = "Використання + Орієнтир";
+"menu.showPacemakerValue" = "Показати значення пейсмейкера";
 "menu.about" = "Про AgentLimits";
 "menu.quit" = "Вийти";
 "menu.language" = "Мова";
@@ -44,7 +45,7 @@
 /* Display Mode */
 "displayMode.used" = "Рівень використання";
 "displayMode.remaining" = "Залишок";
-"displayMode.usedWithIdeal" = "Використання + Орієнтир";
+"displayMode.usedWithPacemaker" = "Використання + Орієнтир";
 
 /* Status */
 "status.notFetched" = "Не отримано";
@@ -170,6 +171,11 @@
 "cliColors.note" = "Зміни застосовуються до віджетів і рядка меню.";
 "cliColors.reset" = "Скинути до стандартних";
 
+/* Pacemaker Colors */
+"cliColors.pacemaker" = "Пейсмейкер";
+"cliColors.pacemakerRing" = "Колір кільця (Віджет)";
+"cliColors.pacemakerText" = "Колір тексту (Рядок меню)";
+
 /* Scripts */
 "scripts.title" = "Вбудовані скрипти";
 "scripts.claudeCode.title" = "Скрипт рядка стану Claude Code";
@@ -184,8 +190,8 @@
 "widgetTapAction.refreshData" = "Оновити дані";
 "widgetTapAction.note" = "Виберіть, що відбудеться при торканні віджета";
 
-/* Ideal Mode Thresholds */
-"notification.idealModeThresholds" = "Guideline Mode Thresholds";
-"notification.idealModeThresholds.description" = "Color thresholds when exceeding guideline";
-"notification.idealModeThresholds.warning" = "Warning (Orange)";
-"notification.idealModeThresholds.danger" = "Danger (Red)";
+/* Pacemaker Mode Thresholds */
+"notification.pacemakerThresholds" = "Pacemaker Mode Thresholds";
+"notification.pacemakerThresholds.description" = "Color thresholds when exceeding pacemaker";
+"notification.pacemakerThresholds.warning" = "Warning (Orange)";
+"notification.pacemakerThresholds.danger" = "Danger (Red)";

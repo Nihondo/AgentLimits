@@ -9,7 +9,8 @@
 "menu.displayMode" = "Modalità di visualizzazione";
 "menu.displayMode.used" = "Tasso di utilizzo";
 "menu.displayMode.remaining" = "Tasso rimanente";
-"menu.displayMode.usedWithIdeal" = "Utilizzo + Riferimento";
+"menu.displayMode.usedWithPacemaker" = "Utilizzo + Riferimento";
+"menu.showPacemakerValue" = "Mostra valore pacemaker";
 "menu.about" = "Informazioni su AgentLimits";
 "menu.quit" = "Esci";
 "menu.language" = "Lingua";
@@ -44,7 +45,7 @@
 /* Display Mode */
 "displayMode.used" = "Tasso di utilizzo";
 "displayMode.remaining" = "Tasso rimanente";
-"displayMode.usedWithIdeal" = "Utilizzo + Riferimento";
+"displayMode.usedWithPacemaker" = "Utilizzo + Riferimento";
 
 /* Status */
 "status.notFetched" = "Non recuperato";
@@ -170,6 +171,11 @@
 "cliColors.note" = "Le modifiche si applicano a widget e barra dei menu.";
 "cliColors.reset" = "Ripristina predefiniti";
 
+/* Pacemaker Colors */
+"cliColors.pacemaker" = "Pacemaker";
+"cliColors.pacemakerRing" = "Colore anello (Widget)";
+"cliColors.pacemakerText" = "Colore testo (Barra dei menu)";
+
 /* Scripts */
 "scripts.title" = "Script inclusi";
 "scripts.claudeCode.title" = "Script linea di stato Claude Code";
@@ -184,8 +190,8 @@
 "widgetTapAction.refreshData" = "Aggiorna dati";
 "widgetTapAction.note" = "Scegli cosa succede quando tocchi un widget";
 
-/* Ideal Mode Thresholds */
-"notification.idealModeThresholds" = "Guideline Mode Thresholds";
-"notification.idealModeThresholds.description" = "Color thresholds when exceeding guideline";
-"notification.idealModeThresholds.warning" = "Warning (Orange)";
-"notification.idealModeThresholds.danger" = "Danger (Red)";
+/* Pacemaker Mode Thresholds */
+"notification.pacemakerThresholds" = "Pacemaker Mode Thresholds";
+"notification.pacemakerThresholds.description" = "Color thresholds when exceeding pacemaker";
+"notification.pacemakerThresholds.warning" = "Warning (Orange)";
+"notification.pacemakerThresholds.danger" = "Danger (Red)";

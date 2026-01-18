@@ -237,6 +237,7 @@ private struct UsageDonutColumnView: View {
                 windowKind: windowKind,
                 centerLabel: centerLabel,
                 displayPercent: displayPercent,
+                pacemakerProgress: pacemakerProgress,
                 usedPercent: window?.usedPercent,
                 size: donutSize,
                 displayMode: displayMode,
@@ -256,8 +257,8 @@ private struct UsageDonutColumnView: View {
     }
 
     private var statusColor: Color {
-        if displayMode == .usedWithIdeal {
-            return WidgetUsageColorResolver.statusColorForIdealMode(for: window)
+        if displayMode == .usedWithPacemaker {
+            return WidgetUsageColorResolver.statusColorForPacemakerMode(for: window)
         }
         return WidgetUsageColorResolver.statusColor(for: window, provider: provider, windowKind: windowKind)
     }
@@ -266,6 +267,12 @@ private struct UsageDonutColumnView: View {
         guard let window else { return nil }
         return displayMode.makeDisplayPercent(from: window.usedPercent, window: window)
     }
+
+    private var pacemakerProgress: Double? {
+        guard displayMode == .usedWithPacemaker else { return nil }
+        guard let percent = window?.calculatePacemakerPercent() else { return nil }
+        return max(0, min(1, percent / 100))
+    }
 }
 
 private struct UsageDonutView: View {
@@ -273,10 +280,14 @@ private struct UsageDonutView: View {
     let windowKind: UsageWindowKind
     let centerLabel: String
     let displayPercent: Double?
+    let pacemakerProgress: Double?
     let usedPercent: Double?
     let size: CGFloat
     let displayMode: UsageDisplayModeRaw
     let window: UsageWindow?
+
+    private let outerLineWidth: CGFloat = 8
+    private let innerLineWidth: CGFloat = 4
 
     private var progress: Double {
         let value = (displayPercent ?? 0) / 100
@@ -286,12 +297,23 @@ private struct UsageDonutView: View {
     var body: some View {
         ZStack {
             Circle()
-                .stroke(.quaternary, lineWidth: 8)
+                .stroke(.quaternary, lineWidth: outerLineWidth)
             Circle()
                 .trim(from: 0, to: progress)
-                .stroke(style: StrokeStyle(lineWidth: 8, lineCap: .butt))
+                .stroke(style: StrokeStyle(lineWidth: outerLineWidth, lineCap: .butt))
                 .rotationEffect(.degrees(-90))
                 .foregroundStyle(ringColor)
+            if displayMode == .usedWithPacemaker, let pacemakerProgress {
+                Circle()
+                    .stroke(.quaternary.opacity(0.5), lineWidth: innerLineWidth)
+                    .padding(outerLineWidth)
+                Circle()
+                    .trim(from: 0, to: pacemakerProgress)
+                    .stroke(style: StrokeStyle(lineWidth: innerLineWidth, lineCap: .butt))
+                    .rotationEffect(.degrees(-90))
+                    .foregroundStyle(pacemakerRingColor)
+                    .padding(outerLineWidth)
+            }
             Text(centerLabel)
                 .font(.title3)
                 .fontWeight(.bold)
@@ -302,14 +324,18 @@ private struct UsageDonutView: View {
     }
 
     private var ringColor: Color {
-        if displayMode == .usedWithIdeal {
-            return WidgetUsageColorResolver.donutRingColorForIdealMode(window: window)
+        if displayMode == .usedWithPacemaker {
+            return WidgetUsageColorResolver.donutRingColorForPacemakerMode(window: window)
         }
         return WidgetUsageColorResolver.donutRingColor(
             usedPercent: usedPercent,
             provider: provider,
             windowKind: windowKind
         )
+    }
+
+    private var pacemakerRingColor: Color {
+        UsageColorSettings.loadPacemakerRingColor()
     }
 }
 
@@ -443,18 +469,18 @@ private enum WidgetUsageColorResolver {
         }
     }
 
-    static func statusColorForIdealMode(
+    static func statusColorForPacemakerMode(
         for window: UsageWindow?
     ) -> Color {
         guard let window else { return .secondary }
-        guard let idealPercent = window.calculateIdealUsagePercent() else {
+        guard let pacemakerPercent = window.calculatePacemakerPercent() else {
             return .secondary
         }
-        let level = UsageStatusLevelResolver.levelForIdealMode(
+        let level = UsageStatusLevelResolver.levelForPacemakerMode(
             usedPercent: window.usedPercent,
-            idealPercent: idealPercent,
-                warningDelta: IdealModeThresholdSettings.loadWarningDelta(),
-                dangerDelta: IdealModeThresholdSettings.loadDangerDelta()
+            pacemakerPercent: pacemakerPercent,
+                warningDelta: PacemakerThresholdSettings.loadWarningDelta(),
+                dangerDelta: PacemakerThresholdSettings.loadDangerDelta()
             )
         return statusColor(for: level)
     }
@@ -479,20 +505,20 @@ private enum WidgetUsageColorResolver {
         return resolveStoredColor(for: UsageColorKeys.donut, defaultColor: .accentColor)
     }
 
-    static func donutRingColorForIdealMode(
+    static func donutRingColorForPacemakerMode(
         window: UsageWindow?
     ) -> Color {
         let defaults = AppGroupDefaults.shared
         let useStatusColor = defaults?.bool(forKey: UsageColorKeys.donutUseStatus) ?? false
         if useStatusColor, let window {
-            guard let idealPercent = window.calculateIdealUsagePercent() else {
+            guard let pacemakerPercent = window.calculatePacemakerPercent() else {
                 return resolveStoredColor(for: UsageColorKeys.donut, defaultColor: .accentColor)
             }
-            let level = UsageStatusLevelResolver.levelForIdealMode(
+            let level = UsageStatusLevelResolver.levelForPacemakerMode(
                 usedPercent: window.usedPercent,
-                idealPercent: idealPercent,
-                warningDelta: IdealModeThresholdSettings.loadWarningDelta(),
-                dangerDelta: IdealModeThresholdSettings.loadDangerDelta()
+                pacemakerPercent: pacemakerPercent,
+                warningDelta: PacemakerThresholdSettings.loadWarningDelta(),
+                dangerDelta: PacemakerThresholdSettings.loadDangerDelta()
             )
             return statusColor(for: level)
         }

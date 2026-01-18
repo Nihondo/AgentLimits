@@ -103,13 +103,13 @@ enum CLICommandPathResolver {
 enum UsageDisplayModeRaw: String, Codable {
     case used
     case remaining
-    case usedWithIdeal
+    case usedWithPacemaker
 
     /// Returns the display percentage based on the stored used percent.
     func makeDisplayPercent(from usedPercent: Double) -> Double {
         let value: Double
         switch self {
-        case .used, .usedWithIdeal:
+        case .used, .usedWithPacemaker:
             value = usedPercent
         case .remaining:
             value = 100 - usedPercent
@@ -121,7 +121,7 @@ enum UsageDisplayModeRaw: String, Codable {
     func makeDisplayPercent(from usedPercent: Double, window: UsageWindow?) -> Double {
         let value: Double
         switch self {
-        case .used, .usedWithIdeal:
+        case .used, .usedWithPacemaker:
             value = usedPercent
         case .remaining:
             value = 100 - usedPercent
@@ -179,26 +179,26 @@ enum UsageStatusLevelResolver {
         return .green
     }
 
-    /// Returns the status level for ideal mode based on comparison between actual and ideal usage.
+    /// Returns the status level for pacemaker mode based on comparison between actual and pacemaker usage.
     /// - Parameters:
     ///   - usedPercent: Actual usage percentage (0-100).
-    ///   - idealPercent: Ideal usage percentage based on elapsed time (0-100).
+    ///   - pacemakerPercent: Pacemaker usage percentage based on elapsed time (0-100).
     ///   - warningDelta: Delta threshold for warning state (default: 0 - any excess).
     ///   - dangerDelta: Delta threshold for danger state (default: 10%).
-    static func levelForIdealMode(
+    static func levelForPacemakerMode(
         usedPercent: Double,
-        idealPercent: Double,
+        pacemakerPercent: Double,
         warningDelta: Double = 0,
         dangerDelta: Double = 10
     ) -> UsageStatusLevel {
-        let diff = usedPercent - idealPercent
-        
+        let diff = usedPercent - pacemakerPercent
+
         if diff >= dangerDelta {
-            return .red      // Significantly exceeds ideal (10%+)
+            return .red      // Significantly exceeds pacemaker (10%+)
         } else if diff > warningDelta {
-            return .orange   // Exceeds ideal
+            return .orange   // Exceeds pacemaker
         } else {
-            return .green    // At or below ideal
+            return .green    // At or below pacemaker
         }
     }
 
@@ -691,18 +691,18 @@ struct UsageWindow: Codable {
 }
 
 extension UsageWindow {
-    /// Calculates the ideal usage percentage based on elapsed time within the window.
+    /// Calculates the pacemaker percentage based on elapsed time within the window.
     /// Returns nil if resetAt is unavailable.
-    func calculateIdealUsagePercent() -> Double? {
+    func calculatePacemakerPercent() -> Double? {
         guard let resetAt = resetAt else { return nil }
         guard limitWindowSeconds > 0 else { return nil }
-        
+
         let now = Date()
         let windowStart = resetAt.addingTimeInterval(-limitWindowSeconds)
         let elapsed = now.timeIntervalSince(windowStart)
-        
-        let idealPercent = (elapsed / limitWindowSeconds) * 100
-        return max(0, min(100, idealPercent))
+
+        let pacemakerPercent = (elapsed / limitWindowSeconds) * 100
+        return max(0, min(100, pacemakerPercent))
     }
 }
 

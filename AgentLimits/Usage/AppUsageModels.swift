@@ -11,13 +11,14 @@ enum UserDefaultsKeys {
     static let cachedDisplayMode = SharedUserDefaultsKeys.cachedDisplayMode
     static let menuBarStatusCodexEnabled = "menu_bar_status_codex_enabled"
     static let menuBarStatusClaudeEnabled = "menu_bar_status_claude_enabled"
+    static let menuBarShowPacemakerValue = "menu_bar_show_pacemaker_value"
 }
 
 /// Display mode for usage percent: used vs remaining
 enum UsageDisplayMode: String, Codable, CaseIterable, Identifiable {
     case used
     case remaining
-    case usedWithIdeal
+    case usedWithPacemaker
 
     var id: String { rawValue }
 
@@ -28,8 +29,8 @@ enum UsageDisplayMode: String, Codable, CaseIterable, Identifiable {
             return "displayMode.used".localized()
         case .remaining:
             return "displayMode.remaining".localized()
-        case .usedWithIdeal:
-            return "displayMode.usedWithIdeal".localized()
+        case .usedWithPacemaker:
+            return "displayMode.usedWithPacemaker".localized()
         }
     }
 
@@ -38,10 +39,10 @@ enum UsageDisplayMode: String, Codable, CaseIterable, Identifiable {
         convertPercent(usedPercent, from: .used)
     }
 
-    /// Converts a used-percent value into the current display mode's value with optional window for ideal calculation
+    /// Converts a used-percent value into the current display mode's value with optional window for pacemaker calculation
     func displayPercent(from usedPercent: Double, window: UsageWindow?) -> Double {
         switch self {
-        case .used, .usedWithIdeal:
+        case .used, .usedWithPacemaker:
             return max(0, min(100, usedPercent))
         case .remaining:
             return max(0, min(100, 100 - usedPercent))
@@ -53,11 +54,11 @@ enum UsageDisplayMode: String, Codable, CaseIterable, Identifiable {
         let value: Double
         if sourceMode == self {
             value = percent
-        } else if self == .usedWithIdeal {
-            // Ideal mode doesn't convert from other modes
+        } else if self == .usedWithPacemaker {
+            // Pacemaker mode doesn't convert from other modes
             value = percent
-        } else if sourceMode == .usedWithIdeal {
-            // Converting from ideal to used/remaining doesn't make sense
+        } else if sourceMode == .usedWithPacemaker {
+            // Converting from pacemaker to used/remaining doesn't make sense
             value = percent
         } else {
             value = 100 - percent
@@ -74,8 +75,8 @@ extension UsageDisplayMode {
             return .used
         case .remaining:
             return .remaining
-        case .usedWithIdeal:
-            return .usedWithIdeal
+        case .usedWithPacemaker:
+            return .usedWithPacemaker
         }
     }
 }
@@ -88,8 +89,8 @@ extension UsageDisplayModeRaw {
             return .used
         case .remaining:
             return .remaining
-        case .usedWithIdeal:
-            return .usedWithIdeal
+        case .usedWithPacemaker:
+            return .usedWithPacemaker
         }
     }
 }

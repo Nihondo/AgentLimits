@@ -19,6 +19,8 @@ enum UsageColorKeys {
     static let statusGreen = "usage_color_green"
     static let statusOrange = "usage_color_orange"
     static let statusRed = "usage_color_red"
+    static let pacemakerRing = "usage_color_pacemaker_ring"
+    static let pacemakerText = "usage_color_pacemaker_text"
 }
 
 /// Helpers for storing and resolving usage colors from App Group defaults.
@@ -75,6 +77,26 @@ enum UsageColorSettings {
         saveColor(color, forKey: UsageColorKeys.statusRed)
     }
 
+    /// Loads the pacemaker ring color (widget inner donut).
+    static func loadPacemakerRingColor() -> Color {
+        loadColor(forKey: UsageColorKeys.pacemakerRing, defaultColor: Color.blue.opacity(0.6))
+    }
+
+    /// Loads the pacemaker text color (menu bar parenthetical value).
+    static func loadPacemakerTextColor() -> Color {
+        loadColor(forKey: UsageColorKeys.pacemakerText, defaultColor: .secondary)
+    }
+
+    /// Saves the pacemaker ring color override.
+    static func savePacemakerRingColor(_ color: Color) {
+        saveColor(color, forKey: UsageColorKeys.pacemakerRing)
+    }
+
+    /// Saves the pacemaker text color override.
+    static func savePacemakerTextColor(_ color: Color) {
+        saveColor(color, forKey: UsageColorKeys.pacemakerText)
+    }
+
     /// Clears stored overrides to restore defaults.
     static func resetToDefaults() {
         let defaults = AppGroupDefaults.shared
@@ -83,6 +105,8 @@ enum UsageColorSettings {
         defaults?.removeObject(forKey: UsageColorKeys.statusGreen)
         defaults?.removeObject(forKey: UsageColorKeys.statusOrange)
         defaults?.removeObject(forKey: UsageColorKeys.statusRed)
+        defaults?.removeObject(forKey: UsageColorKeys.pacemakerRing)
+        defaults?.removeObject(forKey: UsageColorKeys.pacemakerText)
     }
 
     private static func loadColor(forKey key: String, defaultColor: Color) -> Color {
@@ -167,52 +191,52 @@ enum ColorHexCodec {
     }
 }
 
-// MARK: - Ideal Mode Threshold Settings
+// MARK: - Pacemaker Threshold Settings
 
-/// UserDefaults keys for ideal mode threshold customization.
-enum IdealModeThresholdKeys {
-    static let warningDelta = "ideal_mode_warning_delta"
-    static let dangerDelta = "ideal_mode_danger_delta"
+/// UserDefaults keys for pacemaker mode threshold customization.
+enum PacemakerThresholdKeys {
+    static let warningDelta = "pacemaker_warning_delta"
+    static let dangerDelta = "pacemaker_danger_delta"
 }
 
-/// Settings for ideal mode color thresholds (excess percentage).
-enum IdealModeThresholdSettings {
-    /// Default warning delta (orange when exceeding ideal by this amount)
+/// Settings for pacemaker mode color thresholds (excess percentage).
+enum PacemakerThresholdSettings {
+    /// Default warning delta (orange when exceeding pacemaker by this amount)
     static let defaultWarningDelta: Double = 0
 
-    /// Default danger delta (red when exceeding ideal by this amount)
+    /// Default danger delta (red when exceeding pacemaker by this amount)
     static let defaultDangerDelta: Double = 10
 
     /// Loads the warning delta (excess % to trigger orange).
     static func loadWarningDelta() -> Double {
         let defaults = AppGroupDefaults.shared
-        let value = defaults?.object(forKey: IdealModeThresholdKeys.warningDelta) as? Double
+        let value = defaults?.object(forKey: PacemakerThresholdKeys.warningDelta) as? Double
         return value ?? defaultWarningDelta
     }
 
     /// Loads the danger delta (excess % to trigger red).
     static func loadDangerDelta() -> Double {
         let defaults = AppGroupDefaults.shared
-        let value = defaults?.object(forKey: IdealModeThresholdKeys.dangerDelta) as? Double
+        let value = defaults?.object(forKey: PacemakerThresholdKeys.dangerDelta) as? Double
         return value ?? defaultDangerDelta
     }
 
     /// Saves the warning delta.
     static func saveWarningDelta(_ value: Double) {
         let defaults = AppGroupDefaults.shared
-        defaults?.set(value, forKey: IdealModeThresholdKeys.warningDelta)
+        defaults?.set(value, forKey: PacemakerThresholdKeys.warningDelta)
     }
 
     /// Saves the danger delta.
     static func saveDangerDelta(_ value: Double) {
         let defaults = AppGroupDefaults.shared
-        defaults?.set(value, forKey: IdealModeThresholdKeys.dangerDelta)
+        defaults?.set(value, forKey: PacemakerThresholdKeys.dangerDelta)
     }
 
     /// Resets to default values.
     static func resetToDefaults() {
         let defaults = AppGroupDefaults.shared
-        defaults?.removeObject(forKey: IdealModeThresholdKeys.warningDelta)
-        defaults?.removeObject(forKey: IdealModeThresholdKeys.dangerDelta)
+        defaults?.removeObject(forKey: PacemakerThresholdKeys.warningDelta)
+        defaults?.removeObject(forKey: PacemakerThresholdKeys.dangerDelta)
     }
 }

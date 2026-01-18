@@ -9,7 +9,8 @@
 "menu.displayMode" = "显示模式";
 "menu.displayMode.used" = "使用率";
 "menu.displayMode.remaining" = "剩余率";
-"menu.displayMode.usedWithIdeal" = "使用率 + 参考";
+"menu.displayMode.usedWithPacemaker" = "使用率 + 参考";
+"menu.showPacemakerValue" = "显示节拍器值";
 "menu.about" = "关于 AgentLimits";
 "menu.quit" = "退出";
 "menu.language" = "语言";
@@ -44,7 +45,7 @@
 /* Display Mode */
 "displayMode.used" = "使用率";
 "displayMode.remaining" = "剩余率";
-"displayMode.usedWithIdeal" = "使用率 + 参考";
+"displayMode.usedWithPacemaker" = "使用率 + 参考";
 
 /* Status */
 "status.notFetched" = "未获取";
@@ -170,6 +171,11 @@
 "cliColors.note" = "更改会应用到小组件和菜单栏。";
 "cliColors.reset" = "恢复默认";
 
+/* Pacemaker Colors */
+"cliColors.pacemaker" = "节拍器";
+"cliColors.pacemakerRing" = "环形颜色（小组件）";
+"cliColors.pacemakerText" = "文字颜色（菜单栏）";
+
 /* Scripts */
 "scripts.title" = "随附脚本";
 "scripts.claudeCode.title" = "Claude Code 状态栏脚本";
@@ -184,8 +190,8 @@
 "widgetTapAction.refreshData" = "刷新数据";
 "widgetTapAction.note" = "选择点击小组件时的操作";
 
-/* Ideal Mode Thresholds */
-"notification.idealModeThresholds" = "Guideline Mode Thresholds";
-"notification.idealModeThresholds.description" = "Color thresholds when exceeding guideline";
-"notification.idealModeThresholds.warning" = "Warning (Orange)";
-"notification.idealModeThresholds.danger" = "Danger (Red)";
+/* Pacemaker Mode Thresholds */
+"notification.pacemakerThresholds" = "Pacemaker Mode Thresholds";
+"notification.pacemakerThresholds.description" = "Color thresholds when exceeding pacemaker";
+"notification.pacemakerThresholds.warning" = "Warning (Orange)";
+"notification.pacemakerThresholds.danger" = "Danger (Red)";

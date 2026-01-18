@@ -9,7 +9,8 @@
 "menu.displayMode" = "Weergavemodus";
 "menu.displayMode.used" = "Gebruikspercentage";
 "menu.displayMode.remaining" = "Resterend percentage";
-"menu.displayMode.usedWithIdeal" = "Gebruik + Richtlijn";
+"menu.displayMode.usedWithPacemaker" = "Gebruik + Richtlijn";
+"menu.showPacemakerValue" = "Pacemakerwaarde tonen";
 "menu.about" = "Over AgentLimits";
 "menu.quit" = "Afsluiten";
 "menu.language" = "Taal";
@@ -44,7 +45,7 @@
 /* Display Mode */
 "displayMode.used" = "Gebruikspercentage";
 "displayMode.remaining" = "Resterend percentage";
-"displayMode.usedWithIdeal" = "Gebruik + Richtlijn";
+"displayMode.usedWithPacemaker" = "Gebruik + Richtlijn";
 
 /* Status */
 "status.notFetched" = "Niet opgehaald";
@@ -170,6 +171,11 @@
 "cliColors.note" = "Wijzigingen gelden voor widgets en menubalk.";
 "cliColors.reset" = "Standaardwaarden herstellen";
 
+/* Pacemaker Colors */
+"cliColors.pacemaker" = "Pacemaker";
+"cliColors.pacemakerRing" = "Ringkleur (Widget)";
+"cliColors.pacemakerText" = "Tekstkleur (Menubalk)";
+
 /* Scripts */
 "scripts.title" = "Meegeleverde scripts";
 "scripts.claudeCode.title" = "Claude Code statusregel-script";
@@ -184,8 +190,8 @@
 "widgetTapAction.refreshData" = "Gegevens verversen";
 "widgetTapAction.note" = "Kies wat er gebeurt bij het tikken op een widget";
 
-/* Ideal Mode Thresholds */
-"notification.idealModeThresholds" = "Guideline Mode Thresholds";
-"notification.idealModeThresholds.description" = "Color thresholds when exceeding guideline";
-"notification.idealModeThresholds.warning" = "Warning (Orange)";
-"notification.idealModeThresholds.danger" = "Danger (Red)";
+/* Pacemaker Mode Thresholds */
+"notification.pacemakerThresholds" = "Pacemaker Mode Thresholds";
+"notification.pacemakerThresholds.description" = "Color thresholds when exceeding pacemaker";
+"notification.pacemakerThresholds.warning" = "Warning (Orange)";
+"notification.pacemakerThresholds.danger" = "Danger (Red)";
