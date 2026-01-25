@@ -17,7 +17,7 @@
 "menuBar.windowVisibility" = "Voci barra dei menu";
 "menuBar.show5h" = "Mostra 5h";
 "menuBar.show1w" = "Mostra 1w";
-"menu.showPacemakerValue" = "Mostra valore pacemaker";
+"menu.showPacemakerValue" = "Mostra indicatore pacemaker";
 "menu.about" = "Informazioni su AgentLimits";
 "menu.quit" = "Esci";
 "menu.language" = "Lingua";

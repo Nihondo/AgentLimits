@@ -146,8 +146,6 @@ private struct MenuBarLabelView: View {
     @AppStorage(UserDefaultsKeys.menuBarStatusClaudeEnabled) private var claudeEnabled = false
     @AppStorage(UserDefaultsKeys.displayMode) private var displayMode: UsageDisplayMode = .used
     @AppStorage(UserDefaultsKeys.menuBarShowPacemakerValue) private var showPacemakerValue = true
-    @AppStorage(UsageColorKeys.pacemakerText, store: AppGroupDefaults.shared)
-    private var pacemakerTextHex: String = ""
     @AppStorage(UsageStatusThresholdStore.revisionKey, store: AppGroupDefaults.shared)
     private var thresholdRevision: Double = 0
     @State private var renderedImage: NSImage?
@@ -182,9 +180,6 @@ private struct MenuBarLabelView: View {
             scheduleImageUpdate()
         }
         .onChange(of: showPacemakerValue) { _, _ in
-            scheduleImageUpdate()
-        }
-        .onChange(of: pacemakerTextHex) { _, _ in
             scheduleImageUpdate()
         }
         .onChange(of: colorScheme) { _, _ in
@@ -300,8 +295,6 @@ private struct MenuBarPercentLineView: View {
     private var statusOrangeHex: String = ""
     @AppStorage(UsageColorKeys.statusRed, store: AppGroupDefaults.shared)
     private var statusRedHex: String = ""
-    @AppStorage(UsageColorKeys.pacemakerText, store: AppGroupDefaults.shared)
-    private var pacemakerTextHex: String = ""
 
     var body: some View {
         HStack(spacing: 2) {
@@ -323,15 +316,18 @@ private struct MenuBarPercentLineView: View {
             let percent = displayMode.displayPercent(from: window.usedPercent, window: window)
             let displayText = UsagePercentFormatter.formatPercentText(percent)
             if showPacemakerValue,
-               let pacemakerPercent = window.displayPacemakerPercent(for: displayMode.makeDisplayModeRaw()) {
-                let pacemakerInt = Int(pacemakerPercent.rounded())
-                let usedText = Text(displayText.replacingOccurrences(of: "%", with: ""))
+               let pacemakerPercent = window.calculatePacemakerPercent() {
+                // ステータスレベルを取得して矢印アイコンを決定
+                let level = UsageStatusLevelResolver.levelForPacemakerMode(
+                    usedPercent: window.usedPercent,
+                    pacemakerPercent: pacemakerPercent,
+                    warningDelta: PacemakerThresholdSettings.loadWarningDelta(),
+                    dangerDelta: PacemakerThresholdSettings.loadDangerDelta()
+                )
+                let arrowIcon = level.pacemakerArrowIcon
+                // "45%↑" 形式で表示
+                Text(displayText + arrowIcon)
                     .foregroundColor(statusColor)
-                let pacemakerText = Text("(\(pacemakerInt))")
-                    .foregroundColor(resolvePacemakerTextColor())
-                let percentText = Text("%")
-                    .foregroundColor(statusColor)
-                usedText + pacemakerText + percentText
             } else {
                 Text(displayText)
                     .foregroundColor(statusColor)
@@ -362,10 +358,6 @@ private struct MenuBarPercentLineView: View {
         case .red:
             return resolveStoredColor(from: statusRedHex, defaultColor: .red)
         }
-    }
-
-    private func resolvePacemakerTextColor() -> Color {
-        resolveStoredColor(from: pacemakerTextHex, defaultColor: .secondary)
     }
 
     private func resolveStoredColor(from storedValue: String, defaultColor: Color) -> Color {

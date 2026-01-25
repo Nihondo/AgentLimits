@@ -17,7 +17,7 @@
 "menuBar.windowVisibility" = "Menubalkweergave";
 "menuBar.show5h" = "Toon 5h";
 "menuBar.show1w" = "Toon 1w";
-"menu.showPacemakerValue" = "Pacemakerwaarde tonen";
+"menu.showPacemakerValue" = "Pacemaker-indicator tonen";
 "menu.about" = "Over AgentLimits";
 "menu.quit" = "Afsluiten";
 "menu.language" = "Taal";

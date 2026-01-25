@@ -17,7 +17,7 @@
 "menuBar.windowVisibility" = "Menüleistenanzeige";
 "menuBar.show5h" = "5h anzeigen";
 "menuBar.show1w" = "1w anzeigen";
-"menu.showPacemakerValue" = "Pacemaker-Wert anzeigen";
+"menu.showPacemakerValue" = "Pacemaker-Indikator anzeigen";
 "menu.about" = "Über AgentLimits";
 "menu.quit" = "Beenden";
 "menu.language" = "Sprache";

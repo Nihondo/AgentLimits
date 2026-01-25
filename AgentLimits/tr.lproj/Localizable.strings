@@ -17,7 +17,7 @@
 "menuBar.windowVisibility" = "Menü çubuğu görünümü";
 "menuBar.show5h" = "5h göster";
 "menuBar.show1w" = "1w göster";
-"menu.showPacemakerValue" = "Pacemaker değerini göster";
+"menu.showPacemakerValue" = "Pacemaker göstergesini göster";
 "menu.about" = "AgentLimits Hakkında";
 "menu.quit" = "Çıkış";
 "menu.language" = "Dil";

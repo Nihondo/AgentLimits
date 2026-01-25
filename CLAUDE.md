@@ -94,7 +94,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 - Color-coded status based on pacemaker comparison when available (otherwise secondary)
 - Per-provider toggle (Codex/Claude Code separately)
 - Responds to display mode changes (used/remaining)
-- Pacemaker value: shows `<used>% (<pacemaker>)%` with toggleable pacemaker value display (Pacemaker settings)
+- Pacemaker indicator: shows `<used>%↑` or `<used>%↓` with arrow indicating status (↑ = over budget, ↓ = on track), toggleable in Pacemaker settings
 - Status colors are customizable from Notification settings
 - Menu bar menu includes Display Mode, Language selection, Wake Up → Run Now, and Start app at login
 

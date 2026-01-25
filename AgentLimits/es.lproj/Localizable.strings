@@ -17,7 +17,7 @@
 "menuBar.windowVisibility" = "Elementos de la barra de menús";
 "menuBar.show5h" = "Mostrar 5h";
 "menuBar.show1w" = "Mostrar 1w";
-"menu.showPacemakerValue" = "Mostrar valor del marcapasos";
+"menu.showPacemakerValue" = "Mostrar indicador de referencia";
 "menu.about" = "Acerca de AgentLimits";
 "menu.quit" = "Salir";
 "menu.language" = "Idioma";

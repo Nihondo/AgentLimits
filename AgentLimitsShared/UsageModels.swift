@@ -145,6 +145,20 @@ enum UsageStatusLevel {
     case red
 }
 
+extension UsageStatusLevel {
+    /// ペースメーカーモード用の矢印アイコン
+    /// - green (余裕あり): 下向き矢印
+    /// - orange/red (超過): 上向き矢印
+    var pacemakerArrowIcon: String {
+        switch self {
+        case .green:
+            return "↓"
+        case .orange, .red:
+            return "↑"
+        }
+    }
+}
+
 /// Resolves usage status level based on percent and display mode.
 enum UsageStatusLevelResolver {
     /// Returns the status level for a percentage in the current display mode.
