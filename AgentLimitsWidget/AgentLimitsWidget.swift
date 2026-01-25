@@ -263,9 +263,14 @@ private struct UsageDonutColumnView: View {
         )
     }
 
+    private var isPacemakerIndicatorEnabled: Bool {
+        let defaults = AppGroupDefaults.shared
+        return defaults?.bool(forKey: SharedUserDefaultsKeys.menuBarShowPacemakerValue) ?? true
+    }
+
     @ViewBuilder
     private var percentTextView: some View {
-        if displayMode == .usedWithPacemaker,
+        if isPacemakerIndicatorEnabled,
            let window,
            let pacemakerPercent = window.calculatePacemakerPercent() {
             let level = UsageStatusLevelResolver.levelForPacemakerMode(

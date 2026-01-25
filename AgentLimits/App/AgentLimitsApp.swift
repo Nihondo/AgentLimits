@@ -145,9 +145,22 @@ private struct MenuBarLabelView: View {
     @AppStorage(UserDefaultsKeys.menuBarStatusCodexEnabled) private var codexEnabled = false
     @AppStorage(UserDefaultsKeys.menuBarStatusClaudeEnabled) private var claudeEnabled = false
     @AppStorage(UserDefaultsKeys.displayMode) private var displayMode: UsageDisplayMode = .used
-    @AppStorage(UserDefaultsKeys.menuBarShowPacemakerValue) private var showPacemakerValue = true
+    @AppStorage(UserDefaultsKeys.menuBarShowPacemakerValue, store: AppGroupDefaults.shared)
+    private var showPacemakerValue = true
     @AppStorage(UsageStatusThresholdStore.revisionKey, store: AppGroupDefaults.shared)
     private var thresholdRevision: Double = 0
+    @AppStorage(UsageColorKeys.statusGreen, store: AppGroupDefaults.shared)
+    private var statusGreenHex: String = ""
+    @AppStorage(UsageColorKeys.statusOrange, store: AppGroupDefaults.shared)
+    private var statusOrangeHex: String = ""
+    @AppStorage(UsageColorKeys.statusRed, store: AppGroupDefaults.shared)
+    private var statusRedHex: String = ""
+    @AppStorage(UsageColorKeys.pacemakerStatusGreen, store: AppGroupDefaults.shared)
+    private var pacemakerStatusGreenHex: String = ""
+    @AppStorage(UsageColorKeys.pacemakerStatusOrange, store: AppGroupDefaults.shared)
+    private var pacemakerStatusOrangeHex: String = ""
+    @AppStorage(UsageColorKeys.pacemakerStatusRed, store: AppGroupDefaults.shared)
+    private var pacemakerStatusRedHex: String = ""
     @State private var renderedImage: NSImage?
     @Environment(\.colorScheme) private var colorScheme
 
@@ -186,6 +199,24 @@ private struct MenuBarLabelView: View {
             scheduleImageUpdate()
         }
         .onChange(of: thresholdRevision) { _, _ in
+            scheduleImageUpdate()
+        }
+        .onChange(of: statusGreenHex) { _, _ in
+            scheduleImageUpdate()
+        }
+        .onChange(of: statusOrangeHex) { _, _ in
+            scheduleImageUpdate()
+        }
+        .onChange(of: statusRedHex) { _, _ in
+            scheduleImageUpdate()
+        }
+        .onChange(of: pacemakerStatusGreenHex) { _, _ in
+            scheduleImageUpdate()
+        }
+        .onChange(of: pacemakerStatusOrangeHex) { _, _ in
+            scheduleImageUpdate()
+        }
+        .onChange(of: pacemakerStatusRedHex) { _, _ in
             scheduleImageUpdate()
         }
         .onReceive(appState.viewModel.objectWillChange) { _ in
@@ -287,7 +318,7 @@ private struct MenuBarPercentLineView: View {
     let primaryWindow: UsageWindow?
     let secondaryWindow: UsageWindow?
     let displayMode: UsageDisplayMode
-    @AppStorage(UserDefaultsKeys.menuBarShowPacemakerValue)
+    @AppStorage(UserDefaultsKeys.menuBarShowPacemakerValue, store: AppGroupDefaults.shared)
     private var showPacemakerValue: Bool = true
     @AppStorage(UsageColorKeys.statusGreen, store: AppGroupDefaults.shared)
     private var statusGreenHex: String = ""

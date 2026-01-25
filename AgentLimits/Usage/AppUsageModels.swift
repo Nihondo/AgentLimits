@@ -11,7 +11,7 @@ enum UserDefaultsKeys {
     static let cachedDisplayMode = SharedUserDefaultsKeys.cachedDisplayMode
     static let menuBarStatusCodexEnabled = "menu_bar_status_codex_enabled"
     static let menuBarStatusClaudeEnabled = "menu_bar_status_claude_enabled"
-    static let menuBarShowPacemakerValue = "menu_bar_show_pacemaker_value"
+    static let menuBarShowPacemakerValue = SharedUserDefaultsKeys.menuBarShowPacemakerValue
 }
 
 /// Display mode for usage percent: used vs remaining

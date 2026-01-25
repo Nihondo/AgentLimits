@@ -28,6 +28,7 @@ enum AppGroupDefaults {
 enum SharedUserDefaultsKeys {
     static let displayMode = "usage_display_mode"
     static let cachedDisplayMode = "usage_display_mode_cached"
+    static let menuBarShowPacemakerValue = "menu_bar_show_pacemaker_value"
 }
 
 // MARK: - CLI Command Paths

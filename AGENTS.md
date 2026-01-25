@@ -32,7 +32,7 @@
   - Orange: exceeds pacemaker by warning delta (default: 0%)
   - Red: exceeds pacemaker by danger delta (default: 10%)
 - Widget shows dual rings when pacemaker data is available: outer = actual usage, inner = pacemaker percentage
-- Menu bar pacemaker value display is toggleable (Pacemaker settings)
+- Menu bar pacemaker indicator display is toggleable (Pacemaker settings), used by widgets as well
 - Pacemaker ring/text colors are configurable in Pacemaker settings
 - Warning/danger delta thresholds are configurable in Pacemaker settings
 
@@ -153,7 +153,7 @@
 | `usage_color_threshold_revision` | Revision bump for threshold updates |
 | `usage_color_threshold_warning_{provider}_{window}` | Warning threshold used for usage status colors |
 | `usage_color_threshold_danger_{provider}_{window}` | Danger threshold used for usage status colors |
-| `menu_bar_show_pacemaker_value` | Menu bar pacemaker value display toggle |
+| `menu_bar_show_pacemaker_value` | Menu bar pacemaker indicator toggle (shared with widgets) |
 | `usage_color_pacemaker_ring` | Pacemaker ring color (widget) |
 | `usage_color_pacemaker_status_green` | Pacemaker indicator color (normal) |
 | `usage_color_pacemaker_status_orange` | Pacemaker indicator color (warning) |

@@ -6,7 +6,7 @@ import WidgetKit
 
 @MainActor
 struct PacemakerSettingsView: View {
-    @AppStorage(UserDefaultsKeys.menuBarShowPacemakerValue)
+    @AppStorage(UserDefaultsKeys.menuBarShowPacemakerValue, store: AppGroupDefaults.shared)
     private var showPacemakerValue: Bool = true
 
     var body: some View {

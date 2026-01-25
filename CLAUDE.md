@@ -94,7 +94,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 - Color-coded status based on pacemaker comparison when available (otherwise secondary)
 - Per-provider toggle (Codex/Claude Code separately)
 - Responds to display mode changes (used/remaining)
-- Pacemaker indicator: shows `<used>%↑` or `<used>%↓` with arrow indicating status (↑ = over budget, ↓ = on track), toggleable in Pacemaker settings
+- Pacemaker indicator: shows `<used>%↑` when over budget (toggleable in Pacemaker settings, used by widgets as well)
 - Status colors are customizable from Notification settings
 - Menu bar menu includes Display Mode, Language selection, Wake Up → Run Now, and Start app at login
 
@@ -204,7 +204,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 | `usage_color_threshold_warning_{provider}_{window}` | Warning threshold used for usage status colors |
 | `usage_color_threshold_danger_{provider}_{window}` | Danger threshold used for usage status colors |
 | `widget_tap_action` | Widget tap action (openWebsite / refreshData) |
-| `menu_bar_show_pacemaker_value` | Menu bar pacemaker value display toggle |
+| `menu_bar_show_pacemaker_value` | Pacemaker indicator toggle (shared with widgets) |
 | `usage_color_pacemaker_ring` | Pacemaker ring color (widget) |
 | `usage_color_pacemaker_status_green` | Pacemaker indicator color (normal) |
 | `usage_color_pacemaker_status_orange` | Pacemaker indicator color (warning) |
