@@ -14,6 +14,9 @@
 "menu.displayMode.used" = "使用率";
 "menu.displayMode.remaining" = "残り使用率";
 "menu.displayMode.usedWithPacemaker" = "使用率 + ペースメーカー";
+"menuBar.windowVisibility" = "メニューバーの表示対象";
+"menuBar.show5h" = "5hを表示";
+"menuBar.show1w" = "1wを表示";
 "menu.showPacemakerValue" = "ペースメーカー値を表示";
 "menu.about" = "AgentLimitsについて";
 "menu.quit" = "終了";

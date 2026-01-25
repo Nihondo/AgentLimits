@@ -14,6 +14,9 @@
 "menu.displayMode.used" = "Taxa de uso";
 "menu.displayMode.remaining" = "Taxa restante";
 "menu.displayMode.usedWithPacemaker" = "Uso + Referência";
+"menuBar.windowVisibility" = "Exibição na barra de menus";
+"menuBar.show5h" = "Mostrar 5h";
+"menuBar.show1w" = "Mostrar 1w";
 "menu.showPacemakerValue" = "Mostrar valor do pacemaker";
 "menu.about" = "Sobre o AgentLimits";
 "menu.quit" = "Sair";

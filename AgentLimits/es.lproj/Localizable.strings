@@ -14,6 +14,9 @@
 "menu.displayMode.used" = "Tasa de uso";
 "menu.displayMode.remaining" = "Tasa restante";
 "menu.displayMode.usedWithPacemaker" = "Uso + Referencia";
+"menuBar.windowVisibility" = "Elementos de la barra de menús";
+"menuBar.show5h" = "Mostrar 5h";
+"menuBar.show1w" = "Mostrar 1w";
 "menu.showPacemakerValue" = "Mostrar valor del marcapasos";
 "menu.about" = "Acerca de AgentLimits";
 "menu.quit" = "Salir";

@@ -14,6 +14,9 @@
 "menu.displayMode.used" = "Рівень використання";
 "menu.displayMode.remaining" = "Залишок";
 "menu.displayMode.usedWithPacemaker" = "Використання + Орієнтир";
+"menuBar.windowVisibility" = "Відображення у рядку меню";
+"menuBar.show5h" = "Показувати 5h";
+"menuBar.show1w" = "Показувати 1w";
 "menu.showPacemakerValue" = "Показати значення пейсмейкера";
 "menu.about" = "Про AgentLimits";
 "menu.quit" = "Вийти";

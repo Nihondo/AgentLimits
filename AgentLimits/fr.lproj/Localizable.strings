@@ -14,6 +14,9 @@
 "menu.displayMode.used" = "Taux d’utilisation";
 "menu.displayMode.remaining" = "Taux restant";
 "menu.displayMode.usedWithPacemaker" = "Utilisation + Repère";
+"menuBar.windowVisibility" = "Affichage barre de menus";
+"menuBar.show5h" = "Afficher 5h";
+"menuBar.show1w" = "Afficher 1w";
 "menu.showPacemakerValue" = "Afficher la valeur du pacemaker";
 "menu.about" = "À propos d’AgentLimits";
 "menu.quit" = "Quitter";

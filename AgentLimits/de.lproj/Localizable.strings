@@ -14,6 +14,9 @@
 "menu.displayMode.used" = "Nutzungsrate";
 "menu.displayMode.remaining" = "Verbleibende Rate";
 "menu.displayMode.usedWithPacemaker" = "Nutzung + Richtwert";
+"menuBar.windowVisibility" = "Menüleistenanzeige";
+"menuBar.show5h" = "5h anzeigen";
+"menuBar.show1w" = "1w anzeigen";
 "menu.showPacemakerValue" = "Pacemaker-Wert anzeigen";
 "menu.about" = "Über AgentLimits";
 "menu.quit" = "Beenden";

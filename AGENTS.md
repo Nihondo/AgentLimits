@@ -18,8 +18,8 @@
 - Two-line layout (line 1: provider name, line 2: `X% / Y%`)
 - Color-coded status (used vs pacemaker comparison when available; otherwise secondary)
 - Per-provider toggle (Codex/Claude Code separately)
-- Responds to display mode changes (used/remaining/pacemaker)
-- Pacemaker mode shows `<used>% (<pacemaker>)%` with toggleable pacemaker value display (from Pacemaker settings)
+- Responds to display mode changes (used/remaining)
+- Pacemaker value shows `<used>% (<pacemaker>)%` with toggleable pacemaker value display (from Pacemaker settings)
 - Status colors are customizable from Notification settings
 - Menu bar menu includes Display Mode, Language selection, Wake Up → Run Now, and Start app at login
 
@@ -38,7 +38,7 @@
 
 ### Usage Monitoring
 - Auto refresh: configurable 1-10 minutes while the app is running (usage limits)
-- Display mode: used% or remaining% or pacemaker (set from menu bar, shared across app + widgets)
+- Display mode: used% or remaining% (set from menu bar, shared across app + widgets)
 - Language preference: stored in App Group under `app_language`
 - Color-coded percentage display in widgets based on usage level and display mode
 - Usage screen includes **Clear Data** to remove embedded browser login data and website storage

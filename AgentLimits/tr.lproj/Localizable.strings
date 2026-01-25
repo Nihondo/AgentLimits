@@ -14,6 +14,9 @@
 "menu.displayMode.used" = "Kullanım oranı";
 "menu.displayMode.remaining" = "Kalan oran";
 "menu.displayMode.usedWithPacemaker" = "Kullanım + Referans";
+"menuBar.windowVisibility" = "Menü çubuğu görünümü";
+"menuBar.show5h" = "5h göster";
+"menuBar.show1w" = "1w göster";
 "menu.showPacemakerValue" = "Pacemaker değerini göster";
 "menu.about" = "AgentLimits Hakkında";
 "menu.quit" = "Çıkış";

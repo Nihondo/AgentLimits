@@ -14,6 +14,9 @@
 "menu.displayMode.used" = "使用率";
 "menu.displayMode.remaining" = "剩余率";
 "menu.displayMode.usedWithPacemaker" = "使用率 + 参考";
+"menuBar.windowVisibility" = "菜单栏显示项";
+"menuBar.show5h" = "显示 5h";
+"menuBar.show1w" = "显示 1w";
 "menu.showPacemakerValue" = "显示节拍器值";
 "menu.about" = "关于 AgentLimits";
 "menu.quit" = "退出";

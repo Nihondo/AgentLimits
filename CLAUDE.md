@@ -93,8 +93,8 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 - Two-line layout (line 1: provider name, line 2: `X% / Y%` for 5h/weekly)
 - Color-coded status based on pacemaker comparison when available (otherwise secondary)
 - Per-provider toggle (Codex/Claude Code separately)
-- Responds to display mode changes (used/remaining/pacemaker)
-- Pacemaker mode: shows `<used>% (<pacemaker>)%` with toggleable pacemaker value display (Pacemaker settings)
+- Responds to display mode changes (used/remaining)
+- Pacemaker value: shows `<used>% (<pacemaker>)%` with toggleable pacemaker value display (Pacemaker settings)
 - Status colors are customizable from Notification settings
 - Menu bar menu includes Display Mode, Language selection, Wake Up → Run Now, and Start app at login
 
@@ -112,7 +112,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 #### Usage Monitoring
 - Sign in to each service in the in-app WKWebView (Codex/Claude Code)
 - Auto refresh interval is configurable (1-10 minutes)
-- Display mode (used/remaining/pacemaker) shared across app + widgets
+- Display mode (used/remaining) shared across app + widgets
 - Color-coded percentage display in widgets based on usage level and display mode
 - Widget tap action configurable: open website or refresh data (Advanced Settings)
 - Usage screen includes **Clear Data** to remove embedded browser login data and website storage

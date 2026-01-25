@@ -14,6 +14,9 @@
 "menu.displayMode.used" = "Wskaźnik użycia";
 "menu.displayMode.remaining" = "Pozostały wskaźnik";
 "menu.displayMode.usedWithPacemaker" = "Użycie + Wzorzec";
+"menuBar.windowVisibility" = "Wyświetlanie na pasku menu";
+"menuBar.show5h" = "Pokaż 5h";
+"menuBar.show1w" = "Pokaż 1w";
 "menu.showPacemakerValue" = "Pokaż wartość pacemakera";
 "menu.about" = "O AgentLimits";
 "menu.quit" = "Zakończ";

@@ -14,6 +14,9 @@
 "menu.displayMode.used" = "사용률";
 "menu.displayMode.remaining" = "잔여 사용률";
 "menu.displayMode.usedWithPacemaker" = "사용률 + 기준";
+"menuBar.windowVisibility" = "메뉴 막대 표시 항목";
+"menuBar.show5h" = "5h 표시";
+"menuBar.show1w" = "1w 표시";
 "menu.showPacemakerValue" = "페이스메이커 값 표시";
 "menu.about" = "AgentLimits 정보";
 "menu.quit" = "종료";

@@ -14,6 +14,9 @@
 "menu.displayMode.used" = "Tasso di utilizzo";
 "menu.displayMode.remaining" = "Tasso rimanente";
 "menu.displayMode.usedWithPacemaker" = "Utilizzo + Riferimento";
+"menuBar.windowVisibility" = "Voci barra dei menu";
+"menuBar.show5h" = "Mostra 5h";
+"menuBar.show1w" = "Mostra 1w";
 "menu.showPacemakerValue" = "Mostra valore pacemaker";
 "menu.about" = "Informazioni su AgentLimits";
 "menu.quit" = "Esci";

@@ -28,7 +28,7 @@ Download the latest build: [Download](https://github.com/Nihondo/AgentLimits/rel
 - Two-line layout per provider
   - Line 1: provider name
   - Line 2: `X% / Y%` (5-hour / weekly)
-- Display mode: **Used**, **Remaining**, or **Usage + Pacemaker** (shared across app and widgets)
+- Display mode: **Used** or **Remaining** (shared across app and widgets)
 - Status colors are based on pacemaker comparison when available (colors are configurable in **Notification** settings)
 - Pacemaker mode: shows `<used>% (<pacemaker>)%` where pacemaker is elapsed time percentage
 - Toggle visibility per provider in **Usage** settings

@@ -449,9 +449,6 @@ private struct MenuBarContentView: View {
             Button { displayMode = .remaining } label: {
                 CheckmarkLabel("menu.displayMode.remaining".localized(), isSelected: displayMode == .remaining)
             }
-            Button { displayMode = .usedWithPacemaker } label: {
-                CheckmarkLabel("menu.displayMode.usedWithPacemaker".localized(), isSelected: displayMode == .usedWithPacemaker)
-            }
         } label: {
             Label("menu.displayMode".localized(), systemImage: "eye")
         }
