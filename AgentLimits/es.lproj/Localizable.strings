@@ -2,7 +2,11 @@
 "tab.usage" = "Límite de uso";
 "tab.wakeUp" = "Wake Up";
 "tab.notification" = "Notificación";
+"tab.pacemaker" = "Marcapasos";
 "tab.advanced" = "Avanzado";
+
+/* Pacemaker */
+"pacemaker.description" = "Personaliza la visualización del marcapasos, los umbrales y los colores.";
 
 /* Menu */
 "menu.openSettings" = "Ajustes de AgentLimits...";

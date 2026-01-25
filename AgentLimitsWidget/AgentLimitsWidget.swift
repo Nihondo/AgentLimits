@@ -257,10 +257,7 @@ private struct UsageDonutColumnView: View {
     }
 
     private var statusColor: Color {
-        if displayMode == .usedWithPacemaker {
-            return WidgetUsageColorResolver.statusColorForPacemakerMode(for: window)
-        }
-        return WidgetUsageColorResolver.statusColor(for: window, provider: provider, windowKind: windowKind)
+        return WidgetUsageColorResolver.statusColorForPacemakerMode(for: window)
     }
 
     private var displayPercent: Double? {
@@ -269,8 +266,8 @@ private struct UsageDonutColumnView: View {
     }
 
     private var pacemakerProgress: Double? {
-        guard displayMode == .usedWithPacemaker else { return nil }
-        guard let percent = window?.calculatePacemakerPercent() else { return nil }
+        guard let window else { return nil }
+        guard let percent = window.displayPacemakerPercent(for: displayMode) else { return nil }
         return max(0, min(1, percent / 100))
     }
 }
@@ -303,7 +300,7 @@ private struct UsageDonutView: View {
                 .stroke(style: StrokeStyle(lineWidth: outerLineWidth, lineCap: .butt))
                 .rotationEffect(.degrees(-90))
                 .foregroundStyle(ringColor)
-            if displayMode == .usedWithPacemaker, let pacemakerProgress {
+            if let pacemakerProgress {
                 Circle()
                     .stroke(.quaternary.opacity(0.5), lineWidth: innerLineWidth)
                     .padding(outerLineWidth)
@@ -324,14 +321,7 @@ private struct UsageDonutView: View {
     }
 
     private var ringColor: Color {
-        if displayMode == .usedWithPacemaker {
-            return WidgetUsageColorResolver.donutRingColorForPacemakerMode(window: window)
-        }
-        return WidgetUsageColorResolver.donutRingColor(
-            usedPercent: usedPercent,
-            provider: provider,
-            windowKind: windowKind
-        )
+        return WidgetUsageColorResolver.donutRingColorForPacemakerMode(window: window)
     }
 
     private var pacemakerRingColor: Color {

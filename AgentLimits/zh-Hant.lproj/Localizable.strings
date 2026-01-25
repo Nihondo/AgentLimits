@@ -2,7 +2,11 @@
 "tab.usage" = "使用限制";
 "tab.wakeUp" = "Wake Up";
 "tab.notification" = "通知";
+"tab.pacemaker" = "節拍器";
 "tab.advanced" = "進階";
+
+/* Pacemaker */
+"pacemaker.description" = "自訂節拍器顯示、閾值與顏色。";
 
 /* Menu */
 "menu.openSettings" = "AgentLimits 設定...";

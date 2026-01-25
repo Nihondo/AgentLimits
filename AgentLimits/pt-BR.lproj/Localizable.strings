@@ -2,7 +2,11 @@
 "tab.usage" = "Limite de uso";
 "tab.wakeUp" = "Wake Up";
 "tab.notification" = "Notificação";
+"tab.pacemaker" = "Pacemaker";
 "tab.advanced" = "Avançado";
+
+/* Pacemaker */
+"pacemaker.description" = "Personalize a exibição do pacemaker, os limites e as cores.";
 
 /* Menu */
 "menu.openSettings" = "Configurações do AgentLimits...";

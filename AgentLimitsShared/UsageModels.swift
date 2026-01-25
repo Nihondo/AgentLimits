@@ -701,8 +701,20 @@ extension UsageWindow {
         let windowStart = resetAt.addingTimeInterval(-limitWindowSeconds)
         let elapsed = now.timeIntervalSince(windowStart)
 
+        guard elapsed > 1 else { return nil }
+
         let pacemakerPercent = (elapsed / limitWindowSeconds) * 100
         return max(0, min(100, pacemakerPercent))
+    }
+
+    func displayPacemakerPercent(for displayMode: UsageDisplayModeRaw) -> Double? {
+        guard let pacemakerPercent = calculatePacemakerPercent() else { return nil }
+        switch displayMode {
+        case .remaining:
+            return max(0, min(100, 100 - pacemakerPercent))
+        case .used, .usedWithPacemaker:
+            return pacemakerPercent
+        }
     }
 }
 

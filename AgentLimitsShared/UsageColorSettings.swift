@@ -109,6 +109,23 @@ enum UsageColorSettings {
         defaults?.removeObject(forKey: UsageColorKeys.pacemakerText)
     }
 
+    /// Clears stored overrides for usage status colors.
+    static func resetUsageStatusColors() {
+        let defaults = AppGroupDefaults.shared
+        defaults?.removeObject(forKey: UsageColorKeys.donut)
+        defaults?.removeObject(forKey: UsageColorKeys.donutUseStatus)
+        defaults?.removeObject(forKey: UsageColorKeys.statusGreen)
+        defaults?.removeObject(forKey: UsageColorKeys.statusOrange)
+        defaults?.removeObject(forKey: UsageColorKeys.statusRed)
+    }
+
+    /// Clears stored overrides for pacemaker colors.
+    static func resetPacemakerColors() {
+        let defaults = AppGroupDefaults.shared
+        defaults?.removeObject(forKey: UsageColorKeys.pacemakerRing)
+        defaults?.removeObject(forKey: UsageColorKeys.pacemakerText)
+    }
+
     private static func loadColor(forKey key: String, defaultColor: Color) -> Color {
         let defaults = AppGroupDefaults.shared
         let storedValue = defaults?.string(forKey: key)

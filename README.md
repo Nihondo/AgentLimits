@@ -28,10 +28,21 @@ Download the latest build: [Download](https://github.com/Nihondo/AgentLimits/rel
 - Two-line layout per provider
   - Line 1: provider name
   - Line 2: `X% / Y%` (5-hour / weekly)
-- Display mode: **Used** or **Remaining** (shared across app and widgets)
-- Status colors: normal / warning / danger (colors are configurable in **Notification** settings)
+- Display mode: **Used**, **Remaining**, or **Usage + Pacemaker** (shared across app and widgets)
+- Status colors are based on pacemaker comparison when available (colors are configurable in **Notification** settings)
+- Pacemaker mode: shows `<used>% (<pacemaker>)%` where pacemaker is elapsed time percentage
 - Toggle visibility per provider in **Usage** settings
 - Menu bar menu includes **Language** (System/Japanese/English), **Wake Up → Run Now**, and **Start app at login**
+
+## Pacemaker Mode
+Pacemaker mode shows a time-based usage benchmark to help you stay on track.
+
+- **Calculation**: Elapsed percentage of the usage window (e.g., 50% = halfway through the 5h or weekly window)
+- **Comparison**: Green = on track or ahead, Orange = slightly over pace, Red = 10%+ over pace
+- **Menu Bar**: Shows `<used>% (<pacemaker>)%` with toggleable pacemaker value display (**Pacemaker** settings)
+- **Widget**: Outer ring = actual usage, inner ring = pacemaker percentage (shown when pacemaker data is available)
+- **Thresholds**: Warning/danger delta thresholds are configurable in **Pacemaker** settings
+- **Colors**: Pacemaker ring/text colors are configurable in **Pacemaker** settings
 
 ## Widgets
 ### Usage Widgets (Codex / Claude Code)
@@ -77,6 +88,12 @@ Download the latest build: [Download](https://github.com/Nihondo/AgentLimits/rel
 4. Configure thresholds for 5-hour and weekly windows.
 5. Adjust usage colors (donut + status colors) if needed.
 
+### Pacemaker
+1. Open **Pacemaker**.
+2. Toggle the menu bar pacemaker value display.
+3. Adjust pacemaker warning/danger deltas.
+4. Customize pacemaker ring/text colors.
+
 ### Advanced
 1. Open **Advanced**.
 2. Set full paths for `codex`, `claude`, `npx` if needed (blank = resolve via PATH).
@@ -97,7 +114,7 @@ Download the latest build: [Download](https://github.com/Nihondo/AgentLimits/rel
 - Bundled script for Claude Code status line integration (path shown in **Advanced → Bundled Scripts**)
 - Reads Claude Code usage snapshot + App Group settings (display mode, language, thresholds, colors)
 - Outputs a single line with 5-hour/weekly usage, reset times, and update time
-- Options: `-ja`, `-en`, `-r` (remaining), `-u` (used), `-d` (debug)
+- Options: `-ja`, `-en`, `-r` (remaining), `-u` (used), `-p` (pacemaker), `-i` (usage + pacemaker inline), `-d` (debug)
 - Requires `jq` (`brew install jq`)
 
 ## Advanced: Storage (App Group)

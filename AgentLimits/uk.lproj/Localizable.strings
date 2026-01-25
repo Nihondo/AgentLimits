@@ -2,7 +2,11 @@
 "tab.usage" = "Ліміт використання";
 "tab.wakeUp" = "Wake Up";
 "tab.notification" = "Сповіщення";
+"tab.pacemaker" = "Пейсмейкер";
 "tab.advanced" = "Розширено";
+
+/* Pacemaker */
+"pacemaker.description" = "Налаштуйте відображення пейсмейкера, пороги та кольори.";
 
 /* Menu */
 "menu.openSettings" = "Налаштування AgentLimits...";

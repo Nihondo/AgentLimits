@@ -2,7 +2,11 @@
 "tab.usage" = "Kullanım Limiti";
 "tab.wakeUp" = "Wake Up";
 "tab.notification" = "Bildirim";
+"tab.pacemaker" = "Pacemaker";
 "tab.advanced" = "Gelişmiş";
+
+/* Pacemaker */
+"pacemaker.description" = "Pacemaker görünümünü, eşikleri ve renkleri özelleştirin.";
 
 /* Menu */
 "menu.openSettings" = "AgentLimits Ayarları...";

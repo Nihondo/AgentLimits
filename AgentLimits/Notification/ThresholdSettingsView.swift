@@ -60,10 +60,6 @@ struct ThresholdSettingsView: View {
                 }
 
 
-                SettingsFormSection(title: "notification.pacemakerThresholds".localized()) {
-                    PacemakerThresholdSection()
-                }
-
                 SettingsFormSection(title: "notification.colors".localized()) {
                     UsageColorSettingsSection()
                 }
@@ -274,9 +270,6 @@ private struct UsageColorSettingsSection: View {
     @State private var statusGreenColor: Color = UsageColorSettings.loadStatusGreenColor()
     @State private var statusOrangeColor: Color = UsageColorSettings.loadStatusOrangeColor()
     @State private var statusRedColor: Color = UsageColorSettings.loadStatusRedColor()
-    @State private var pacemakerRingColor: Color = UsageColorSettings.loadPacemakerRingColor()
-    @State private var pacemakerTextColor: Color = UsageColorSettings.loadPacemakerTextColor()
-
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             VStack(alignment: .leading, spacing: 6) {
@@ -297,14 +290,6 @@ private struct UsageColorSettingsSection: View {
             ColorPicker("cliColors.orange".localized(), selection: $statusOrangeColor, supportsOpacity: false)
             Divider()
             ColorPicker("cliColors.red".localized(), selection: $statusRedColor, supportsOpacity: false)
-
-            Divider()
-            Text("cliColors.pacemaker".localized())
-                .font(.headline)
-                .padding(.top, 4)
-            ColorPicker("cliColors.pacemakerRing".localized(), selection: $pacemakerRingColor, supportsOpacity: true)
-            Divider()
-            ColorPicker("cliColors.pacemakerText".localized(), selection: $pacemakerTextColor, supportsOpacity: true)
 
             Divider()
             HStack {
@@ -341,14 +326,6 @@ private struct UsageColorSettingsSection: View {
             UsageColorSettings.saveStatusRedColor(statusRedColor)
             reloadUsageTimelines()
         }
-        .onChange(of: pacemakerRingColor) { _, _ in
-            UsageColorSettings.savePacemakerRingColor(pacemakerRingColor)
-            reloadUsageTimelines()
-        }
-        .onChange(of: pacemakerTextColor) { _, _ in
-            UsageColorSettings.savePacemakerTextColor(pacemakerTextColor)
-            reloadUsageTimelines()
-        }
     }
 
     private func reloadUsageColorSettings() {
@@ -357,12 +334,10 @@ private struct UsageColorSettingsSection: View {
         statusGreenColor = UsageColorSettings.loadStatusGreenColor()
         statusOrangeColor = UsageColorSettings.loadStatusOrangeColor()
         statusRedColor = UsageColorSettings.loadStatusRedColor()
-        pacemakerRingColor = UsageColorSettings.loadPacemakerRingColor()
-        pacemakerTextColor = UsageColorSettings.loadPacemakerTextColor()
     }
 
     private func resetUsageColors() {
-        UsageColorSettings.resetToDefaults()
+        UsageColorSettings.resetUsageStatusColors()
         reloadUsageColorSettings()
         reloadUsageTimelines()
     }
@@ -376,83 +351,4 @@ private struct UsageColorSettingsSection: View {
 
 #Preview {
     ThresholdSettingsView(manager: .shared)
-}
-
-// MARK: - Pacemaker Threshold Section
-
-private struct PacemakerThresholdSection: View {
-    @State private var warningDelta: Double = PacemakerThresholdSettings.loadWarningDelta()
-    @State private var dangerDelta: Double = PacemakerThresholdSettings.loadDangerDelta()
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("notification.pacemakerThresholds.description".localized())
-                .font(.caption)
-                .foregroundColor(.secondary)
-
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("notification.pacemakerThresholds.warning".localized())
-                    Spacer()
-                    Text("+\(Int(warningDelta))%")
-                        .foregroundColor(.orange)
-                        .monospacedDigit()
-                        .frame(width: 50, alignment: .trailing)
-                }
-                Slider(value: $warningDelta, in: 0...50, step: 1)
-                    .accessibilityLabel("notification.pacemakerThresholds.warning".localized())
-                    .accessibilityValue(Text("+\(Int(warningDelta))%"))
-            }
-
-            Divider()
-
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("notification.pacemakerThresholds.danger".localized())
-                    Spacer()
-                    Text("+\(Int(dangerDelta))%")
-                        .foregroundColor(.red)
-                        .monospacedDigit()
-                        .frame(width: 50, alignment: .trailing)
-                }
-                Slider(value: $dangerDelta, in: 1...50, step: 1)
-                    .accessibilityLabel("notification.pacemakerThresholds.danger".localized())
-                    .accessibilityValue(Text("+\(Int(dangerDelta))%"))
-            }
-
-            Divider()
-            HStack {
-                Spacer()
-                Button("cliColors.reset".localized()) {
-                    warningDelta = PacemakerThresholdSettings.defaultWarningDelta
-                    dangerDelta = PacemakerThresholdSettings.defaultDangerDelta
-                    PacemakerThresholdSettings.resetToDefaults()
-                    reloadUsageTimelines()
-                }
-            }
-        }
-        .padding()
-        .background(.thinMaterial)
-        .cornerRadius(8)
-        .onChange(of: warningDelta) { _, newValue in
-            // Ensure warning <= danger
-            if newValue >= dangerDelta {
-                dangerDelta = min(newValue + 1, 50)
-            }
-            PacemakerThresholdSettings.saveWarningDelta(newValue)
-            reloadUsageTimelines()
-        }
-        .onChange(of: dangerDelta) { _, newValue in
-            // Ensure danger > warning
-            if newValue <= warningDelta {
-                warningDelta = max(newValue - 1, 0)
-            }
-            PacemakerThresholdSettings.saveDangerDelta(newValue)
-            reloadUsageTimelines()
-        }
-    }
-
-    private func reloadUsageTimelines() {
-        WidgetCenter.shared.reloadAllTimelines()
-    }
 }

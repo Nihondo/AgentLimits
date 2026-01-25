@@ -2,7 +2,11 @@
 "tab.usage" = "Gebruikslimiet";
 "tab.wakeUp" = "Wake Up";
 "tab.notification" = "Melding";
+"tab.pacemaker" = "Pacemaker";
 "tab.advanced" = "Geavanceerd";
+
+/* Pacemaker */
+"pacemaker.description" = "Pas de pacemaker-weergave, drempels en kleuren aan.";
 
 /* Menu */
 "menu.openSettings" = "AgentLimits-instellingen...";

@@ -290,7 +290,8 @@ private enum WakeUpCommandBuilder {
         marker: String?
     ) -> String {
         let markerSuffix = marker.map { " \($0)" } ?? ""
-        return "echo \"=== $(date)\(markerSuffix) ===\" && echo \"Command: \(command)\" && mkdir -p ~/.agentlimits && cd ~/.agentlimits && \(command)"
+        let escapedCommand = command.replacingOccurrences(of: "\"", with: "\\\"")
+        return "echo \"=== $(date)\(markerSuffix) ===\" && echo \"Command: \(escapedCommand)\" && mkdir -p ~/.agentlimits && cd ~/.agentlimits && \(command)"
     }
 }
 

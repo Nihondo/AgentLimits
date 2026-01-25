@@ -2,7 +2,11 @@
 "tab.usage" = "Usage";
 "tab.wakeUp" = "Wake Up";
 "tab.notification" = "Notification";
+"tab.pacemaker" = "Pacemaker";
 "tab.advanced" = "Advanced";
+
+/* Pacemaker */
+"pacemaker.description" = "Customize pacemaker display, thresholds, and colors.";
 
 /* Menu */
 "menu.openSettings" = "AgentLimits Settings...";

@@ -2,7 +2,11 @@
 "tab.usage" = "사용 제한";
 "tab.wakeUp" = "Wake Up";
 "tab.notification" = "알림";
+"tab.pacemaker" = "페이스메이커";
 "tab.advanced" = "고급";
+
+/* Pacemaker */
+"pacemaker.description" = "페이스메이커 표시, 임계값, 색상을 설정합니다.";
 
 /* Menu */
 "menu.openSettings" = "AgentLimits 설정...";

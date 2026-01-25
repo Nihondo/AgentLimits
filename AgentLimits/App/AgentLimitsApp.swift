@@ -319,23 +319,22 @@ private struct MenuBarPercentLineView: View {
     @ViewBuilder
     private func percentTextView(_ window: UsageWindow?, windowKind: UsageWindowKind) -> some View {
         if let window {
-            if displayMode == .usedWithPacemaker {
-                let usedPercent = Int(window.usedPercent.rounded())
-                let usedText = Text("\(usedPercent)")
-                    .foregroundColor(resolveStatusColor(window, windowKind: windowKind))
-                if showPacemakerValue, let pacemakerPercent = window.calculatePacemakerPercent() {
-                    let pacemakerInt = Int(pacemakerPercent.rounded())
-                    let pacemakerText = Text("(\(pacemakerInt))%")
-                        .foregroundColor(resolvePacemakerTextColor())
-                    usedText + pacemakerText
-                } else {
-                    Text("\(usedPercent)%")
-                        .foregroundColor(resolveStatusColor(window, windowKind: windowKind))
-                }
+            let statusColor = resolveStatusColor(window, windowKind: windowKind)
+            let percent = displayMode.displayPercent(from: window.usedPercent, window: window)
+            let displayText = UsagePercentFormatter.formatPercentText(percent)
+            if showPacemakerValue,
+               let pacemakerPercent = window.displayPacemakerPercent(for: displayMode.makeDisplayModeRaw()) {
+                let pacemakerInt = Int(pacemakerPercent.rounded())
+                let usedText = Text(displayText.replacingOccurrences(of: "%", with: ""))
+                    .foregroundColor(statusColor)
+                let pacemakerText = Text("(\(pacemakerInt))")
+                    .foregroundColor(resolvePacemakerTextColor())
+                let percentText = Text("%")
+                    .foregroundColor(statusColor)
+                usedText + pacemakerText + percentText
             } else {
-                let percent = displayMode.displayPercent(from: window.usedPercent, window: window)
-                Text(UsagePercentFormatter.formatPercentText(percent))
-                    .foregroundColor(resolveStatusColor(window, windowKind: windowKind))
+                Text(displayText)
+                    .foregroundColor(statusColor)
             }
         } else {
             Text(UsagePercentFormatter.formatPercentText(nil))
@@ -343,28 +342,18 @@ private struct MenuBarPercentLineView: View {
         }
     }
 
-    private func resolveStatusColor(_ window: UsageWindow?, windowKind: UsageWindowKind) -> Color {
+    private func resolveStatusColor(_ window: UsageWindow?, windowKind _: UsageWindowKind) -> Color {
         guard let window else { return .secondary }
         let level: UsageStatusLevel
-        if displayMode == .usedWithPacemaker {
-            guard let pacemakerPercent = window.calculatePacemakerPercent() else {
-                return .secondary
-            }
-            level = UsageStatusLevelResolver.levelForPacemakerMode(
-                usedPercent: window.usedPercent,
-                pacemakerPercent: pacemakerPercent,
-                warningDelta: PacemakerThresholdSettings.loadWarningDelta(),
-                dangerDelta: PacemakerThresholdSettings.loadDangerDelta()
-            )
-        } else {
-            let thresholds = UsageStatusThresholdStore.loadThresholds(for: provider, windowKind: windowKind)
-            level = UsageStatusLevelResolver.level(
-                for: window.usedPercent,
-                isRemainingMode: false,
-                warningThreshold: thresholds.warningPercent,
-                dangerThreshold: thresholds.dangerPercent
-            )
+        guard let pacemakerPercent = window.calculatePacemakerPercent() else {
+            return .secondary
         }
+        level = UsageStatusLevelResolver.levelForPacemakerMode(
+            usedPercent: window.usedPercent,
+            pacemakerPercent: pacemakerPercent,
+            warningDelta: PacemakerThresholdSettings.loadWarningDelta(),
+            dangerDelta: PacemakerThresholdSettings.loadDangerDelta()
+        )
         switch level {
         case .green:
             return resolveStoredColor(from: statusGreenHex, defaultColor: .green)
@@ -410,7 +399,6 @@ private struct CheckmarkLabel: View {
 /// Menu bar dropdown content with settings, display mode, and language options
 private struct MenuBarContentView: View {
     @AppStorage(UserDefaultsKeys.displayMode) private var displayMode: UsageDisplayMode = .used
-    @AppStorage(UserDefaultsKeys.menuBarShowPacemakerValue) private var showPacemakerValue = true
     @Environment(\.openWindow) private var openWindow
     @EnvironmentObject private var appState: AppSharedState
     @ObservedObject private var languageManager = LanguageManager.shared
@@ -463,10 +451,6 @@ private struct MenuBarContentView: View {
             }
             Button { displayMode = .usedWithPacemaker } label: {
                 CheckmarkLabel("menu.displayMode.usedWithPacemaker".localized(), isSelected: displayMode == .usedWithPacemaker)
-            }
-            Divider()
-            Button { showPacemakerValue.toggle() } label: {
-                CheckmarkLabel("menu.showPacemakerValue".localized(), isSelected: showPacemakerValue)
             }
         } label: {
             Label("menu.displayMode".localized(), systemImage: "eye")

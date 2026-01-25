@@ -2,7 +2,11 @@
 "tab.usage" = "使用制限";
 "tab.wakeUp" = "Wake Up";
 "tab.notification" = "通知";
+"tab.pacemaker" = "ペースメーカー";
 "tab.advanced" = "詳細設定";
+
+/* Pacemaker */
+"pacemaker.description" = "ペースメーカーの表示、閾値、色を設定します。";
 
 /* Menu */
 "menu.openSettings" = "AgentLimits 設定...";

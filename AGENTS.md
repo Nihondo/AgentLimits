@@ -16,17 +16,29 @@
 ### Menu Bar Status Display
 - Real-time usage percentage display in menu bar (5h/weekly)
 - Two-line layout (line 1: provider name, line 2: `X% / Y%`)
-- Color-coded status:
-  - Used mode: normal / warning / danger
-  - Remaining mode: normal / warning / danger (thresholds inverted)
+- Color-coded status (used vs pacemaker comparison when available; otherwise secondary)
 - Per-provider toggle (Codex/Claude Code separately)
-- Responds to display mode changes (used/remaining)
-- Colors are customizable from Notification settings
+- Responds to display mode changes (used/remaining/pacemaker)
+- Pacemaker mode shows `<used>% (<pacemaker>)%` with toggleable pacemaker value display (from Pacemaker settings)
+- Status colors are customizable from Notification settings
 - Menu bar menu includes Display Mode, Language selection, Wake Up → Run Now, and Start app at login
+
+### Pacemaker Mode
+- Time-based usage benchmark: calculates elapsed percentage of usage window
+- Formula: `(elapsed time / window duration) × 100`
+- Compares actual usage against elapsed time to determine if user is on track
+- Status levels based on difference (usedPercent - pacemakerPercent):
+  - Green: at or below pacemaker (on track)
+  - Orange: exceeds pacemaker by warning delta (default: 0%)
+  - Red: exceeds pacemaker by danger delta (default: 10%)
+- Widget shows dual rings when pacemaker data is available: outer = actual usage, inner = pacemaker percentage
+- Menu bar pacemaker value display is toggleable (Pacemaker settings)
+- Pacemaker ring/text colors are configurable in Pacemaker settings
+- Warning/danger delta thresholds are configurable in Pacemaker settings
 
 ### Usage Monitoring
 - Auto refresh: configurable 1-10 minutes while the app is running (usage limits)
-- Display mode: used% or remaining% (set from menu bar, shared across app + widgets)
+- Display mode: used% or remaining% or pacemaker (set from menu bar, shared across app + widgets)
 - Language preference: stored in App Group under `app_language`
 - Color-coded percentage display in widgets based on usage level and display mode
 - Usage screen includes **Clear Data** to remove embedded browser login data and website storage
@@ -69,7 +81,7 @@
 - Bundled script for Claude Code status line integration
 - Reads Claude Code usage snapshot + App Group settings (display mode, language, thresholds, colors)
 - Outputs a single line with 5h/weekly usage, reset times, and update time
-- Supports overrides: `-ja`, `-en`, `-r` (remaining), `-u` (used), `-d` (debug)
+- Supports overrides: `-ja`, `-en`, `-r` (remaining), `-u` (used), `-p` (pacemaker), `-i` (usage + pacemaker inline), `-d` (debug)
 - Requires `jq`
 
 ## Key Decisions
@@ -90,6 +102,7 @@
   - `App/` (app entry, shared state, language/login item management, settings tabs, logging, shell executor)
   - `Usage/` (usage limits UI, WebView, fetchers, display mode store, provider state management)
   - `CCUsage/` (ccusage UI, fetcher, view model)
+  - `Pacemaker/` (pacemaker settings UI)
   - `WakeUp/` (Wake Up feature)
   - `Notification/` (threshold notification components)
 - `AgentLimitsShared/` (shared models/store + display mode/status helpers and ccusage links)
@@ -119,7 +132,7 @@
 ### UserDefaults Keys
 | Key | Purpose |
 |-----|---------|
-| `usage_display_mode` | Display mode (used% / remaining%) |
+| `usage_display_mode` | Display mode (used% / remaining% / pacemaker) |
 | `usage_display_mode_cached` | Cached display mode used to convert stored snapshots (shared via App Group for widgets) |
 | `menu_bar_status_codex_enabled` | Menu bar Codex status display toggle |
 | `menu_bar_status_claude_enabled` | Menu bar Claude Code status display toggle |
@@ -140,6 +153,11 @@
 | `usage_color_threshold_revision` | Revision bump for threshold updates |
 | `usage_color_threshold_warning_{provider}_{window}` | Warning threshold used for usage status colors |
 | `usage_color_threshold_danger_{provider}_{window}` | Danger threshold used for usage status colors |
+| `menu_bar_show_pacemaker_value` | Menu bar pacemaker value display toggle |
+| `usage_color_pacemaker_ring` | Pacemaker ring color (widget) |
+| `usage_color_pacemaker_text` | Pacemaker text color (menu bar) |
+| `pacemaker_warning_delta` | Pacemaker mode warning threshold delta (default: 0%) |
+| `pacemaker_danger_delta` | Pacemaker mode danger threshold delta (default: 10%) |
 
 ## Update Workflow
 1. App saves a `UsageSnapshot` and `TokenUsageSnapshot` as JSON in the App Group container
