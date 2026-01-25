@@ -181,7 +181,9 @@
 /* Pacemaker Colors */
 "cliColors.pacemaker" = "Пейсмейкер";
 "cliColors.pacemakerRing" = "Колір кільця (Віджет)";
-"cliColors.pacemakerText" = "Колір тексту (Рядок меню)";
+"cliColors.pacemakerGreen" = "Перевищення темпу (Норма)";
+"cliColors.pacemakerOrange" = "Перевищення темпу (Попередження)";
+"cliColors.pacemakerRed" = "Перевищення темпу (Небезпека)";
 
 /* Scripts */
 "scripts.title" = "Вбудовані скрипти";

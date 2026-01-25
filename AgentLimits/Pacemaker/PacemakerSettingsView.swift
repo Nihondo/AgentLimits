@@ -130,13 +130,19 @@ private struct PacemakerThresholdRow: View {
 
 private struct PacemakerColorSettingsSection: View {
     @State private var pacemakerRingColor: Color = UsageColorSettings.loadPacemakerRingColor()
-    @State private var pacemakerTextColor: Color = UsageColorSettings.loadPacemakerTextColor()
+    @State private var pacemakerStatusGreenColor: Color = UsageColorSettings.loadPacemakerStatusGreenColor()
+    @State private var pacemakerStatusOrangeColor: Color = UsageColorSettings.loadPacemakerStatusOrangeColor()
+    @State private var pacemakerStatusRedColor: Color = UsageColorSettings.loadPacemakerStatusRedColor()
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             ColorPicker("cliColors.pacemakerRing".localized(), selection: $pacemakerRingColor, supportsOpacity: true)
             Divider()
-            ColorPicker("cliColors.pacemakerText".localized(), selection: $pacemakerTextColor, supportsOpacity: true)
+            ColorPicker("cliColors.pacemakerGreen".localized(), selection: $pacemakerStatusGreenColor, supportsOpacity: false)
+            Divider()
+            ColorPicker("cliColors.pacemakerOrange".localized(), selection: $pacemakerStatusOrangeColor, supportsOpacity: false)
+            Divider()
+            ColorPicker("cliColors.pacemakerRed".localized(), selection: $pacemakerStatusRedColor, supportsOpacity: false)
             Divider()
             HStack {
                 Spacer()
@@ -155,15 +161,25 @@ private struct PacemakerColorSettingsSection: View {
             UsageColorSettings.savePacemakerRingColor(pacemakerRingColor)
             reloadUsageTimelines()
         }
-        .onChange(of: pacemakerTextColor) { _, _ in
-            UsageColorSettings.savePacemakerTextColor(pacemakerTextColor)
+        .onChange(of: pacemakerStatusGreenColor) { _, _ in
+            UsageColorSettings.savePacemakerStatusGreenColor(pacemakerStatusGreenColor)
+            reloadUsageTimelines()
+        }
+        .onChange(of: pacemakerStatusOrangeColor) { _, _ in
+            UsageColorSettings.savePacemakerStatusOrangeColor(pacemakerStatusOrangeColor)
+            reloadUsageTimelines()
+        }
+        .onChange(of: pacemakerStatusRedColor) { _, _ in
+            UsageColorSettings.savePacemakerStatusRedColor(pacemakerStatusRedColor)
             reloadUsageTimelines()
         }
     }
 
     private func reloadPacemakerColors() {
         pacemakerRingColor = UsageColorSettings.loadPacemakerRingColor()
-        pacemakerTextColor = UsageColorSettings.loadPacemakerTextColor()
+        pacemakerStatusGreenColor = UsageColorSettings.loadPacemakerStatusGreenColor()
+        pacemakerStatusOrangeColor = UsageColorSettings.loadPacemakerStatusOrangeColor()
+        pacemakerStatusRedColor = UsageColorSettings.loadPacemakerStatusRedColor()
     }
 
     private func resetPacemakerColors() {

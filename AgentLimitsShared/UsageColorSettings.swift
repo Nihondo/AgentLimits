@@ -20,7 +20,9 @@ enum UsageColorKeys {
     static let statusOrange = "usage_color_orange"
     static let statusRed = "usage_color_red"
     static let pacemakerRing = "usage_color_pacemaker_ring"
-    static let pacemakerText = "usage_color_pacemaker_text"
+    static let pacemakerStatusGreen = "usage_color_pacemaker_status_green"
+    static let pacemakerStatusOrange = "usage_color_pacemaker_status_orange"
+    static let pacemakerStatusRed = "usage_color_pacemaker_status_red"
 }
 
 /// Helpers for storing and resolving usage colors from App Group defaults.
@@ -82,9 +84,19 @@ enum UsageColorSettings {
         loadColor(forKey: UsageColorKeys.pacemakerRing, defaultColor: Color.blue.opacity(0.6))
     }
 
-    /// Loads the pacemaker text color (menu bar parenthetical value).
-    static func loadPacemakerTextColor() -> Color {
-        loadColor(forKey: UsageColorKeys.pacemakerText, defaultColor: .secondary)
+    /// Loads the pacemaker status color for "on track" indicator.
+    static func loadPacemakerStatusGreenColor() -> Color {
+        loadColor(forKey: UsageColorKeys.pacemakerStatusGreen, defaultColor: .green)
+    }
+
+    /// Loads the pacemaker status color for warning indicator.
+    static func loadPacemakerStatusOrangeColor() -> Color {
+        loadColor(forKey: UsageColorKeys.pacemakerStatusOrange, defaultColor: .orange)
+    }
+
+    /// Loads the pacemaker status color for danger indicator.
+    static func loadPacemakerStatusRedColor() -> Color {
+        loadColor(forKey: UsageColorKeys.pacemakerStatusRed, defaultColor: .red)
     }
 
     /// Saves the pacemaker ring color override.
@@ -92,9 +104,19 @@ enum UsageColorSettings {
         saveColor(color, forKey: UsageColorKeys.pacemakerRing)
     }
 
-    /// Saves the pacemaker text color override.
-    static func savePacemakerTextColor(_ color: Color) {
-        saveColor(color, forKey: UsageColorKeys.pacemakerText)
+    /// Saves the pacemaker status color override for "on track" indicator.
+    static func savePacemakerStatusGreenColor(_ color: Color) {
+        saveColor(color, forKey: UsageColorKeys.pacemakerStatusGreen)
+    }
+
+    /// Saves the pacemaker status color override for warning indicator.
+    static func savePacemakerStatusOrangeColor(_ color: Color) {
+        saveColor(color, forKey: UsageColorKeys.pacemakerStatusOrange)
+    }
+
+    /// Saves the pacemaker status color override for danger indicator.
+    static func savePacemakerStatusRedColor(_ color: Color) {
+        saveColor(color, forKey: UsageColorKeys.pacemakerStatusRed)
     }
 
     /// Clears stored overrides to restore defaults.
@@ -106,7 +128,9 @@ enum UsageColorSettings {
         defaults?.removeObject(forKey: UsageColorKeys.statusOrange)
         defaults?.removeObject(forKey: UsageColorKeys.statusRed)
         defaults?.removeObject(forKey: UsageColorKeys.pacemakerRing)
-        defaults?.removeObject(forKey: UsageColorKeys.pacemakerText)
+        defaults?.removeObject(forKey: UsageColorKeys.pacemakerStatusGreen)
+        defaults?.removeObject(forKey: UsageColorKeys.pacemakerStatusOrange)
+        defaults?.removeObject(forKey: UsageColorKeys.pacemakerStatusRed)
     }
 
     /// Clears stored overrides for usage status colors.
@@ -123,7 +147,9 @@ enum UsageColorSettings {
     static func resetPacemakerColors() {
         let defaults = AppGroupDefaults.shared
         defaults?.removeObject(forKey: UsageColorKeys.pacemakerRing)
-        defaults?.removeObject(forKey: UsageColorKeys.pacemakerText)
+        defaults?.removeObject(forKey: UsageColorKeys.pacemakerStatusGreen)
+        defaults?.removeObject(forKey: UsageColorKeys.pacemakerStatusOrange)
+        defaults?.removeObject(forKey: UsageColorKeys.pacemakerStatusRed)
     }
 
     private static func loadColor(forKey key: String, defaultColor: Color) -> Color {

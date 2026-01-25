@@ -181,7 +181,9 @@
 /* Pacemaker Colors */
 "cliColors.pacemaker" = "Pacemaker";
 "cliColors.pacemakerRing" = "Ring Color (Widget)";
-"cliColors.pacemakerText" = "Text Color (Menu Bar)";
+"cliColors.pacemakerGreen" = "Pace Exceeded (Normal)";
+"cliColors.pacemakerOrange" = "Pace Exceeded (Warning)";
+"cliColors.pacemakerRed" = "Pace Exceeded (Danger)";
 
 /* Scripts */
 "scripts.title" = "Bundled Scripts";

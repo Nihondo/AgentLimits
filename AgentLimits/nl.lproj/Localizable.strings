@@ -181,7 +181,9 @@
 /* Pacemaker Colors */
 "cliColors.pacemaker" = "Pacemaker";
 "cliColors.pacemakerRing" = "Ringkleur (Widget)";
-"cliColors.pacemakerText" = "Tekstkleur (Menubalk)";
+"cliColors.pacemakerGreen" = "Tempo overschreden (Normaal)";
+"cliColors.pacemakerOrange" = "Tempo overschreden (Waarschuwing)";
+"cliColors.pacemakerRed" = "Tempo overschreden (Gevaar)";
 
 /* Scripts */
 "scripts.title" = "Meegeleverde scripts";

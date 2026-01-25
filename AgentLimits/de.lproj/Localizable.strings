@@ -181,7 +181,9 @@
 /* Pacemaker Colors */
 "cliColors.pacemaker" = "Pacemaker";
 "cliColors.pacemakerRing" = "Ringfarbe (Widget)";
-"cliColors.pacemakerText" = "Textfarbe (Menüleiste)";
+"cliColors.pacemakerGreen" = "Tempo überschritten (Normal)";
+"cliColors.pacemakerOrange" = "Tempo überschritten (Warnung)";
+"cliColors.pacemakerRed" = "Tempo überschritten (Gefahr)";
 
 /* Scripts */
 "scripts.title" = "Mitgelieferte Skripte";

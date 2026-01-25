@@ -181,7 +181,9 @@
 /* Pacemaker Colors */
 "cliColors.pacemaker" = "節拍器";
 "cliColors.pacemakerRing" = "環形顏色（小工具）";
-"cliColors.pacemakerText" = "文字顏色（選單列）";
+"cliColors.pacemakerGreen" = "超出節奏（正常）";
+"cliColors.pacemakerOrange" = "超出節奏（警告）";
+"cliColors.pacemakerRed" = "超出節奏（危險）";
 
 /* Scripts */
 "scripts.title" = "隨附腳本";

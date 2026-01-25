@@ -181,7 +181,9 @@
 /* Pacemaker Colors */
 "cliColors.pacemaker" = "Pacemaker";
 "cliColors.pacemakerRing" = "Couleur de l'anneau (Widget)";
-"cliColors.pacemakerText" = "Couleur du texte (Barre de menus)";
+"cliColors.pacemakerGreen" = "Dépassement du rythme (Normal)";
+"cliColors.pacemakerOrange" = "Dépassement du rythme (Alerte)";
+"cliColors.pacemakerRed" = "Dépassement du rythme (Danger)";
 
 /* Scripts */
 "scripts.title" = "Scripts intégrés";

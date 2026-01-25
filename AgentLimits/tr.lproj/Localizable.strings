@@ -181,7 +181,9 @@
 /* Pacemaker Colors */
 "cliColors.pacemaker" = "Pacemaker";
 "cliColors.pacemakerRing" = "Halka Rengi (Widget)";
-"cliColors.pacemakerText" = "Metin Rengi (Menü Çubuğu)";
+"cliColors.pacemakerGreen" = "Tempo aşıldı (Normal)";
+"cliColors.pacemakerOrange" = "Tempo aşıldı (Uyarı)";
+"cliColors.pacemakerRed" = "Tempo aşıldı (Tehlike)";
 
 /* Scripts */
 "scripts.title" = "Dahil edilen betikler";

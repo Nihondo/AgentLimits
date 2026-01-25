@@ -181,7 +181,9 @@
 /* Pacemaker Colors */
 "cliColors.pacemaker" = "ペースメーカー";
 "cliColors.pacemakerRing" = "リング色（ウィジェット）";
-"cliColors.pacemakerText" = "文字色（メニューバー）";
+"cliColors.pacemakerGreen" = "ペース超過（正常域）";
+"cliColors.pacemakerOrange" = "ペース超過（警告域）";
+"cliColors.pacemakerRed" = "ペース超過（危険域）";
 
 /* Scripts */
 "scripts.title" = "同梱スクリプト";

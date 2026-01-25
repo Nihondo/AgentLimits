@@ -325,9 +325,17 @@ private struct MenuBarPercentLineView: View {
                     dangerDelta: PacemakerThresholdSettings.loadDangerDelta()
                 )
                 let arrowIcon = level.pacemakerArrowIcon
-                // "45%↑" 形式で表示
-                Text(displayText + arrowIcon)
-                    .foregroundColor(statusColor)
+                let indicatorColor = level.pacemakerIndicatorColor
+                // "45%↑" 形式で表示（超過時のみ）
+                if arrowIcon.isEmpty {
+                    Text(displayText)
+                        .foregroundColor(statusColor)
+                } else {
+                    Text(displayText)
+                        .foregroundColor(statusColor) +
+                    Text(arrowIcon)
+                        .foregroundColor(indicatorColor)
+                }
             } else {
                 Text(displayText)
                     .foregroundColor(statusColor)
@@ -338,17 +346,14 @@ private struct MenuBarPercentLineView: View {
         }
     }
 
-    private func resolveStatusColor(_ window: UsageWindow?, windowKind _: UsageWindowKind) -> Color {
+    private func resolveStatusColor(_ window: UsageWindow?, windowKind: UsageWindowKind) -> Color {
         guard let window else { return .secondary }
-        let level: UsageStatusLevel
-        guard let pacemakerPercent = window.calculatePacemakerPercent() else {
-            return .secondary
-        }
-        level = UsageStatusLevelResolver.levelForPacemakerMode(
-            usedPercent: window.usedPercent,
-            pacemakerPercent: pacemakerPercent,
-            warningDelta: PacemakerThresholdSettings.loadWarningDelta(),
-            dangerDelta: PacemakerThresholdSettings.loadDangerDelta()
+        let thresholds = UsageStatusThresholdStore.loadThresholds(for: provider, windowKind: windowKind)
+        let level = UsageStatusLevelResolver.level(
+            for: window.usedPercent,
+            isRemainingMode: false,
+            warningThreshold: thresholds.warningPercent,
+            dangerThreshold: thresholds.dangerPercent
         )
         switch level {
         case .green:

@@ -181,7 +181,9 @@
 /* Pacemaker Colors */
 "cliColors.pacemaker" = "페이스메이커";
 "cliColors.pacemakerRing" = "링 색상 (위젯)";
-"cliColors.pacemakerText" = "텍스트 색상 (메뉴 막대)";
+"cliColors.pacemakerGreen" = "페이스 초과(정상)";
+"cliColors.pacemakerOrange" = "페이스 초과(경고)";
+"cliColors.pacemakerRed" = "페이스 초과(위험)";
 
 /* Scripts */
 "scripts.title" = "번들 스크립트";

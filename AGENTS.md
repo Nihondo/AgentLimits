@@ -155,7 +155,9 @@
 | `usage_color_threshold_danger_{provider}_{window}` | Danger threshold used for usage status colors |
 | `menu_bar_show_pacemaker_value` | Menu bar pacemaker value display toggle |
 | `usage_color_pacemaker_ring` | Pacemaker ring color (widget) |
-| `usage_color_pacemaker_text` | Pacemaker text color (menu bar) |
+| `usage_color_pacemaker_status_green` | Pacemaker indicator color (normal) |
+| `usage_color_pacemaker_status_orange` | Pacemaker indicator color (warning) |
+| `usage_color_pacemaker_status_red` | Pacemaker indicator color (danger) |
 | `pacemaker_warning_delta` | Pacemaker mode warning threshold delta (default: 0%) |
 | `pacemaker_danger_delta` | Pacemaker mode danger threshold delta (default: 10%) |
 

@@ -181,7 +181,9 @@
 /* Pacemaker Colors */
 "cliColors.pacemaker" = "Pacemaker";
 "cliColors.pacemakerRing" = "Kolor pierścienia (Widget)";
-"cliColors.pacemakerText" = "Kolor tekstu (Pasek menu)";
+"cliColors.pacemakerGreen" = "Przekroczenie tempa (Normalny)";
+"cliColors.pacemakerOrange" = "Przekroczenie tempa (Ostrzeżenie)";
+"cliColors.pacemakerRed" = "Przekroczenie tempa (Niebezpieczeństwo)";
 
 /* Scripts */
 "scripts.title" = "Dołączone skrypty";

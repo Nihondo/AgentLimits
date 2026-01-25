@@ -4,6 +4,7 @@
 // the snapshot store for persisting data via App Group.
 
 import Foundation
+import SwiftUI
 
 // MARK: - Configuration
 
@@ -147,14 +148,26 @@ enum UsageStatusLevel {
 
 extension UsageStatusLevel {
     /// ペースメーカーモード用の矢印アイコン
-    /// - green (余裕あり): 下向き矢印
+    /// - green (余裕あり): 表示なし
     /// - orange/red (超過): 上向き矢印
     var pacemakerArrowIcon: String {
         switch self {
         case .green:
-            return "↓"
+            return ""
         case .orange, .red:
             return "↑"
+        }
+    }
+
+    /// ペースメーカーモード用インジケータ色
+    var pacemakerIndicatorColor: Color {
+        switch self {
+        case .green:
+            return UsageColorSettings.loadPacemakerStatusGreenColor()
+        case .orange:
+            return UsageColorSettings.loadPacemakerStatusOrangeColor()
+        case .red:
+            return UsageColorSettings.loadPacemakerStatusRedColor()
         }
     }
 }
