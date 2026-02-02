@@ -13,6 +13,7 @@ enum LaunchAgentConfig {
     static let labelPrefix = "com.dmng.agentlimit.wakeup"
     static let launchAgentsPath = "Library/LaunchAgents"
     static let logDirectory = "/tmp"
+    static let cliTimeoutSeconds: Int = 30
 }
 
 // MARK: - Wake Up Schedule
@@ -276,7 +277,8 @@ final class LaunchAgentManager {
 private enum WakeUpCommandBuilder {
     static func buildLaunchAgentCommand(for schedule: WakeUpSchedule) -> String {
         let prefixedCommand = ShellCommandPathPrefixer.prefixIfNeeded(command: schedule.cliCommand)
-        return buildCommand(for: schedule, command: prefixedCommand, marker: nil)
+        let guardedCommand = wrapWithTimeout(command: prefixedCommand)
+        return buildCommand(for: schedule, command: guardedCommand, marker: nil)
     }
 
     static func buildTestCommand(for schedule: WakeUpSchedule) -> String {
@@ -292,6 +294,11 @@ private enum WakeUpCommandBuilder {
         let markerSuffix = marker.map { " \($0)" } ?? ""
         let escapedCommand = command.replacingOccurrences(of: "\"", with: "\\\"")
         return "echo \"=== $(date)\(markerSuffix) ===\" && echo \"Command: \(escapedCommand)\" && mkdir -p ~/.agentlimits && cd ~/.agentlimits && \(command)"
+    }
+
+    private static func wrapWithTimeout(command: String) -> String {
+        let timeout = LaunchAgentConfig.cliTimeoutSeconds
+        return "{ \(command) & pid=$!; ( sleep \(timeout); if kill -0 $pid 2>/dev/null; then kill $pid; sleep 2; kill -0 $pid 2>/dev/null && kill -9 $pid; fi ) & watchdog=$!; wait $pid; status=$?; kill -9 $watchdog 2>/dev/null; exit $status; }"
     }
 }
 
