@@ -9,6 +9,7 @@
 "menu.displayMode" = "Weergavemodus";
 "menu.displayMode.used" = "Gebruikspercentage";
 "menu.displayMode.remaining" = "Resterend percentage";
+"menu.displayMode.usedWithIdeal" = "Gebruik + Richtlijn";
 "menu.about" = "Over AgentLimits";
 "menu.quit" = "Afsluiten";
 "menu.language" = "Taal";
@@ -43,6 +44,7 @@
 /* Display Mode */
 "displayMode.used" = "Gebruikspercentage";
 "displayMode.remaining" = "Resterend percentage";
+"displayMode.usedWithIdeal" = "Gebruik + Richtlijn";
 
 /* Status */
 "status.notFetched" = "Niet opgehaald";
@@ -181,3 +183,9 @@
 "widgetTapAction.openWebsite" = "Website openen";
 "widgetTapAction.refreshData" = "Gegevens verversen";
 "widgetTapAction.note" = "Kies wat er gebeurt bij het tikken op een widget";
+
+/* Ideal Mode Thresholds */
+"notification.idealModeThresholds" = "Guideline Mode Thresholds";
+"notification.idealModeThresholds.description" = "Color thresholds when exceeding guideline";
+"notification.idealModeThresholds.warning" = "Warning (Orange)";
+"notification.idealModeThresholds.danger" = "Danger (Red)";

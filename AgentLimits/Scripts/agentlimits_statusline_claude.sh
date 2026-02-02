@@ -9,6 +9,7 @@
 #   ./agentlimits_statusline_claude.sh -en       # Force English
 #   ./agentlimits_statusline_claude.sh -r        # Force remaining mode
 #   ./agentlimits_statusline_claude.sh -u        # Force used mode
+#   ./agentlimits_statusline_claude.sh -i        # Force used+ideal mode
 #   ./agentlimits_statusline_claude.sh -d        # Debug output
 
 set -euo pipefail
@@ -32,6 +33,10 @@ DEFAULT_COLOR_RED="#FF0000"
 DEFAULT_WARNING_THRESHOLD=70
 DEFAULT_DANGER_THRESHOLD=90
 
+
+# Default ideal mode thresholds (excess percentage)
+DEFAULT_IDEAL_WARNING_DELTA=0
+DEFAULT_IDEAL_DANGER_DELTA=10
 # Debug flag (prints detailed settings and parsed values)
 DEBUG=false
 
@@ -112,6 +117,25 @@ get_status_level() {
     fi
 }
 
+# Determine status level for ideal mode (comparison-based)
+# Returns: "green", "orange", or "red"
+get_ideal_status_level() {
+    local used_percent="$1"
+    local ideal_percent="$2"
+    local warning_delta="$3"
+    local danger_delta="$4"
+    
+    local diff=$((used_percent - ideal_percent))
+    
+    if [[ $diff -ge $danger_delta ]]; then
+        echo "red"
+    elif [[ $diff -gt $warning_delta ]]; then
+        echo "orange"
+    else
+        echo "green"
+    fi
+}
+
 # Get system language
 get_system_language() {
     local sys_lang
@@ -162,6 +186,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         -u|--used)
             DISPLAY_MODE_OVERRIDE="used"
+            shift
+            ;;
+        -i|--ideal)
+            DISPLAY_MODE_OVERRIDE="usedWithIdeal"
             shift
             ;;
         -d|--debug)
@@ -221,10 +249,22 @@ primary_percent=$(echo "$json_data" | jq -r '.primaryWindow.usedPercent // empty
 primary_reset_at=$(echo "$json_data" | jq -r '.primaryWindow.resetAt // empty')
 secondary_percent=$(echo "$json_data" | jq -r '.secondaryWindow.usedPercent // empty')
 secondary_reset_at=$(echo "$json_data" | jq -r '.secondaryWindow.resetAt // empty')
+primary_window_seconds=$(echo "$json_data" | jq -r '.primaryWindow.limitWindowSeconds // 18000')
+secondary_window_seconds=$(echo "$json_data" | jq -r '.secondaryWindow.limitWindowSeconds // 604800')
 fetched_at=$(echo "$json_data" | jq -r '.fetchedAt // empty')
 snapshot_display_mode=$(echo "$json_data" | jq -r '.displayMode // empty')
 
-# Resolve effective display mode (override > snapshot > app)
+# Resolve effective display mode (override > app > snapshot)
+if [[ -n "$DISPLAY_MODE_OVERRIDE" ]]; then
+    EFFECTIVE_DISPLAY_MODE="$DISPLAY_MODE_OVERRIDE"
+elif [[ -n "$APP_DISPLAY_MODE" ]]; then
+    EFFECTIVE_DISPLAY_MODE="$APP_DISPLAY_MODE"
+elif [[ -n "$snapshot_display_mode" ]]; then
+    EFFECTIVE_DISPLAY_MODE="$snapshot_display_mode"
+else
+    EFFECTIVE_DISPLAY_MODE="used"
+fi
+
 if [[ -n "$DISPLAY_MODE_OVERRIDE" ]]; then
     DISPLAY_MODE="$DISPLAY_MODE_OVERRIDE"
 elif [[ "$snapshot_display_mode" == "remaining" ]]; then
@@ -261,6 +301,49 @@ convert_iso8601_to_local() {
 }
 
 # Format updated time (absolute)
+# Calculate ideal usage percentage based on elapsed time
+# Returns: integer percentage (0-100)
+calculate_ideal_percent() {
+    local reset_at_iso="$1"
+    local window_seconds="$2"
+    
+    # Convert reset_at to Unix timestamp
+    local clean_date
+    clean_date=$(echo "$reset_at_iso" | sed 's/.[0-9]*Z$/Z/' | sed 's/Z$/+0000/')
+    local reset_ts
+    reset_ts=$(date -j -f "%Y-%m-%dT%H:%M:%S%z" "$clean_date" +"%s" 2>/dev/null)
+    
+    if [[ -z "$reset_ts" || ! "$reset_ts" =~ ^[0-9]+$ ]]; then
+        echo ""  # Return empty when resetAt is unavailable
+        return
+    fi
+    
+    # Calculate window start (reset - window_seconds)
+    local window_start=$((reset_ts - window_seconds))
+    local now_ts
+    now_ts=$(date +"%s")
+    
+    # Calculate elapsed time
+    local elapsed=$((now_ts - window_start))
+    
+    # Calculate ideal percentage
+    if [[ $window_seconds -le 0 ]]; then
+        echo "50"
+        return
+    fi
+    
+    local ideal_percent=$((elapsed * 100 / window_seconds))
+    
+    # Clamp to 0-100
+    if [[ $ideal_percent -lt 0 ]]; then
+        ideal_percent=0
+    elif [[ $ideal_percent -gt 100 ]]; then
+        ideal_percent=100
+    fi
+    
+    echo "$ideal_percent"
+}
+
 format_updated_at() {
     local fetched_iso="$1"
     local updated_time
@@ -291,6 +374,10 @@ PRIMARY_DANGER=$(read_threshold "usage_color_threshold_danger_claudeCode_primary
 SECONDARY_WARNING=$(read_threshold "usage_color_threshold_warning_claudeCode_secondary" "$DEFAULT_WARNING_THRESHOLD")
 SECONDARY_DANGER=$(read_threshold "usage_color_threshold_danger_claudeCode_secondary" "$DEFAULT_DANGER_THRESHOLD")
 
+# Read ideal mode thresholds
+IDEAL_WARNING_DELTA=$(read_threshold "ideal_mode_warning_delta" "$DEFAULT_IDEAL_WARNING_DELTA")
+IDEAL_DANGER_DELTA=$(read_threshold "ideal_mode_danger_delta" "$DEFAULT_IDEAL_DANGER_DELTA")
+
 # Read color settings
 COLOR_GREEN=$(read_color "usage_color_green" "$DEFAULT_COLOR_GREEN")
 COLOR_ORANGE=$(read_color "usage_color_orange" "$DEFAULT_COLOR_ORANGE")
@@ -299,6 +386,7 @@ COLOR_RED=$(read_color "usage_color_red" "$DEFAULT_COLOR_RED")
 debug_log "thresholds.primary warning=${PRIMARY_WARNING} danger=${PRIMARY_DANGER}"
 debug_log "thresholds.secondary warning=${SECONDARY_WARNING} danger=${SECONDARY_DANGER}"
 debug_log "colors green=${COLOR_GREEN} orange=${COLOR_ORANGE} red=${COLOR_RED}"
+debug_log "ideal_thresholds warning_delta=${IDEAL_WARNING_DELTA} danger_delta=${IDEAL_DANGER_DELTA}"
 
 # Convert hex colors to ANSI escape sequences
 ANSI_GREEN=$(hex_to_ansi "$COLOR_GREEN")
@@ -306,8 +394,30 @@ ANSI_ORANGE=$(hex_to_ansi "$COLOR_ORANGE")
 ANSI_RED=$(hex_to_ansi "$COLOR_RED")
 
 # Determine status levels based on USED percentages (before display mode conversion)
-primary_status=$(get_status_level "$primary_used_int" "$PRIMARY_WARNING" "$PRIMARY_DANGER")
-secondary_status=$(get_status_level "$secondary_used_int" "$SECONDARY_WARNING" "$SECONDARY_DANGER")
+# For usedWithIdeal mode, use comparison-based logic
+if [[ "$EFFECTIVE_DISPLAY_MODE" == "usedWithIdeal" ]]; then
+    # Calculate ideal percentages
+    primary_ideal_int=$(calculate_ideal_percent "$primary_reset_at" "$primary_window_seconds")
+    secondary_ideal_int=$(calculate_ideal_percent "$secondary_reset_at" "$secondary_window_seconds")
+    
+    # Use ideal mode status calculation only if ideal percent is available
+    if [[ -n "$primary_ideal_int" ]]; then
+        primary_status=$(get_ideal_status_level "$primary_used_int" "$primary_ideal_int" "$IDEAL_WARNING_DELTA" "$IDEAL_DANGER_DELTA")
+    else
+        primary_status=$(get_status_level "$primary_used_int" "$PRIMARY_WARNING" "$PRIMARY_DANGER")
+    fi
+    if [[ -n "$secondary_ideal_int" ]]; then
+        secondary_status=$(get_ideal_status_level "$secondary_used_int" "$secondary_ideal_int" "$IDEAL_WARNING_DELTA" "$IDEAL_DANGER_DELTA")
+    else
+        secondary_status=$(get_status_level "$secondary_used_int" "$SECONDARY_WARNING" "$SECONDARY_DANGER")
+    fi
+    
+    debug_log "ideal_mode.primary used=${primary_used_int} ideal=${primary_ideal_int:-N/A} status=${primary_status}"
+    debug_log "ideal_mode.secondary used=${secondary_used_int} ideal=${secondary_ideal_int:-N/A} status=${secondary_status}"
+else
+    primary_status=$(get_status_level "$primary_used_int" "$PRIMARY_WARNING" "$PRIMARY_DANGER")
+    secondary_status=$(get_status_level "$secondary_used_int" "$SECONDARY_WARNING" "$SECONDARY_DANGER")
+fi
 
 # Apply display mode conversion for display
 if [[ "$DISPLAY_MODE" == "remaining" ]]; then
@@ -334,5 +444,23 @@ get_status_color() {
 primary_color=$(get_status_color "$primary_status")
 secondary_color=$(get_status_color "$secondary_status")
 
+# Format percentage text based on display mode
+if [[ "$EFFECTIVE_DISPLAY_MODE" == "usedWithIdeal" ]]; then
+    # Show used(ideal)% format, or just used% if ideal is unavailable
+    if [[ -n "$primary_ideal_int" ]]; then
+        primary_text="${primary_used_int}(${primary_ideal_int})%"
+    else
+        primary_text="${primary_used_int}%"
+    fi
+    if [[ -n "$secondary_ideal_int" ]]; then
+        secondary_text="${secondary_used_int}(${secondary_ideal_int})%"
+    else
+        secondary_text="${secondary_used_int}%"
+    fi
+else
+    primary_text="${primary_percent_int}%"
+    secondary_text="${secondary_percent_int}%"
+fi
+
 # Output formatted string with colored percentages and gray reset times/updated time
-echo -e "🕔 5h: ${primary_color}${primary_percent_int}%${RESET_COLOR} ${GRAY}(${L_RESET} ${primary_reset_time})${RESET_COLOR} / 📅 1w: ${secondary_color}${secondary_percent_int}%${RESET_COLOR} ${GRAY}(${L_RESET} ${secondary_reset_time})${RESET_COLOR} - ${GRAY}${updated_text}${RESET_COLOR}"
+echo -e "🕔 5h: ${primary_color}${primary_text}${RESET_COLOR} ${GRAY}(${L_RESET} ${primary_reset_time})${RESET_COLOR} / 📅 1w: ${secondary_color}${secondary_text}${RESET_COLOR} ${GRAY}(${L_RESET} ${secondary_reset_time})${RESET_COLOR} - ${GRAY}${updated_text}${RESET_COLOR}"
