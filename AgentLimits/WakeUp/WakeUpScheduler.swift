@@ -297,7 +297,7 @@ private enum WakeUpCommandBuilder {
 
     private static func wrapWithTimeout(command: String) -> String {
         let timeout = LaunchAgentConfig.cliTimeoutSeconds
-        return "{ \(command) & pid=$!; ( sleep \(timeout); if kill -0 $pid 2>/dev/null; then kill $pid; sleep 2; kill -0 $pid 2>/dev/null && kill -9 $pid; fi ) & watchdog=$!; wait $pid; status=$?; kill -9 $watchdog 2>/dev/null; exit $status; }"
+        return "{ \(command) & pid=$!; ( sleep \(timeout); if kill -0 $pid 2>/dev/null; then kill $pid; sleep 2; kill -0 $pid 2>/dev/null && kill -9 $pid; fi ) & watchdog=$!; wait $pid; exit_code=$?; kill -9 $watchdog 2>/dev/null; exit $exit_code; }"
     }
 }
 
