@@ -9,6 +9,7 @@
 "menu.displayMode" = "Görüntüleme Modu";
 "menu.displayMode.used" = "Kullanım oranı";
 "menu.displayMode.remaining" = "Kalan oran";
+"menu.displayMode.usedWithIdeal" = "Kullanım + Referans";
 "menu.about" = "AgentLimits Hakkında";
 "menu.quit" = "Çıkış";
 "menu.language" = "Dil";
@@ -43,6 +44,7 @@
 /* Display Mode */
 "displayMode.used" = "Kullanım oranı";
 "displayMode.remaining" = "Kalan oran";
+"displayMode.usedWithIdeal" = "Kullanım + Referans";
 
 /* Status */
 "status.notFetched" = "Getirilemedi";
@@ -181,3 +183,9 @@
 "widgetTapAction.openWebsite" = "Web sitesini aç";
 "widgetTapAction.refreshData" = "Verileri yenile";
 "widgetTapAction.note" = "Widget'a dokunulduğunda ne olacağını seçin";
+
+/* Ideal Mode Thresholds */
+"notification.idealModeThresholds" = "Guideline Mode Thresholds";
+"notification.idealModeThresholds.description" = "Color thresholds when exceeding guideline";
+"notification.idealModeThresholds.warning" = "Warning (Orange)";
+"notification.idealModeThresholds.danger" = "Danger (Red)";

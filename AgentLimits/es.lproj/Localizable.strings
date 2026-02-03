@@ -9,6 +9,7 @@
 "menu.displayMode" = "Modo de visualización";
 "menu.displayMode.used" = "Tasa de uso";
 "menu.displayMode.remaining" = "Tasa restante";
+"menu.displayMode.usedWithIdeal" = "Uso + Referencia";
 "menu.about" = "Acerca de AgentLimits";
 "menu.quit" = "Salir";
 "menu.language" = "Idioma";
@@ -43,6 +44,7 @@
 /* Display Mode */
 "displayMode.used" = "Tasa de uso";
 "displayMode.remaining" = "Tasa restante";
+"displayMode.usedWithIdeal" = "Uso + Referencia";
 
 /* Status */
 "status.notFetched" = "No se obtuvo";
@@ -181,3 +183,9 @@
 "widgetTapAction.openWebsite" = "Abrir sitio web";
 "widgetTapAction.refreshData" = "Actualizar datos";
 "widgetTapAction.note" = "Elige lo que ocurre al tocar un widget";
+
+/* Ideal Mode Thresholds */
+"notification.idealModeThresholds" = "Guideline Mode Thresholds";
+"notification.idealModeThresholds.description" = "Color thresholds when exceeding guideline";
+"notification.idealModeThresholds.warning" = "Warning (Orange)";
+"notification.idealModeThresholds.danger" = "Danger (Red)";

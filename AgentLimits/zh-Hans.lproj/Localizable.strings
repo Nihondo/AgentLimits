@@ -9,6 +9,7 @@
 "menu.displayMode" = "显示模式";
 "menu.displayMode.used" = "使用率";
 "menu.displayMode.remaining" = "剩余率";
+"menu.displayMode.usedWithIdeal" = "使用率 + 参考";
 "menu.about" = "关于 AgentLimits";
 "menu.quit" = "退出";
 "menu.language" = "语言";
@@ -43,6 +44,7 @@
 /* Display Mode */
 "displayMode.used" = "使用率";
 "displayMode.remaining" = "剩余率";
+"displayMode.usedWithIdeal" = "使用率 + 参考";
 
 /* Status */
 "status.notFetched" = "未获取";
@@ -181,3 +183,9 @@
 "widgetTapAction.openWebsite" = "打开网站";
 "widgetTapAction.refreshData" = "刷新数据";
 "widgetTapAction.note" = "选择点击小组件时的操作";
+
+/* Ideal Mode Thresholds */
+"notification.idealModeThresholds" = "Guideline Mode Thresholds";
+"notification.idealModeThresholds.description" = "Color thresholds when exceeding guideline";
+"notification.idealModeThresholds.warning" = "Warning (Orange)";
+"notification.idealModeThresholds.danger" = "Danger (Red)";
