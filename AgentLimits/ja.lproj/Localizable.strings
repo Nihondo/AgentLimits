@@ -200,7 +200,7 @@
 "widgetTapAction.note" = "ウィジェットをタップしたときの動作を選択します";
 
 /* Pacemaker Mode Thresholds */
-"notification.pacemakerThresholds" = "ペースメーカーモード閾値";
-"notification.pacemakerThresholds.description" = "「使用率+ペースメーカー」モードでペースメーカーを超過した時の色分け閾値";
-"notification.pacemakerThresholds.warning" = "警告（オレンジ）";
-"notification.pacemakerThresholds.danger" = "危険（赤）";
+"notification.pacemakerThresholds" = "ペースメーカー閾値";
+"notification.pacemakerThresholds.description" = "ペース超過時の警告・危険域の閾値を設定します（相対%）";
+"notification.pacemakerThresholds.warning" = "警告域";
+"notification.pacemakerThresholds.danger" = "危険域";

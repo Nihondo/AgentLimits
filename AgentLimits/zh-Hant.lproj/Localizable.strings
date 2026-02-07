@@ -199,8 +199,8 @@
 "widgetTapAction.refreshData" = "重新整理資料";
 "widgetTapAction.note" = "選擇點擊小工具時的動作";
 
-/* Pacemaker Mode Thresholds */
-"notification.pacemakerThresholds" = "Pacemaker Mode Thresholds";
-"notification.pacemakerThresholds.description" = "Color thresholds when exceeding pacemaker";
-"notification.pacemakerThresholds.warning" = "Warning (Orange)";
-"notification.pacemakerThresholds.danger" = "Danger (Red)";
+/* Pacemaker Thresholds */
+"notification.pacemakerThresholds" = "節拍器閾值";
+"notification.pacemakerThresholds.description" = "設定超出節奏時的警告和危險閾值（相對%）";
+"notification.pacemakerThresholds.warning" = "警告區域";
+"notification.pacemakerThresholds.danger" = "危險區域";

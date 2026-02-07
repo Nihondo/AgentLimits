@@ -199,8 +199,8 @@
 "widgetTapAction.refreshData" = "Оновити дані";
 "widgetTapAction.note" = "Виберіть, що відбудеться при торканні віджета";
 
-/* Pacemaker Mode Thresholds */
-"notification.pacemakerThresholds" = "Pacemaker Mode Thresholds";
-"notification.pacemakerThresholds.description" = "Color thresholds when exceeding pacemaker";
-"notification.pacemakerThresholds.warning" = "Warning (Orange)";
-"notification.pacemakerThresholds.danger" = "Danger (Red)";
+/* Pacemaker Thresholds */
+"notification.pacemakerThresholds" = "Пороги пейсмейкера";
+"notification.pacemakerThresholds.description" = "Встановити пороги попередження та небезпеки при перевищенні темпу (відносний %)";
+"notification.pacemakerThresholds.warning" = "Попередження";
+"notification.pacemakerThresholds.danger" = "Небезпека";

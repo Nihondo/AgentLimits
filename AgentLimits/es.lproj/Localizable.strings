@@ -199,8 +199,8 @@
 "widgetTapAction.refreshData" = "Actualizar datos";
 "widgetTapAction.note" = "Elige lo que ocurre al tocar un widget";
 
-/* Pacemaker Mode Thresholds */
-"notification.pacemakerThresholds" = "Pacemaker Mode Thresholds";
-"notification.pacemakerThresholds.description" = "Color thresholds when exceeding pacemaker";
-"notification.pacemakerThresholds.warning" = "Warning (Orange)";
-"notification.pacemakerThresholds.danger" = "Danger (Red)";
+/* Pacemaker Thresholds */
+"notification.pacemakerThresholds" = "Umbrales del marcapasos";
+"notification.pacemakerThresholds.description" = "Configura los umbrales de advertencia y peligro para el exceso de ritmo (% relativo)";
+"notification.pacemakerThresholds.warning" = "Advertencia";
+"notification.pacemakerThresholds.danger" = "Peligro";

@@ -199,8 +199,8 @@
 "widgetTapAction.refreshData" = "Odśwież dane";
 "widgetTapAction.note" = "Wybierz, co ma się stać po stuknięciu widżetu";
 
-/* Pacemaker Mode Thresholds */
-"notification.pacemakerThresholds" = "Pacemaker Mode Thresholds";
-"notification.pacemakerThresholds.description" = "Color thresholds when exceeding pacemaker";
-"notification.pacemakerThresholds.warning" = "Warning (Orange)";
-"notification.pacemakerThresholds.danger" = "Danger (Red)";
+/* Pacemaker Thresholds */
+"notification.pacemakerThresholds" = "Progi rozrusznika";
+"notification.pacemakerThresholds.description" = "Ustaw progi ostrzeżenia i zagrożenia przy przekroczeniu tempa (% względny)";
+"notification.pacemakerThresholds.warning" = "Ostrzeżenie";
+"notification.pacemakerThresholds.danger" = "Zagrożenie";

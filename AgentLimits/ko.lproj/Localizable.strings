@@ -199,8 +199,8 @@
 "widgetTapAction.refreshData" = "데이터 새로 고침";
 "widgetTapAction.note" = "위젯을 탭했을 때의 동작을 선택합니다";
 
-/* Pacemaker Mode Thresholds */
-"notification.pacemakerThresholds" = "Pacemaker Mode Thresholds";
-"notification.pacemakerThresholds.description" = "Color thresholds when exceeding pacemaker";
-"notification.pacemakerThresholds.warning" = "Warning (Orange)";
-"notification.pacemakerThresholds.danger" = "Danger (Red)";
+/* Pacemaker Thresholds */
+"notification.pacemakerThresholds" = "페이스메이커 임계값";
+"notification.pacemakerThresholds.description" = "페이스 초과 시 경고 및 위험 임계값을 설정합니다 (상대 %)";
+"notification.pacemakerThresholds.warning" = "경고 영역";
+"notification.pacemakerThresholds.danger" = "위험 영역";

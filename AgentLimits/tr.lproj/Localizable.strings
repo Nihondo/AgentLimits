@@ -199,8 +199,8 @@
 "widgetTapAction.refreshData" = "Verileri yenile";
 "widgetTapAction.note" = "Widget'a dokunulduğunda ne olacağını seçin";
 
-/* Pacemaker Mode Thresholds */
-"notification.pacemakerThresholds" = "Pacemaker Mode Thresholds";
-"notification.pacemakerThresholds.description" = "Color thresholds when exceeding pacemaker";
-"notification.pacemakerThresholds.warning" = "Warning (Orange)";
-"notification.pacemakerThresholds.danger" = "Danger (Red)";
+/* Pacemaker Thresholds */
+"notification.pacemakerThresholds" = "Kalp pili eşikleri";
+"notification.pacemakerThresholds.description" = "Hız aşıldığında uyarı ve tehlike eşiklerini ayarlayın (göreceli %)";
+"notification.pacemakerThresholds.warning" = "Uyarı";
+"notification.pacemakerThresholds.danger" = "Tehlike";
