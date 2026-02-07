@@ -201,6 +201,6 @@
 
 /* Pacemaker Thresholds */
 "notification.pacemakerThresholds" = "Pacemaker-Schwellenwerte";
-"notification.pacemakerThresholds.description" = "Warn- und Gefahrenschwellen bei Schrittmacherüberschreitung festlegen (relativ %)";
+"notification.pacemakerThresholds.description" = "Warn- und Gefahrenschwellen bei Überschreitung des Pace-Ziels festlegen (relativ %)";
 "notification.pacemakerThresholds.warning" = "Warnbereich";
 "notification.pacemakerThresholds.danger" = "Gefahrenbereich";

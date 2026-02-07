@@ -201,6 +201,6 @@
 
 /* Pacemaker Thresholds */
 "notification.pacemakerThresholds" = "Pacemaker Thresholds";
-"notification.pacemakerThresholds.description" = "Set warning and danger thresholds for pace excess (relative %)";
+"notification.pacemakerThresholds.description" = "Set warning and danger thresholds when pace is exceeded (relative %)";
 "notification.pacemakerThresholds.warning" = "Warning";
 "notification.pacemakerThresholds.danger" = "Danger";

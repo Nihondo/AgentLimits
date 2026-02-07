@@ -200,7 +200,7 @@
 "widgetTapAction.note" = "Widget'a dokunulduğunda ne olacağını seçin";
 
 /* Pacemaker Thresholds */
-"notification.pacemakerThresholds" = "Kalp pili eşikleri";
+"notification.pacemakerThresholds" = "Pacemaker eşikleri";
 "notification.pacemakerThresholds.description" = "Hız aşıldığında uyarı ve tehlike eşiklerini ayarlayın (göreceli %)";
 "notification.pacemakerThresholds.warning" = "Uyarı";
 "notification.pacemakerThresholds.danger" = "Tehlike";
