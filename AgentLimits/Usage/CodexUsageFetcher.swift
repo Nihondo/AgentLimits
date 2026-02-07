@@ -13,6 +13,7 @@ struct CodexUsageResponse: Codable {
         struct Window: Codable {
             let used_percent: Double?
             let limit_window_seconds: Double?
+            let reset_after_seconds: Double?
             let reset_at: TimeInterval?
         }
 
@@ -25,42 +26,46 @@ struct CodexUsageResponse: Codable {
 }
 
 extension CodexUsageResponse {
+    /// Small tolerance for comparing API double values.
+    private static let secondsEqualityTolerance: TimeInterval = 0.001
+
     func toSnapshot(fetchedAt: Date) -> UsageSnapshot {
-        let primary: UsageWindow?
-        if let window = rate_limit?.primary_window,
-           let usedPercent = window.used_percent,
-           let limitSeconds = window.limit_window_seconds {
-            let resetAt = window.reset_at.map { Date(timeIntervalSince1970: $0) }
-            primary = UsageWindow(
-                kind: .primary,
-                usedPercent: usedPercent,
-                resetAt: resetAt,
-                limitWindowSeconds: limitSeconds
-            )
-        } else {
-            primary = nil
-        }
-
-        let secondary: UsageWindow?
-        if let window = rate_limit?.secondary_window,
-           let usedPercent = window.used_percent,
-           let limitSeconds = window.limit_window_seconds {
-            let resetAt = window.reset_at.map { Date(timeIntervalSince1970: $0) }
-            secondary = UsageWindow(
-                kind: .secondary,
-                usedPercent: usedPercent,
-                resetAt: resetAt,
-                limitWindowSeconds: limitSeconds
-            )
-        } else {
-            secondary = nil
-        }
-
+        let primary = makeWindow(
+            kind: .primary,
+            source: rate_limit?.primary_window
+        )
+        let secondary = makeWindow(
+            kind: .secondary,
+            source: rate_limit?.secondary_window
+        )
         return UsageSnapshot(
             provider: .chatgptCodex,
             fetchedAt: fetchedAt,
             primaryWindow: primary,
             secondaryWindow: secondary
+        )
+    }
+
+    private func makeWindow(
+        kind: UsageWindowKind,
+        source: RateLimit.Window?
+    ) -> UsageWindow? {
+        guard let source,
+              let usedPercent = source.used_percent,
+              let limitSeconds = source.limit_window_seconds else {
+            return nil
+        }
+        if usedPercent == 0,
+           let resetAfterSeconds = source.reset_after_seconds,
+           abs(limitSeconds - resetAfterSeconds) <= Self.secondsEqualityTolerance {
+            return nil
+        }
+        let resetAt = source.reset_at.map { Date(timeIntervalSince1970: $0) }
+        return UsageWindow(
+            kind: kind,
+            usedPercent: usedPercent,
+            resetAt: resetAt,
+            limitWindowSeconds: limitSeconds
         )
     }
 }
