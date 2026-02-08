@@ -29,6 +29,7 @@ enum SharedUserDefaultsKeys {
     static let displayMode = "usage_display_mode"
     static let cachedDisplayMode = "usage_display_mode_cached"
     static let menuBarShowPacemakerValue = "menu_bar_show_pacemaker_value"
+    static let pacemakerRingWarningEnabled = "pacemaker_ring_warning_enabled"
 }
 
 // MARK: - CLI Command Paths
@@ -161,10 +162,11 @@ extension UsageStatusLevel {
     }
 
     /// ペースメーカーモード用インジケータ色
+    /// - Note: greenの場合は矢印が表示されないため実際には使用されない
     var pacemakerIndicatorColor: Color {
         switch self {
         case .green:
-            return UsageColorSettings.loadPacemakerStatusGreenColor()
+            return .secondary  // 矢印非表示のため未使用
         case .orange:
             return UsageColorSettings.loadPacemakerStatusOrangeColor()
         case .red:

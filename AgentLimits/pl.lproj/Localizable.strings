@@ -204,3 +204,4 @@
 "notification.pacemakerThresholds.description" = "Ustaw progi ostrzeżenia i zagrożenia przy przekroczeniu tempa (% względny)";
 "notification.pacemakerThresholds.warning" = "Ostrzeżenie";
 "notification.pacemakerThresholds.danger" = "Zagrożenie";
+"pacemaker.showRingWarningSegment" = "Pokaż segmenty ostrzegawcze pierścienia";

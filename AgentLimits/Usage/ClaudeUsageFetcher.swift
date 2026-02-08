@@ -59,7 +59,11 @@ extension ClaudeUsageResponse {
         guard let source, let usedPercent = source.utilization else {
             return nil
         }
-        let resetAt = source.resets_at.flatMap(parseResetDate)
+        // resets_at が null の場合は初期状態として扱い、UsageWindow を作らない
+        guard let resetAtString = source.resets_at,
+              let resetAt = parseResetDate(resetAtString) else {
+            return nil
+        }
         return UsageWindow(
             kind: kind,
             usedPercent: usedPercent,

@@ -204,3 +204,4 @@
 "notification.pacemakerThresholds.description" = "设置超出节奏时的警告和危险阈值（相对%）";
 "notification.pacemakerThresholds.warning" = "警告区域";
 "notification.pacemakerThresholds.danger" = "危险区域";
+"pacemaker.showRingWarningSegment" = "显示环形警告分段";

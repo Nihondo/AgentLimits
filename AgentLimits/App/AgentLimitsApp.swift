@@ -155,8 +155,6 @@ private struct MenuBarLabelView: View {
     private var statusOrangeHex: String = ""
     @AppStorage(UsageColorKeys.statusRed, store: AppGroupDefaults.shared)
     private var statusRedHex: String = ""
-    @AppStorage(UsageColorKeys.pacemakerStatusGreen, store: AppGroupDefaults.shared)
-    private var pacemakerStatusGreenHex: String = ""
     @AppStorage(UsageColorKeys.pacemakerStatusOrange, store: AppGroupDefaults.shared)
     private var pacemakerStatusOrangeHex: String = ""
     @AppStorage(UsageColorKeys.pacemakerStatusRed, store: AppGroupDefaults.shared)
@@ -208,9 +206,6 @@ private struct MenuBarLabelView: View {
             scheduleImageUpdate()
         }
         .onChange(of: statusRedHex) { _, _ in
-            scheduleImageUpdate()
-        }
-        .onChange(of: pacemakerStatusGreenHex) { _, _ in
             scheduleImageUpdate()
         }
         .onChange(of: pacemakerStatusOrangeHex) { _, _ in

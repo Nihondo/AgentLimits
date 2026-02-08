@@ -204,3 +204,4 @@
 "notification.pacemakerThresholds.description" = "Встановити пороги попередження та небезпеки при перевищенні темпу (відносний %)";
 "notification.pacemakerThresholds.warning" = "Попередження";
 "notification.pacemakerThresholds.danger" = "Небезпека";
+"pacemaker.showRingWarningSegment" = "Показати сегменти попередження кільця";

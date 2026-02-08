@@ -204,3 +204,4 @@
 "notification.pacemakerThresholds.description" = "Configura los umbrales de advertencia y peligro para el exceso de ritmo (% relativo)";
 "notification.pacemakerThresholds.warning" = "Advertencia";
 "notification.pacemakerThresholds.danger" = "Peligro";
+"pacemaker.showRingWarningSegment" = "Mostrar segmentos de advertencia del anillo";

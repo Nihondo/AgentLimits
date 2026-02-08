@@ -204,3 +204,4 @@
 "notification.pacemakerThresholds.description" = "Defina os limites de aviso e perigo quando o ritmo é excedido (% relativo)";
 "notification.pacemakerThresholds.warning" = "Aviso";
 "notification.pacemakerThresholds.danger" = "Perigo";
+"pacemaker.showRingWarningSegment" = "Mostrar segmentos de aviso do anel";

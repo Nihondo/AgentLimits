@@ -12,6 +12,7 @@ enum UserDefaultsKeys {
     static let menuBarStatusCodexEnabled = "menu_bar_status_codex_enabled"
     static let menuBarStatusClaudeEnabled = "menu_bar_status_claude_enabled"
     static let menuBarShowPacemakerValue = SharedUserDefaultsKeys.menuBarShowPacemakerValue
+    static let pacemakerRingWarningEnabled = SharedUserDefaultsKeys.pacemakerRingWarningEnabled
 }
 
 /// Display mode for usage percent: used vs remaining

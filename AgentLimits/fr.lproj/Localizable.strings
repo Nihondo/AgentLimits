@@ -204,3 +204,4 @@
 "notification.pacemakerThresholds.description" = "Définir les seuils d'avertissement et de danger en cas de dépassement du rythme (% relatif)";
 "notification.pacemakerThresholds.warning" = "Avertissement";
 "notification.pacemakerThresholds.danger" = "Danger";
+"pacemaker.showRingWarningSegment" = "Afficher les segments d'alerte de l'anneau";

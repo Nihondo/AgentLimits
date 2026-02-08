@@ -41,6 +41,7 @@ Pacemaker mode shows a time-based usage benchmark to help you stay on track.
 - **Comparison**: Green = on track or ahead, Orange = slightly over pace, Red = 10%+ over pace
 - **Menu Bar**: Shows `<used>% (<pacemaker>)%` with toggleable pacemaker value display (**Pacemaker** settings)
 - **Widget**: Outer ring = actual usage, inner ring = pacemaker percentage (shown when pacemaker data is available)
+  - When usage exceeds pacemaker in **used mode only**, the outer ring is segmented and color-coded (green → orange → red) to show warning/danger zones (toggleable in **Pacemaker** settings, enabled by default)
 - **Thresholds**: Warning/danger delta thresholds are configurable in **Pacemaker** settings
 - **Colors**: Pacemaker ring/text colors are configurable in **Pacemaker** settings
 
@@ -91,8 +92,9 @@ Pacemaker mode shows a time-based usage benchmark to help you stay on track.
 ### Pacemaker
 1. Open **Pacemaker**.
 2. Toggle the menu bar pacemaker value display.
-3. Adjust pacemaker warning/danger deltas.
-4. Customize pacemaker ring/text colors.
+3. Toggle the widget ring warning segments (color-coded segments when exceeding pacemaker).
+4. Adjust pacemaker warning/danger deltas.
+5. Customize pacemaker ring/text colors.
 
 ### Advanced
 1. Open **Advanced**.

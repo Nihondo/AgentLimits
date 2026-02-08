@@ -18,6 +18,7 @@
 "menuBar.show5h" = "5h anzeigen";
 "menuBar.show1w" = "1w anzeigen";
 "menu.showPacemakerValue" = "Pacemaker-Indikator anzeigen";
+"pacemaker.showRingWarningSegment" = "Ring-Warnsegmente anzeigen";
 "menu.about" = "Über AgentLimits";
 "menu.quit" = "Beenden";
 "menu.language" = "Sprache";

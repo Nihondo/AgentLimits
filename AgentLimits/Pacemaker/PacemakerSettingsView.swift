@@ -8,6 +8,8 @@ import WidgetKit
 struct PacemakerSettingsView: View {
     @AppStorage(UserDefaultsKeys.menuBarShowPacemakerValue, store: AppGroupDefaults.shared)
     private var showPacemakerValue: Bool = true
+    @AppStorage(UserDefaultsKeys.pacemakerRingWarningEnabled, store: AppGroupDefaults.shared)
+    private var isPacemakerRingWarningEnabled: Bool = PacemakerRingWarningSettings.defaultEnabled
 
     var body: some View {
         SettingsScrollContainer {
@@ -16,6 +18,8 @@ struct PacemakerSettingsView: View {
             Form {
                 SettingsFormSection {
                     Toggle("menu.showPacemakerValue".localized(), isOn: $showPacemakerValue)
+                        .toggleStyle(.checkbox)
+                    Toggle("pacemaker.showRingWarningSegment".localized(), isOn: $isPacemakerRingWarningEnabled)
                         .toggleStyle(.checkbox)
                 }
 
@@ -30,6 +34,12 @@ struct PacemakerSettingsView: View {
             .formStyle(.grouped)
         }
         .frame(minWidth: 400, minHeight: 400)
+        .onChange(of: showPacemakerValue) { _, _ in
+            reloadUsageTimelines()
+        }
+        .onChange(of: isPacemakerRingWarningEnabled) { _, _ in
+            reloadUsageTimelines()
+        }
     }
 
     private var headerView: some View {
@@ -37,6 +47,10 @@ struct PacemakerSettingsView: View {
             titleText: "tab.pacemaker".localized(),
             descriptionText: "pacemaker.description".localized()
         )
+    }
+
+    private func reloadUsageTimelines() {
+        WidgetCenter.shared.reloadAllTimelines()
     }
 }
 
@@ -130,15 +144,12 @@ private struct PacemakerThresholdRow: View {
 
 private struct PacemakerColorSettingsSection: View {
     @State private var pacemakerRingColor: Color = UsageColorSettings.loadPacemakerRingColor()
-    @State private var pacemakerStatusGreenColor: Color = UsageColorSettings.loadPacemakerStatusGreenColor()
     @State private var pacemakerStatusOrangeColor: Color = UsageColorSettings.loadPacemakerStatusOrangeColor()
     @State private var pacemakerStatusRedColor: Color = UsageColorSettings.loadPacemakerStatusRedColor()
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             ColorPicker("cliColors.pacemakerRing".localized(), selection: $pacemakerRingColor, supportsOpacity: true)
-            Divider()
-            ColorPicker("cliColors.pacemakerGreen".localized(), selection: $pacemakerStatusGreenColor, supportsOpacity: false)
             Divider()
             ColorPicker("cliColors.pacemakerOrange".localized(), selection: $pacemakerStatusOrangeColor, supportsOpacity: false)
             Divider()
@@ -161,10 +172,6 @@ private struct PacemakerColorSettingsSection: View {
             UsageColorSettings.savePacemakerRingColor(pacemakerRingColor)
             reloadUsageTimelines()
         }
-        .onChange(of: pacemakerStatusGreenColor) { _, _ in
-            UsageColorSettings.savePacemakerStatusGreenColor(pacemakerStatusGreenColor)
-            reloadUsageTimelines()
-        }
         .onChange(of: pacemakerStatusOrangeColor) { _, _ in
             UsageColorSettings.savePacemakerStatusOrangeColor(pacemakerStatusOrangeColor)
             reloadUsageTimelines()
@@ -177,7 +184,6 @@ private struct PacemakerColorSettingsSection: View {
 
     private func reloadPacemakerColors() {
         pacemakerRingColor = UsageColorSettings.loadPacemakerRingColor()
-        pacemakerStatusGreenColor = UsageColorSettings.loadPacemakerStatusGreenColor()
         pacemakerStatusOrangeColor = UsageColorSettings.loadPacemakerStatusOrangeColor()
         pacemakerStatusRedColor = UsageColorSettings.loadPacemakerStatusRedColor()
     }

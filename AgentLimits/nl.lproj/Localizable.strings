@@ -204,3 +204,4 @@
 "notification.pacemakerThresholds.description" = "Waarschuwings- en gevarendrempels instellen bij pacemakeroverschrijding (relatief %)";
 "notification.pacemakerThresholds.warning" = "Waarschuwing";
 "notification.pacemakerThresholds.danger" = "Gevaar";
+"pacemaker.showRingWarningSegment" = "Waarschuwingssegmenten van ring weergeven";

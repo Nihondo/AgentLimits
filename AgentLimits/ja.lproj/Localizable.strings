@@ -18,6 +18,7 @@
 "menuBar.show5h" = "5hを表示";
 "menuBar.show1w" = "1wを表示";
 "menu.showPacemakerValue" = "ペースメーカーインジケーターを表示";
+"pacemaker.showRingWarningSegment" = "リングの警告色分けを表示";
 "menu.about" = "AgentLimitsについて";
 "menu.quit" = "終了";
 "menu.language" = "言語";

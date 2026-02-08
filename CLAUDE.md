@@ -83,7 +83,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 | `AgentLimits/Notification/ThresholdNotificationSettings.swift` | Per-provider, per-window threshold settings model |
 | `AgentLimits/Notification/ThresholdNotificationStore.swift` | Threshold settings persistence |
 | `AgentLimits/Notification/ThresholdSettingsView.swift` | Threshold notification settings UI (thresholds + usage colors) |
-| `AgentLimits/Pacemaker/PacemakerSettingsView.swift` | Pacemaker settings UI (menu bar toggle + thresholds + colors) |
+| `AgentLimits/Pacemaker/PacemakerSettingsView.swift` | Pacemaker settings UI (menu bar toggle + ring warning toggle + thresholds + colors) |
 | `AgentLimits/Scripts/agentlimits_statusline_claude.sh` | Claude Code status line script (reads App Group snapshots) |
 
 ### Features
@@ -106,6 +106,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
   - Orange: exceeds pacemaker (slight excess, default threshold: 0%)
   - Danger: 10%+ ahead of pacemaker (significant excess, default threshold: 10%)
 - Widget shows dual rings when pacemaker data is available: outer = actual usage, inner = pacemaker percentage
+  - When usage exceeds pacemaker in **used mode only**, the outer ring is segmented and color-coded (green → orange → red) to show warning/danger zones (toggleable via `pacemaker_ring_warning_enabled`, enabled by default)
 - Menu bar shows both values with configurable colors
 - Thresholds and pacemaker colors are configurable in Pacemaker settings (warning/danger delta)
 
@@ -205,8 +206,8 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 | `usage_color_threshold_danger_{provider}_{window}` | Danger threshold used for usage status colors |
 | `widget_tap_action` | Widget tap action (openWebsite / refreshData) |
 | `menu_bar_show_pacemaker_value` | Pacemaker indicator toggle (shared with widgets) |
+| `pacemaker_ring_warning_enabled` | Pacemaker ring warning segments toggle (default: true) |
 | `usage_color_pacemaker_ring` | Pacemaker ring color (widget) |
-| `usage_color_pacemaker_status_green` | Pacemaker indicator color (normal) |
 | `usage_color_pacemaker_status_orange` | Pacemaker indicator color (warning) |
 | `usage_color_pacemaker_status_red` | Pacemaker indicator color (danger) |
 | `pacemaker_warning_delta` | Pacemaker mode warning threshold delta (default: 0%) |

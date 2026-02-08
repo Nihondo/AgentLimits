@@ -327,15 +327,47 @@ private struct UsageDonutView: View {
         return min(max(value, 0), 1)
     }
 
+    private var isPacemakerRingWarningEnabled: Bool {
+        PacemakerRingWarningSettings.isWarningEnabled()
+    }
+
+    private var pacemakerSegments: PacemakerRingSegments? {
+        guard isPacemakerRingWarningEnabled else { return nil }
+        guard displayMode != .remaining else { return nil }
+        guard let window, let usedPercent else { return nil }
+        guard let pacemakerPercent = window.calculatePacemakerPercent() else { return nil }
+
+        let warningDelta = PacemakerThresholdSettings.loadWarningDelta()
+        let dangerDelta = PacemakerThresholdSettings.loadDangerDelta()
+        guard usedPercent > pacemakerPercent + warningDelta else { return nil }
+
+        let totalEnd = progress
+        let warningStart = clampProgress((pacemakerPercent + warningDelta) / 100)
+        let dangerStart = max(warningStart, clampProgress((pacemakerPercent + dangerDelta) / 100))
+        let normalEnd = min(totalEnd, warningStart)
+        return PacemakerRingSegments(
+            normalEnd: normalEnd,
+            warningStart: warningStart,
+            dangerStart: dangerStart,
+            totalEnd: totalEnd
+        )
+    }
+
     var body: some View {
         ZStack {
             Circle()
                 .stroke(.quaternary, lineWidth: outerLineWidth)
-            Circle()
-                .trim(from: 0, to: progress)
-                .stroke(style: StrokeStyle(lineWidth: outerLineWidth, lineCap: .butt))
-                .rotationEffect(.degrees(-90))
-                .foregroundStyle(ringColor)
+            if let segments = pacemakerSegments {
+                ringSegmentView(from: 0, to: segments.normalEnd, color: ringColor)
+                ringSegmentView(
+                    from: segments.warningStart,
+                    to: min(segments.dangerStart, segments.totalEnd),
+                    color: pacemakerWarningColor
+                )
+                ringSegmentView(from: segments.dangerStart, to: segments.totalEnd, color: pacemakerDangerColor)
+            } else {
+                ringSegmentView(from: 0, to: progress, color: ringColor)
+            }
             if let pacemakerProgress {
                 Circle()
                     .stroke(.quaternary.opacity(0.5), lineWidth: innerLineWidth)
@@ -367,6 +399,36 @@ private struct UsageDonutView: View {
     private var pacemakerRingColor: Color {
         UsageColorSettings.loadPacemakerRingColor()
     }
+
+    private var pacemakerWarningColor: Color {
+        UsageColorSettings.loadPacemakerStatusOrangeColor()
+    }
+
+    private var pacemakerDangerColor: Color {
+        UsageColorSettings.loadPacemakerStatusRedColor()
+    }
+
+    private func clampProgress(_ value: Double) -> Double {
+        min(max(value, 0), 1)
+    }
+
+    @ViewBuilder
+    private func ringSegmentView(from start: Double, to end: Double, color: Color) -> some View {
+        if end > start {
+            Circle()
+                .trim(from: start, to: end)
+                .stroke(style: StrokeStyle(lineWidth: outerLineWidth, lineCap: .butt))
+                .rotationEffect(.degrees(-90))
+                .foregroundStyle(color)
+        }
+    }
+}
+
+private struct PacemakerRingSegments {
+    let normalEnd: Double
+    let warningStart: Double
+    let dangerStart: Double
+    let totalEnd: Double
 }
 
 private struct UsageDetailColumnView: View {
