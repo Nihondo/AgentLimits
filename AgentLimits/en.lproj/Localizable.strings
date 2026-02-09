@@ -13,18 +13,12 @@
 "menu.displayMode" = "Display Mode";
 "menu.displayMode.used" = "Usage rate";
 "menu.displayMode.remaining" = "Remaining rate";
-"menu.displayMode.usedWithPacemaker" = "Usage + Pacemaker";
-"menuBar.windowVisibility" = "Menu Bar Windows";
-"menuBar.show5h" = "Show 5h";
-"menuBar.show1w" = "Show 1w";
 "menu.showPacemakerValue" = "Show pacemaker indicator";
 "pacemaker.showRingWarningSegment" = "Show ring warning segments";
 "menu.about" = "About AgentLimits";
 "menu.quit" = "Quit";
 "menu.language" = "Language";
 "menu.language.system" = "System";
-"menu.language.japanese" = "日本語";
-"menu.language.english" = "English";
 
 /* ContentView */
 "content.login" = "Login to get current usage rate";
@@ -40,10 +34,8 @@
 "content.clearDataCancel" = "Cancel";
 "content.provider" = "Service";
 "content.usageSummary" = "Status";
-"content.latestUsage" = "Latest Usage";
 "content.5hours" = "5 Hours";
 "content.week" = "Week";
-"content.updated" = "Updated:";
 "usage.updated" = "Updated: ";
 "content.notFetched" = "Not fetched. Please login below.";
 "content.reset" = "Reset:";
@@ -70,10 +62,6 @@
 "error.decodeFailed" = "Failed to decode data";
 
 /* Relative Time */
-"time.withinMinute" = "Within 1 min";
-"time.minutesAgo" = "%d min ago";
-"time.hoursAgo" = "%d hours ago";
-"time.daysAgo" = "%d days ago";
 "time.minutesLater" = "In %d min";
 "time.hoursLater" = "In %d hours";
 "time.daysLater" = "In %d days";
@@ -81,8 +69,6 @@
 /* Wake Up */
 "menu.wakeUp" = "Wake up";
 "menu.wakeUpNow" = " - Run Now";
-"menu.wakeUpSettings" = "Wake up Settings...";
-"wakeUp.windowTitle" = "Wake up Settings";
 "wakeUp.title" = "Wake up Schedule";
 "wakeUp.description" = "Calls CLI at scheduled times to start 5-hour sessions";
 "wakeUp.provider" = "Service";
@@ -97,7 +83,6 @@
 "wakeUp.additionalArgs" = "Additional Arguments";
 "wakeUp.additionalArgsPlaceholder" = "e.g. --model=\"<<model-name>>\"";
 "wakeUp.status" = "Status";
-"wakeUp.nextRun" = "Next run:";
 "wakeUp.notScheduled" = "Not scheduled";
 "wakeUp.lastResult" = "Last result:";
 "wakeUp.success" = "Success";
@@ -108,12 +93,9 @@
 "loginItem.notFound" = "Login item not found";
 
 /* Threshold Notification */
-"menu.thresholdSettings" = "Threshold Notification Settings...";
-"notification.windowTitle" = "Threshold Notification Settings";
 "notification.title" = "Usage Rate Threshold Notification";
 "notification.description" = "Configure notification thresholds and usage colors";
 "notification.provider" = "Service";
-"notification.thresholds" = "Thresholds";
 "notification.colors" = "Colors";
 "notification.authorization" = "Notification permission required";
 "notification.requestAuth" = "Request Permission";
@@ -123,7 +105,6 @@
 "notification.warning" = "Warning Level";
 "notification.danger" = "Danger Level";
 "notification.resetDefaults" = "Reset to Defaults";
-"notification.threshold" = "Threshold:";
 "notification.alertTitleWarning" = "%@ Usage Rate Warning";
 "notification.alertTitleDanger" = "%@ Usage Rate Danger";
 "notification.alertBody5h" = "5-hour usage limit has reached %d%%";
@@ -131,9 +112,6 @@
 
 /* ccusage */
 "tab.ccusage" = "ccusage";
-"menu.ccusage" = "ccusage";
-"menu.ccusageSettings" = "ccusage Settings...";
-"ccusage.windowTitle" = "ccusage Settings";
 "ccusage.title" = "Token Usage Tracking(ccusage)";
 "ccusage.description" = "Fetch token usage and costs using ccusage CLI";
 "ccusage.settings" = "Settings";
@@ -144,7 +122,6 @@
 "ccusage.testNow" = "Test Now";
 "ccusage.status" = "Status";
 "ccusage.lastResult" = "Last result:";
-"ccusage.success" = "Success";
 "tokenUsage.notFetched" = "Not fetched";
 "tokenUsage.updated" = "Updated: ";
 "ccusage.provider" = "Service";
@@ -158,7 +135,6 @@
 "advancedSettings.title" = "Advanced Settings";
 "advancedSettings.description" = "Customize CLI paths, scripts, and widget actions.";
 "cliPaths.sectionTitle" = "CLI Command Paths";
-"cliPaths.description" = "Specify full paths for codex, claude, and npx. Leave blank to use PATH lookup.";
 "cliPaths.codex" = "codex path";
 "cliPaths.claude" = "claude path";
 "cliPaths.npx" = "npx path";
@@ -170,19 +146,16 @@
 "cliPaths.notFound" = "Not found";
 
 /* CLI Colors */
-"cliColors.title" = "Usage Rate Colors";
 "cliColors.donut" = "Donut chart color";
 "cliColors.donutUseStatus" = "Use usage rate colors";
 "cliColors.green" = "Usage rate (normal)";
 "cliColors.orange" = "Usage rate (warning)";
 "cliColors.red" = "Usage rate (danger)";
-"cliColors.note" = "Changes apply to widgets and the menu bar.";
 "cliColors.reset" = "Reset to Defaults";
 
 /* Pacemaker Colors */
-"cliColors.pacemaker" = "Pacemaker";
-"cliColors.pacemakerRing" = "Ring Color (Widget)";
-"cliColors.pacemakerGreen" = "Pace Exceeded (Normal)";
+"cliColors.pacemaker" = "Color Settings";
+"cliColors.pacemakerRing" = "Donut Chart";
 "cliColors.pacemakerOrange" = "Pace Exceeded (Warning)";
 "cliColors.pacemakerRed" = "Pace Exceeded (Danger)";
 

@@ -13,17 +13,11 @@
 "menu.displayMode" = "표시 모드";
 "menu.displayMode.used" = "사용률";
 "menu.displayMode.remaining" = "잔여 사용률";
-"menu.displayMode.usedWithPacemaker" = "사용률 + 기준";
-"menuBar.windowVisibility" = "메뉴 막대 표시 항목";
-"menuBar.show5h" = "5h 표시";
-"menuBar.show1w" = "1w 표시";
 "menu.showPacemakerValue" = "페이스메이커 인디케이터 표시";
 "menu.about" = "AgentLimits 정보";
 "menu.quit" = "종료";
 "menu.language" = "언어";
 "menu.language.system" = "시스템";
-"menu.language.japanese" = "日本語";
-"menu.language.english" = "English";
 
 /* ContentView */
 "content.login" = "로그인하여 현재 사용률을 가져오세요";
@@ -39,10 +33,8 @@
 "content.clearDataCancel" = "취소";
 "content.provider" = "서비스";
 "content.usageSummary" = "상태";
-"content.latestUsage" = "최신 사용량";
 "content.5hours" = "5시간";
 "content.week" = "주";
-"content.updated" = "업데이트:";
 "usage.updated" = "업데이트: ";
 "content.notFetched" = "가져오지 못했습니다. 아래에서 로그인하세요.";
 "content.reset" = "재설정:";
@@ -69,10 +61,6 @@
 "error.decodeFailed" = "데이터 디코딩 실패";
 
 /* Relative Time */
-"time.withinMinute" = "1분 이내";
-"time.minutesAgo" = "%d분 전";
-"time.hoursAgo" = "%d시간 전";
-"time.daysAgo" = "%d일 전";
 "time.minutesLater" = "%d분 후";
 "time.hoursLater" = "%d시간 후";
 "time.daysLater" = "%d일 후";
@@ -80,8 +68,6 @@
 /* Wake Up */
 "menu.wakeUp" = "Wake up";
 "menu.wakeUpNow" = " - 지금 실행";
-"menu.wakeUpSettings" = "Wake up 설정...";
-"wakeUp.windowTitle" = "Wake up 설정";
 "wakeUp.title" = "Wake up 스케줄";
 "wakeUp.description" = "예약된 시간에 CLI를 호출하여 5시간 세션을 시작합니다";
 "wakeUp.provider" = "서비스";
@@ -96,7 +82,6 @@
 "wakeUp.additionalArgs" = "추가 인수";
 "wakeUp.additionalArgsPlaceholder" = "예: --model=\"<<model-name>>\"";
 "wakeUp.status" = "상태";
-"wakeUp.nextRun" = "다음 실행:";
 "wakeUp.notScheduled" = "예약되지 않음";
 "wakeUp.lastResult" = "마지막 결과:";
 "wakeUp.success" = "성공";
@@ -107,12 +92,9 @@
 "loginItem.notFound" = "로그인 항목을 찾을 수 없습니다";
 
 /* Threshold Notification */
-"menu.thresholdSettings" = "임계값 알림 설정...";
-"notification.windowTitle" = "임계값 알림 설정";
 "notification.title" = "사용률 임계값 알림";
 "notification.description" = "알림 임계값과 사용률 색상을 설정합니다";
 "notification.provider" = "서비스";
-"notification.thresholds" = "임계값";
 "notification.colors" = "색상";
 "notification.authorization" = "알림 권한 필요";
 "notification.requestAuth" = "권한 요청";
@@ -122,7 +104,6 @@
 "notification.warning" = "경고 수준";
 "notification.danger" = "위험 수준";
 "notification.resetDefaults" = "기본값으로 재설정";
-"notification.threshold" = "임계값:";
 "notification.alertTitleWarning" = "%@ 사용률 경고";
 "notification.alertTitleDanger" = "%@ 사용률 위험";
 "notification.alertBody5h" = "5시간 사용 제한이 %d%%에 도달했습니다";
@@ -130,9 +111,6 @@
 
 /* ccusage */
 "tab.ccusage" = "ccusage";
-"menu.ccusage" = "ccusage";
-"menu.ccusageSettings" = "ccusage 설정...";
-"ccusage.windowTitle" = "ccusage 설정";
 "ccusage.title" = "토큰 사용량 추적(ccusage)";
 "ccusage.description" = "ccusage CLI를 사용하여 토큰 사용량과 비용을 가져옵니다";
 "ccusage.settings" = "설정";
@@ -143,7 +121,6 @@
 "ccusage.testNow" = "지금 테스트 실행";
 "ccusage.status" = "상태";
 "ccusage.lastResult" = "마지막 결과:";
-"ccusage.success" = "성공";
 "tokenUsage.notFetched" = "가져오지 못함";
 "tokenUsage.updated" = "업데이트: ";
 "ccusage.provider" = "서비스";
@@ -157,7 +134,6 @@
 "advancedSettings.title" = "고급 설정";
 "advancedSettings.description" = "CLI 경로, 스크립트, 위젯 동작을 사용자 지정합니다.";
 "cliPaths.sectionTitle" = "CLI 명령 경로";
-"cliPaths.description" = "codex, claude, npx의 전체 경로를 지정하세요. 비워두면 PATH를 사용합니다.";
 "cliPaths.codex" = "codex 경로";
 "cliPaths.claude" = "claude 경로";
 "cliPaths.npx" = "npx 경로";
@@ -169,19 +145,16 @@
 "cliPaths.notFound" = "찾을 수 없음";
 
 /* CLI Colors */
-"cliColors.title" = "사용률 색상";
 "cliColors.donut" = "도넛 차트 색상";
 "cliColors.donutUseStatus" = "사용률 색상을 사용";
 "cliColors.green" = "사용률(정상)";
 "cliColors.orange" = "사용률(경고)";
 "cliColors.red" = "사용률(위험)";
-"cliColors.note" = "변경 사항은 위젯과 메뉴 막대에 적용됩니다.";
 "cliColors.reset" = "기본값으로 재설정";
 
 /* Pacemaker Colors */
-"cliColors.pacemaker" = "페이스메이커";
-"cliColors.pacemakerRing" = "링 색상 (위젯)";
-"cliColors.pacemakerGreen" = "페이스 초과(정상)";
+"cliColors.pacemaker" = "색상 설정";
+"cliColors.pacemakerRing" = "도넛 그래프";
 "cliColors.pacemakerOrange" = "페이스 초과(경고)";
 "cliColors.pacemakerRed" = "페이스 초과(위험)";
 
