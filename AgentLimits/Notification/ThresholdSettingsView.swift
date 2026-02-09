@@ -59,6 +59,7 @@ struct ThresholdSettingsView: View {
                     }
                 }
 
+
                 SettingsFormSection(title: "notification.colors".localized()) {
                     UsageColorSettingsSection()
                 }
@@ -269,7 +270,6 @@ private struct UsageColorSettingsSection: View {
     @State private var statusGreenColor: Color = UsageColorSettings.loadStatusGreenColor()
     @State private var statusOrangeColor: Color = UsageColorSettings.loadStatusOrangeColor()
     @State private var statusRedColor: Color = UsageColorSettings.loadStatusRedColor()
-
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             VStack(alignment: .leading, spacing: 6) {
@@ -337,7 +337,7 @@ private struct UsageColorSettingsSection: View {
     }
 
     private func resetUsageColors() {
-        UsageColorSettings.resetToDefaults()
+        UsageColorSettings.resetUsageStatusColors()
         reloadUsageColorSettings()
         reloadUsageTimelines()
     }

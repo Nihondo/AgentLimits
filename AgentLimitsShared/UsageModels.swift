@@ -4,6 +4,7 @@
 // the snapshot store for persisting data via App Group.
 
 import Foundation
+import SwiftUI
 
 // MARK: - Configuration
 
@@ -27,6 +28,8 @@ enum AppGroupDefaults {
 enum SharedUserDefaultsKeys {
     static let displayMode = "usage_display_mode"
     static let cachedDisplayMode = "usage_display_mode_cached"
+    static let menuBarShowPacemakerValue = "menu_bar_show_pacemaker_value"
+    static let pacemakerRingWarningEnabled = "pacemaker_ring_warning_enabled"
 }
 
 // MARK: - CLI Command Paths
@@ -103,12 +106,25 @@ enum CLICommandPathResolver {
 enum UsageDisplayModeRaw: String, Codable {
     case used
     case remaining
+    case usedWithPacemaker
 
     /// Returns the display percentage based on the stored used percent.
     func makeDisplayPercent(from usedPercent: Double) -> Double {
         let value: Double
         switch self {
-        case .used:
+        case .used, .usedWithPacemaker:
+            value = usedPercent
+        case .remaining:
+            value = 100 - usedPercent
+        }
+        return max(0, min(100, value))
+    }
+
+    /// Returns the display percentage based on the stored used percent and optional window for time-based calculation.
+    func makeDisplayPercent(from usedPercent: Double, window: UsageWindow?) -> Double {
+        let value: Double
+        switch self {
+        case .used, .usedWithPacemaker:
             value = usedPercent
         case .remaining:
             value = 100 - usedPercent
@@ -130,6 +146,33 @@ enum UsageStatusLevel {
     case green
     case orange
     case red
+}
+
+extension UsageStatusLevel {
+    /// ペースメーカーモード用の矢印アイコン
+    /// - green (余裕あり): 表示なし
+    /// - orange/red (超過): 上向き矢印
+    var pacemakerArrowIcon: String {
+        switch self {
+        case .green:
+            return ""
+        case .orange, .red:
+            return "↑"
+        }
+    }
+
+    /// ペースメーカーモード用インジケータ色
+    /// - Note: greenの場合は矢印が表示されないため実際には使用されない
+    var pacemakerIndicatorColor: Color {
+        switch self {
+        case .green:
+            return .secondary  // 矢印非表示のため未使用
+        case .orange:
+            return UsageColorSettings.loadPacemakerStatusOrangeColor()
+        case .red:
+            return UsageColorSettings.loadPacemakerStatusRedColor()
+        }
+    }
 }
 
 /// Resolves usage status level based on percent and display mode.
@@ -164,6 +207,29 @@ enum UsageStatusLevelResolver {
         if clamped >= Double(usedDanger) { return .red }
         if clamped >= Double(usedWarning) { return .orange }
         return .green
+    }
+
+    /// Returns the status level for pacemaker mode based on comparison between actual and pacemaker usage.
+    /// - Parameters:
+    ///   - usedPercent: Actual usage percentage (0-100).
+    ///   - pacemakerPercent: Pacemaker usage percentage based on elapsed time (0-100).
+    ///   - warningDelta: Delta threshold for warning state (default: 0 - any excess).
+    ///   - dangerDelta: Delta threshold for danger state (default: 10%).
+    static func levelForPacemakerMode(
+        usedPercent: Double,
+        pacemakerPercent: Double,
+        warningDelta: Double = 0,
+        dangerDelta: Double = 10
+    ) -> UsageStatusLevel {
+        let diff = usedPercent - pacemakerPercent
+
+        if diff >= dangerDelta {
+            return .red      // Significantly exceeds pacemaker (10%+)
+        } else if diff > warningDelta {
+            return .orange   // Exceeds pacemaker
+        } else {
+            return .green    // At or below pacemaker
+        }
     }
 
     private static func clampThreshold(_ value: Int) -> Int {
@@ -652,6 +718,34 @@ struct UsageWindow: Codable {
     let resetAt: Date?
     /// Duration of the window in seconds
     let limitWindowSeconds: TimeInterval
+}
+
+extension UsageWindow {
+    /// Calculates the pacemaker percentage based on elapsed time within the window.
+    /// Returns nil if resetAt is unavailable.
+    func calculatePacemakerPercent() -> Double? {
+        guard let resetAt = resetAt else { return nil }
+        guard limitWindowSeconds > 0 else { return nil }
+
+        let now = Date()
+        let windowStart = resetAt.addingTimeInterval(-limitWindowSeconds)
+        let elapsed = now.timeIntervalSince(windowStart)
+
+        guard elapsed > 1 else { return nil }
+
+        let pacemakerPercent = (elapsed / limitWindowSeconds) * 100
+        return max(0, min(100, pacemakerPercent))
+    }
+
+    func displayPacemakerPercent(for displayMode: UsageDisplayModeRaw) -> Double? {
+        guard let pacemakerPercent = calculatePacemakerPercent() else { return nil }
+        switch displayMode {
+        case .remaining:
+            return max(0, min(100, 100 - pacemakerPercent))
+        case .used, .usedWithPacemaker:
+            return pacemakerPercent
+        }
+    }
 }
 
 /// A snapshot of usage data for a provider at a specific point in time

@@ -2,19 +2,23 @@
 "tab.usage" = "Nutzungslimit";
 "tab.wakeUp" = "Wake Up";
 "tab.notification" = "Benachrichtigung";
+"tab.pacemaker" = "Pacemaker";
 "tab.advanced" = "Erweitert";
+
+/* Pacemaker */
+"pacemaker.description" = "Pacemaker-Anzeige, Schwellenwerte und Farben anpassen.";
 
 /* Menu */
 "menu.openSettings" = "AgentLimits-Einstellungen...";
 "menu.displayMode" = "Anzeigemodus";
 "menu.displayMode.used" = "Nutzungsrate";
 "menu.displayMode.remaining" = "Verbleibende Rate";
+"menu.showPacemakerValue" = "Pacemaker-Indikator anzeigen";
+"pacemaker.showRingWarningSegment" = "Ring-Warnsegmente anzeigen";
 "menu.about" = "Über AgentLimits";
 "menu.quit" = "Beenden";
 "menu.language" = "Sprache";
 "menu.language.system" = "System";
-"menu.language.japanese" = "日本語";
-"menu.language.english" = "English";
 
 /* ContentView */
 "content.login" = "Melden Sie sich an, um die aktuelle Nutzungsrate abzurufen";
@@ -30,10 +34,8 @@
 "content.clearDataCancel" = "Abbrechen";
 "content.provider" = "Dienst";
 "content.usageSummary" = "Status";
-"content.latestUsage" = "Neueste Nutzung";
 "content.5hours" = "5 Stunden";
 "content.week" = "Woche";
-"content.updated" = "Aktualisiert:";
 "usage.updated" = "Aktualisiert: ";
 "content.notFetched" = "Nicht abgerufen. Bitte unten anmelden.";
 "content.reset" = "Zurückgesetzt:";
@@ -43,6 +45,7 @@
 /* Display Mode */
 "displayMode.used" = "Nutzungsrate";
 "displayMode.remaining" = "Verbleibende Rate";
+"displayMode.usedWithPacemaker" = "Nutzung + Richtwert";
 
 /* Status */
 "status.notFetched" = "Nicht abgerufen";
@@ -59,10 +62,6 @@
 "error.decodeFailed" = "Daten konnten nicht dekodiert werden";
 
 /* Relative Time */
-"time.withinMinute" = "Innerhalb von 1 Min.";
-"time.minutesAgo" = "Vor %d Min.";
-"time.hoursAgo" = "Vor %d Std.";
-"time.daysAgo" = "Vor %d Tagen";
 "time.minutesLater" = "In %d Min.";
 "time.hoursLater" = "In %d Std.";
 "time.daysLater" = "In %d Tagen";
@@ -70,8 +69,6 @@
 /* Wake Up */
 "menu.wakeUp" = "Wake up";
 "menu.wakeUpNow" = " - Jetzt ausführen";
-"menu.wakeUpSettings" = "Wake up-Einstellungen...";
-"wakeUp.windowTitle" = "Wake up-Einstellungen";
 "wakeUp.title" = "Wake up-Zeitplan";
 "wakeUp.description" = "Ruft die CLI zu geplanten Zeiten auf, um 5‑Stunden-Sitzungen zu starten";
 "wakeUp.provider" = "Dienst";
@@ -86,7 +83,6 @@
 "wakeUp.additionalArgs" = "Zusätzliche Argumente";
 "wakeUp.additionalArgsPlaceholder" = "z. B. --model=\"<<model-name>>\"";
 "wakeUp.status" = "Status";
-"wakeUp.nextRun" = "Nächste Ausführung:";
 "wakeUp.notScheduled" = "Nicht geplant";
 "wakeUp.lastResult" = "Letztes Ergebnis:";
 "wakeUp.success" = "Erfolg";
@@ -97,12 +93,9 @@
 "loginItem.notFound" = "Login-Objekt nicht gefunden";
 
 /* Threshold Notification */
-"menu.thresholdSettings" = "Schwellenwert-Benachrichtigung...";
-"notification.windowTitle" = "Schwellenwert-Benachrichtigung";
 "notification.title" = "Benachrichtigung bei Nutzungsrate";
 "notification.description" = "Benachrichtigungsschwellen und Nutzungsfarben konfigurieren";
 "notification.provider" = "Dienst";
-"notification.thresholds" = "Schwellenwerte";
 "notification.colors" = "Farben";
 "notification.authorization" = "Benachrichtigungsberechtigung erforderlich";
 "notification.requestAuth" = "Berechtigung anfordern";
@@ -112,7 +105,6 @@
 "notification.warning" = "Warnstufe";
 "notification.danger" = "Gefahrenstufe";
 "notification.resetDefaults" = "Auf Standard zurücksetzen";
-"notification.threshold" = "Schwellenwert:";
 "notification.alertTitleWarning" = "%@ Nutzungsrate Warnung";
 "notification.alertTitleDanger" = "%@ Nutzungsrate Gefahr";
 "notification.alertBody5h" = "Das 5‑Stunden-Nutzungslimit hat %d%% erreicht";
@@ -120,9 +112,6 @@
 
 /* ccusage */
 "tab.ccusage" = "ccusage";
-"menu.ccusage" = "ccusage";
-"menu.ccusageSettings" = "ccusage-Einstellungen...";
-"ccusage.windowTitle" = "ccusage-Einstellungen";
 "ccusage.title" = "Token-Nutzungsverfolgung (ccusage)";
 "ccusage.description" = "Token-Nutzung und Kosten mit der ccusage-CLI abrufen";
 "ccusage.settings" = "Einstellungen";
@@ -133,7 +122,6 @@
 "ccusage.testNow" = "Jetzt testen";
 "ccusage.status" = "Status";
 "ccusage.lastResult" = "Letztes Ergebnis:";
-"ccusage.success" = "Erfolg";
 "tokenUsage.notFetched" = "Nicht abgerufen";
 "tokenUsage.updated" = "Aktualisiert: ";
 "ccusage.provider" = "Dienst";
@@ -147,7 +135,6 @@
 "advancedSettings.title" = "Erweiterte Einstellungen";
 "advancedSettings.description" = "CLI-Pfade, Skripte und Widget-Aktionen anpassen.";
 "cliPaths.sectionTitle" = "CLI-Befehls-Pfade";
-"cliPaths.description" = "Geben Sie vollständige Pfade für codex, claude und npx an. Leer lassen, um PATH zu verwenden.";
 "cliPaths.codex" = "codex-Pfad";
 "cliPaths.claude" = "claude-Pfad";
 "cliPaths.npx" = "npx-Pfad";
@@ -159,14 +146,18 @@
 "cliPaths.notFound" = "Nicht gefunden";
 
 /* CLI Colors */
-"cliColors.title" = "Nutzungsfarben";
 "cliColors.donut" = "Donut-Diagrammfarbe";
 "cliColors.donutUseStatus" = "Nutzungsfarben verwenden";
 "cliColors.green" = "Nutzungsrate (normal)";
 "cliColors.orange" = "Nutzungsrate (Warnung)";
 "cliColors.red" = "Nutzungsrate (Gefahr)";
-"cliColors.note" = "Änderungen gelten für Widgets und Menüleiste.";
 "cliColors.reset" = "Auf Standard zurücksetzen";
+
+/* Pacemaker Colors */
+"cliColors.pacemaker" = "Farbeinstellungen";
+"cliColors.pacemakerRing" = "Donut-Diagramm";
+"cliColors.pacemakerOrange" = "Tempo überschritten (Warnung)";
+"cliColors.pacemakerRed" = "Tempo überschritten (Gefahr)";
 
 /* Scripts */
 "scripts.title" = "Mitgelieferte Skripte";
@@ -181,3 +172,9 @@
 "widgetTapAction.openWebsite" = "Website öffnen";
 "widgetTapAction.refreshData" = "Daten aktualisieren";
 "widgetTapAction.note" = "Wählen Sie, was beim Tippen auf ein Widget passiert";
+
+/* Pacemaker Thresholds */
+"notification.pacemakerThresholds" = "Pacemaker-Schwellenwerte";
+"notification.pacemakerThresholds.description" = "Warn- und Gefahrenschwellen bei Überschreitung des Pace-Ziels festlegen (relativ %)";
+"notification.pacemakerThresholds.warning" = "Warnbereich";
+"notification.pacemakerThresholds.danger" = "Gefahrenbereich";

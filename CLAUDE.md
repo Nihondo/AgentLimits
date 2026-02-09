@@ -83,6 +83,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 | `AgentLimits/Notification/ThresholdNotificationSettings.swift` | Per-provider, per-window threshold settings model |
 | `AgentLimits/Notification/ThresholdNotificationStore.swift` | Threshold settings persistence |
 | `AgentLimits/Notification/ThresholdSettingsView.swift` | Threshold notification settings UI (thresholds + usage colors) |
+| `AgentLimits/Pacemaker/PacemakerSettingsView.swift` | Pacemaker settings UI (menu bar toggle + ring warning toggle + thresholds + colors) |
 | `AgentLimits/Scripts/agentlimits_statusline_claude.sh` | Claude Code status line script (reads App Group snapshots) |
 
 ### Features
@@ -90,11 +91,24 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 #### Menu Bar Status Display
 - Real-time usage percentage display in menu bar for enabled providers
 - Two-line layout (line 1: provider name, line 2: `X% / Y%` for 5h/weekly)
-- Color-coded status (normal/warning/danger)
+- Color-coded status based on pacemaker comparison when available (otherwise secondary)
 - Per-provider toggle (Codex/Claude Code separately)
 - Responds to display mode changes (used/remaining)
-- Colors are customizable from Notification settings
+- Pacemaker indicator: shows `<used>%↑` when over budget (toggleable in Pacemaker settings, used by widgets as well)
+- Status colors are customizable from Notification settings
 - Menu bar menu includes Display Mode, Language selection, Wake Up → Run Now, and Start app at login
+
+#### Pacemaker Mode
+- Time-based usage benchmark that calculates what percentage of the window has elapsed
+- Compares actual usage against elapsed time to determine if user is on track
+- Status levels based on difference (usedPercent - pacemakerPercent):
+  - Green: at or below pacemaker (on track)
+  - Orange: exceeds pacemaker (slight excess, default threshold: 0%)
+  - Danger: 10%+ ahead of pacemaker (significant excess, default threshold: 10%)
+- Widget shows dual rings when pacemaker data is available: outer = actual usage, inner = pacemaker percentage
+  - When usage exceeds pacemaker in **used mode only**, the outer ring is segmented and color-coded (green → orange → red) to show warning/danger zones (toggleable via `pacemaker_ring_warning_enabled`, enabled by default)
+- Menu bar shows both values with configurable colors
+- Thresholds and pacemaker colors are configurable in Pacemaker settings (warning/danger delta)
 
 #### Usage Monitoring
 - Sign in to each service in the in-app WKWebView (Codex/Claude Code)
@@ -142,7 +156,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 - Bundled script for Claude Code status line integration
 - Reads Claude Code usage snapshot and App Group settings (display mode, language, thresholds, colors)
 - Outputs a single line with 5h/weekly usage, reset times, and update time
-- Supports overrides: `-ja`, `-en`, `-r` (remaining), `-u` (used), `-d` (debug)
+- Supports overrides: `-ja`, `-en`, `-r` (remaining), `-u` (used), `-p` (pacemaker), `-i` (usage + pacemaker inline), `-d` (debug)
 - Requires `jq`
 
 ### Shared Data Model
@@ -169,7 +183,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 
 | Key | Purpose |
 |-----|---------|
-| `usage_display_mode` | Display mode (used% / remaining%) |
+| `usage_display_mode` | Display mode (used% / remaining% / pacemaker) |
 | `usage_display_mode_cached` | Cached display mode used to convert stored snapshots (also shared via App Group for widgets) |
 | `menu_bar_status_codex_enabled` | Menu bar Codex status display toggle |
 | `menu_bar_status_claude_enabled` | Menu bar Claude Code status display toggle |
@@ -191,6 +205,13 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 | `usage_color_threshold_warning_{provider}_{window}` | Warning threshold used for usage status colors |
 | `usage_color_threshold_danger_{provider}_{window}` | Danger threshold used for usage status colors |
 | `widget_tap_action` | Widget tap action (openWebsite / refreshData) |
+| `menu_bar_show_pacemaker_value` | Pacemaker indicator toggle (shared with widgets) |
+| `pacemaker_ring_warning_enabled` | Pacemaker ring warning segments toggle (default: true) |
+| `usage_color_pacemaker_ring` | Pacemaker ring color (widget) |
+| `usage_color_pacemaker_status_orange` | Pacemaker indicator color (warning) |
+| `usage_color_pacemaker_status_red` | Pacemaker indicator color (danger) |
+| `pacemaker_warning_delta` | Pacemaker mode warning threshold delta (default: 0%) |
+| `pacemaker_danger_delta` | Pacemaker mode danger threshold delta (default: 10%) |
 
 ### Widget Kinds
 

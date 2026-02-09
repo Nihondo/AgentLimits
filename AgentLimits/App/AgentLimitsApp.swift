@@ -89,6 +89,10 @@ struct AgentLimitsApp: App {
 
     private var appState: AppSharedState { AppSharedState.shared }
 
+    init() {
+        Self.migrateIdealToPacemakerKeys()
+    }
+
     var body: some Scene {
         MenuBarExtra {
             MenuBarContentView()
@@ -109,6 +113,27 @@ struct AgentLimitsApp: App {
         .handlesExternalEvents(matching: [])
         .commandsRemoved()
     }
+
+    private static func migrateIdealToPacemakerKeys() {
+        guard let defaults = AppGroupDefaults.shared else { return }
+
+        let oldWarningKey = "ideal_mode_warning_delta"
+        let oldDangerKey = "ideal_mode_danger_delta"
+
+        if let oldWarning = defaults.object(forKey: oldWarningKey) as? Double {
+            if defaults.object(forKey: PacemakerThresholdKeys.warningDelta) == nil {
+                defaults.set(oldWarning, forKey: PacemakerThresholdKeys.warningDelta)
+            }
+            defaults.removeObject(forKey: oldWarningKey)
+        }
+
+        if let oldDanger = defaults.object(forKey: oldDangerKey) as? Double {
+            if defaults.object(forKey: PacemakerThresholdKeys.dangerDelta) == nil {
+                defaults.set(oldDanger, forKey: PacemakerThresholdKeys.dangerDelta)
+            }
+            defaults.removeObject(forKey: oldDangerKey)
+        }
+    }
 }
 
 // MARK: - Menu Bar Label
@@ -120,8 +145,20 @@ private struct MenuBarLabelView: View {
     @AppStorage(UserDefaultsKeys.menuBarStatusCodexEnabled) private var codexEnabled = false
     @AppStorage(UserDefaultsKeys.menuBarStatusClaudeEnabled) private var claudeEnabled = false
     @AppStorage(UserDefaultsKeys.displayMode) private var displayMode: UsageDisplayMode = .used
+    @AppStorage(UserDefaultsKeys.menuBarShowPacemakerValue, store: AppGroupDefaults.shared)
+    private var showPacemakerValue = true
     @AppStorage(UsageStatusThresholdStore.revisionKey, store: AppGroupDefaults.shared)
     private var thresholdRevision: Double = 0
+    @AppStorage(UsageColorKeys.statusGreen, store: AppGroupDefaults.shared)
+    private var statusGreenHex: String = ""
+    @AppStorage(UsageColorKeys.statusOrange, store: AppGroupDefaults.shared)
+    private var statusOrangeHex: String = ""
+    @AppStorage(UsageColorKeys.statusRed, store: AppGroupDefaults.shared)
+    private var statusRedHex: String = ""
+    @AppStorage(UsageColorKeys.pacemakerStatusOrange, store: AppGroupDefaults.shared)
+    private var pacemakerStatusOrangeHex: String = ""
+    @AppStorage(UsageColorKeys.pacemakerStatusRed, store: AppGroupDefaults.shared)
+    private var pacemakerStatusRedHex: String = ""
     @State private var renderedImage: NSImage?
     @Environment(\.colorScheme) private var colorScheme
 
@@ -153,10 +190,28 @@ private struct MenuBarLabelView: View {
         .onChange(of: displayMode) { _, _ in
             scheduleImageUpdate()
         }
+        .onChange(of: showPacemakerValue) { _, _ in
+            scheduleImageUpdate()
+        }
         .onChange(of: colorScheme) { _, _ in
             scheduleImageUpdate()
         }
         .onChange(of: thresholdRevision) { _, _ in
+            scheduleImageUpdate()
+        }
+        .onChange(of: statusGreenHex) { _, _ in
+            scheduleImageUpdate()
+        }
+        .onChange(of: statusOrangeHex) { _, _ in
+            scheduleImageUpdate()
+        }
+        .onChange(of: statusRedHex) { _, _ in
+            scheduleImageUpdate()
+        }
+        .onChange(of: pacemakerStatusOrangeHex) { _, _ in
+            scheduleImageUpdate()
+        }
+        .onChange(of: pacemakerStatusRedHex) { _, _ in
             scheduleImageUpdate()
         }
         .onReceive(appState.viewModel.objectWillChange) { _ in
@@ -258,6 +313,8 @@ private struct MenuBarPercentLineView: View {
     let primaryWindow: UsageWindow?
     let secondaryWindow: UsageWindow?
     let displayMode: UsageDisplayMode
+    @AppStorage(UserDefaultsKeys.menuBarShowPacemakerValue, store: AppGroupDefaults.shared)
+    private var showPacemakerValue: Bool = true
     @AppStorage(UsageColorKeys.statusGreen, store: AppGroupDefaults.shared)
     private var statusGreenHex: String = ""
     @AppStorage(UsageColorKeys.statusOrange, store: AppGroupDefaults.shared)
@@ -267,12 +324,10 @@ private struct MenuBarPercentLineView: View {
 
     var body: some View {
         HStack(spacing: 2) {
-            Text(formatPercentText(primaryWindow))
-                .foregroundColor(resolveStatusColor(primaryWindow, windowKind: .primary))
+            percentTextView(primaryWindow, windowKind: .primary)
             Text("/")
                 .foregroundStyle(.secondary)
-            Text(formatPercentText(secondaryWindow))
-                .foregroundColor(resolveStatusColor(secondaryWindow, windowKind: .secondary))
+            percentTextView(secondaryWindow, windowKind: .secondary)
         }
         .font(.system(size: 13.5, weight: .semibold, design: .monospaced))
         .monospacedDigit()
@@ -280,9 +335,41 @@ private struct MenuBarPercentLineView: View {
         .minimumScaleFactor(0.8)
     }
 
-    private func formatPercentText(_ window: UsageWindow?) -> String {
-        let percent = window.map { displayMode.displayPercent(from: $0.usedPercent) }
-        return UsagePercentFormatter.formatPercentText(percent)
+    @ViewBuilder
+    private func percentTextView(_ window: UsageWindow?, windowKind: UsageWindowKind) -> some View {
+        if let window {
+            let statusColor = resolveStatusColor(window, windowKind: windowKind)
+            let percent = displayMode.displayPercent(from: window.usedPercent, window: window)
+            let displayText = UsagePercentFormatter.formatPercentText(percent)
+            if showPacemakerValue,
+               let pacemakerPercent = window.calculatePacemakerPercent() {
+                // ステータスレベルを取得して矢印アイコンを決定
+                let level = UsageStatusLevelResolver.levelForPacemakerMode(
+                    usedPercent: window.usedPercent,
+                    pacemakerPercent: pacemakerPercent,
+                    warningDelta: PacemakerThresholdSettings.loadWarningDelta(),
+                    dangerDelta: PacemakerThresholdSettings.loadDangerDelta()
+                )
+                let arrowIcon = level.pacemakerArrowIcon
+                let indicatorColor = level.pacemakerIndicatorColor
+                // "45%↑" 形式で表示（超過時のみ）
+                if arrowIcon.isEmpty {
+                    Text(displayText)
+                        .foregroundColor(statusColor)
+                } else {
+                    Text(displayText)
+                        .foregroundColor(statusColor) +
+                    Text(arrowIcon)
+                        .foregroundColor(indicatorColor)
+                }
+            } else {
+                Text(displayText)
+                    .foregroundColor(statusColor)
+            }
+        } else {
+            Text(UsagePercentFormatter.formatPercentText(nil))
+                .foregroundStyle(.secondary)
+        }
     }
 
     private func resolveStatusColor(_ window: UsageWindow?, windowKind: UsageWindowKind) -> Color {

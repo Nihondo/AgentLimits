@@ -2,19 +2,22 @@
 "tab.usage" = "使用限制";
 "tab.wakeUp" = "Wake Up";
 "tab.notification" = "通知";
+"tab.pacemaker" = "节拍器";
 "tab.advanced" = "高级";
+
+/* Pacemaker */
+"pacemaker.description" = "自定义节拍器显示、阈值和颜色。";
 
 /* Menu */
 "menu.openSettings" = "AgentLimits 设置...";
 "menu.displayMode" = "显示模式";
 "menu.displayMode.used" = "使用率";
 "menu.displayMode.remaining" = "剩余率";
+"menu.showPacemakerValue" = "显示节拍器指示器";
 "menu.about" = "关于 AgentLimits";
 "menu.quit" = "退出";
 "menu.language" = "语言";
 "menu.language.system" = "系统";
-"menu.language.japanese" = "日本語";
-"menu.language.english" = "English";
 
 /* ContentView */
 "content.login" = "登录以获取当前使用率";
@@ -30,10 +33,8 @@
 "content.clearDataCancel" = "取消";
 "content.provider" = "服务";
 "content.usageSummary" = "状态";
-"content.latestUsage" = "最新使用情况";
 "content.5hours" = "5 小时";
 "content.week" = "周";
-"content.updated" = "更新：";
 "usage.updated" = "更新： ";
 "content.notFetched" = "未获取。请在下方登录。";
 "content.reset" = "重置：";
@@ -43,6 +44,7 @@
 /* Display Mode */
 "displayMode.used" = "使用率";
 "displayMode.remaining" = "剩余率";
+"displayMode.usedWithPacemaker" = "使用率 + 参考";
 
 /* Status */
 "status.notFetched" = "未获取";
@@ -59,10 +61,6 @@
 "error.decodeFailed" = "解析数据失败";
 
 /* Relative Time */
-"time.withinMinute" = "1 分钟内";
-"time.minutesAgo" = "%d 分钟前";
-"time.hoursAgo" = "%d 小时前";
-"time.daysAgo" = "%d 天前";
 "time.minutesLater" = "%d 分钟后";
 "time.hoursLater" = "%d 小时后";
 "time.daysLater" = "%d 天后";
@@ -70,8 +68,6 @@
 /* Wake Up */
 "menu.wakeUp" = "Wake up";
 "menu.wakeUpNow" = " - 立即运行";
-"menu.wakeUpSettings" = "Wake up 设置...";
-"wakeUp.windowTitle" = "Wake up 设置";
 "wakeUp.title" = "Wake up 计划";
 "wakeUp.description" = "在计划时间调用 CLI 以开始 5 小时会话";
 "wakeUp.provider" = "服务";
@@ -86,7 +82,6 @@
 "wakeUp.additionalArgs" = "附加参数";
 "wakeUp.additionalArgsPlaceholder" = "例如：--model=\"<<model-name>>\"";
 "wakeUp.status" = "状态";
-"wakeUp.nextRun" = "下次运行：";
 "wakeUp.notScheduled" = "未计划";
 "wakeUp.lastResult" = "上次结果：";
 "wakeUp.success" = "成功";
@@ -97,12 +92,9 @@
 "loginItem.notFound" = "未找到登录项";
 
 /* Threshold Notification */
-"menu.thresholdSettings" = "阈值通知设置...";
-"notification.windowTitle" = "阈值通知设置";
 "notification.title" = "使用率阈值通知";
 "notification.description" = "配置通知阈值和使用率颜色";
 "notification.provider" = "服务";
-"notification.thresholds" = "阈值";
 "notification.colors" = "颜色";
 "notification.authorization" = "需要通知权限";
 "notification.requestAuth" = "请求权限";
@@ -112,7 +104,6 @@
 "notification.warning" = "警告级别";
 "notification.danger" = "危险级别";
 "notification.resetDefaults" = "恢复默认";
-"notification.threshold" = "阈值：";
 "notification.alertTitleWarning" = "%@ 使用率警告";
 "notification.alertTitleDanger" = "%@ 使用率危险";
 "notification.alertBody5h" = "5 小时使用限制已达到 %d%%";
@@ -120,9 +111,6 @@
 
 /* ccusage */
 "tab.ccusage" = "ccusage";
-"menu.ccusage" = "ccusage";
-"menu.ccusageSettings" = "ccusage 设置...";
-"ccusage.windowTitle" = "ccusage 设置";
 "ccusage.title" = "令牌使用量跟踪（ccusage）";
 "ccusage.description" = "使用 ccusage CLI 获取令牌使用量和费用";
 "ccusage.settings" = "设置";
@@ -133,7 +121,6 @@
 "ccusage.testNow" = "立即测试";
 "ccusage.status" = "状态";
 "ccusage.lastResult" = "上次结果：";
-"ccusage.success" = "成功";
 "tokenUsage.notFetched" = "未获取";
 "tokenUsage.updated" = "更新： ";
 "ccusage.provider" = "服务";
@@ -147,7 +134,6 @@
 "advancedSettings.title" = "高级设置";
 "advancedSettings.description" = "自定义 CLI 路径、脚本和小组件操作。";
 "cliPaths.sectionTitle" = "CLI 命令路径";
-"cliPaths.description" = "指定 codex、claude、npx 的完整路径。留空将使用 PATH。";
 "cliPaths.codex" = "codex 路径";
 "cliPaths.claude" = "claude 路径";
 "cliPaths.npx" = "npx 路径";
@@ -159,14 +145,18 @@
 "cliPaths.notFound" = "未找到";
 
 /* CLI Colors */
-"cliColors.title" = "使用率颜色";
 "cliColors.donut" = "甜甜圈图颜色";
 "cliColors.donutUseStatus" = "使用使用率颜色";
 "cliColors.green" = "使用率（正常）";
 "cliColors.orange" = "使用率（警告）";
 "cliColors.red" = "使用率（危险）";
-"cliColors.note" = "更改会应用到小组件和菜单栏。";
 "cliColors.reset" = "恢复默认";
+
+/* Pacemaker Colors */
+"cliColors.pacemaker" = "颜色设置";
+"cliColors.pacemakerRing" = "环形图";
+"cliColors.pacemakerOrange" = "超出节奏（警告）";
+"cliColors.pacemakerRed" = "超出节奏（危险）";
 
 /* Scripts */
 "scripts.title" = "随附脚本";
@@ -181,3 +171,10 @@
 "widgetTapAction.openWebsite" = "打开网站";
 "widgetTapAction.refreshData" = "刷新数据";
 "widgetTapAction.note" = "选择点击小组件时的操作";
+
+/* Pacemaker Thresholds */
+"notification.pacemakerThresholds" = "节拍器阈值";
+"notification.pacemakerThresholds.description" = "设置超出节奏时的警告和危险阈值（相对%）";
+"notification.pacemakerThresholds.warning" = "警告区域";
+"notification.pacemakerThresholds.danger" = "危险区域";
+"pacemaker.showRingWarningSegment" = "显示环形警告分段";

@@ -19,6 +19,9 @@ enum UsageColorKeys {
     static let statusGreen = "usage_color_green"
     static let statusOrange = "usage_color_orange"
     static let statusRed = "usage_color_red"
+    static let pacemakerRing = "usage_color_pacemaker_ring"
+    static let pacemakerStatusOrange = "usage_color_pacemaker_status_orange"
+    static let pacemakerStatusRed = "usage_color_pacemaker_status_red"
 }
 
 /// Helpers for storing and resolving usage colors from App Group defaults.
@@ -75,6 +78,36 @@ enum UsageColorSettings {
         saveColor(color, forKey: UsageColorKeys.statusRed)
     }
 
+    /// Loads the pacemaker ring color (widget inner donut).
+    static func loadPacemakerRingColor() -> Color {
+        loadColor(forKey: UsageColorKeys.pacemakerRing, defaultColor: Color.blue.opacity(0.6))
+    }
+
+    /// Loads the pacemaker status color for warning indicator.
+    static func loadPacemakerStatusOrangeColor() -> Color {
+        loadColor(forKey: UsageColorKeys.pacemakerStatusOrange, defaultColor: .orange)
+    }
+
+    /// Loads the pacemaker status color for danger indicator.
+    static func loadPacemakerStatusRedColor() -> Color {
+        loadColor(forKey: UsageColorKeys.pacemakerStatusRed, defaultColor: .red)
+    }
+
+    /// Saves the pacemaker ring color override.
+    static func savePacemakerRingColor(_ color: Color) {
+        saveColor(color, forKey: UsageColorKeys.pacemakerRing)
+    }
+
+    /// Saves the pacemaker status color override for warning indicator.
+    static func savePacemakerStatusOrangeColor(_ color: Color) {
+        saveColor(color, forKey: UsageColorKeys.pacemakerStatusOrange)
+    }
+
+    /// Saves the pacemaker status color override for danger indicator.
+    static func savePacemakerStatusRedColor(_ color: Color) {
+        saveColor(color, forKey: UsageColorKeys.pacemakerStatusRed)
+    }
+
     /// Clears stored overrides to restore defaults.
     static func resetToDefaults() {
         let defaults = AppGroupDefaults.shared
@@ -83,6 +116,27 @@ enum UsageColorSettings {
         defaults?.removeObject(forKey: UsageColorKeys.statusGreen)
         defaults?.removeObject(forKey: UsageColorKeys.statusOrange)
         defaults?.removeObject(forKey: UsageColorKeys.statusRed)
+        defaults?.removeObject(forKey: UsageColorKeys.pacemakerRing)
+        defaults?.removeObject(forKey: UsageColorKeys.pacemakerStatusOrange)
+        defaults?.removeObject(forKey: UsageColorKeys.pacemakerStatusRed)
+    }
+
+    /// Clears stored overrides for usage status colors.
+    static func resetUsageStatusColors() {
+        let defaults = AppGroupDefaults.shared
+        defaults?.removeObject(forKey: UsageColorKeys.donut)
+        defaults?.removeObject(forKey: UsageColorKeys.donutUseStatus)
+        defaults?.removeObject(forKey: UsageColorKeys.statusGreen)
+        defaults?.removeObject(forKey: UsageColorKeys.statusOrange)
+        defaults?.removeObject(forKey: UsageColorKeys.statusRed)
+    }
+
+    /// Clears stored overrides for pacemaker colors.
+    static func resetPacemakerColors() {
+        let defaults = AppGroupDefaults.shared
+        defaults?.removeObject(forKey: UsageColorKeys.pacemakerRing)
+        defaults?.removeObject(forKey: UsageColorKeys.pacemakerStatusOrange)
+        defaults?.removeObject(forKey: UsageColorKeys.pacemakerStatusRed)
     }
 
     private static func loadColor(forKey key: String, defaultColor: Color) -> Color {
@@ -164,5 +218,68 @@ enum ColorHexCodec {
         #else
         return nil
         #endif
+    }
+}
+
+// MARK: - Pacemaker Threshold Settings
+
+/// Settings for enabling or disabling pacemaker ring warning segments.
+enum PacemakerRingWarningSettings {
+    static let defaultEnabled = true
+
+    static func isWarningEnabled() -> Bool {
+        let defaults = AppGroupDefaults.shared
+        guard defaults?.object(forKey: SharedUserDefaultsKeys.pacemakerRingWarningEnabled) != nil else {
+            return defaultEnabled
+        }
+        return defaults?.bool(forKey: SharedUserDefaultsKeys.pacemakerRingWarningEnabled) ?? defaultEnabled
+    }
+}
+
+/// UserDefaults keys for pacemaker mode threshold customization.
+enum PacemakerThresholdKeys {
+    static let warningDelta = "pacemaker_warning_delta"
+    static let dangerDelta = "pacemaker_danger_delta"
+}
+
+/// Settings for pacemaker mode color thresholds (excess percentage).
+enum PacemakerThresholdSettings {
+    /// Default warning delta (orange when exceeding pacemaker by this amount)
+    static let defaultWarningDelta: Double = 0
+
+    /// Default danger delta (red when exceeding pacemaker by this amount)
+    static let defaultDangerDelta: Double = 10
+
+    /// Loads the warning delta (excess % to trigger orange).
+    static func loadWarningDelta() -> Double {
+        let defaults = AppGroupDefaults.shared
+        let value = defaults?.object(forKey: PacemakerThresholdKeys.warningDelta) as? Double
+        return value ?? defaultWarningDelta
+    }
+
+    /// Loads the danger delta (excess % to trigger red).
+    static func loadDangerDelta() -> Double {
+        let defaults = AppGroupDefaults.shared
+        let value = defaults?.object(forKey: PacemakerThresholdKeys.dangerDelta) as? Double
+        return value ?? defaultDangerDelta
+    }
+
+    /// Saves the warning delta.
+    static func saveWarningDelta(_ value: Double) {
+        let defaults = AppGroupDefaults.shared
+        defaults?.set(value, forKey: PacemakerThresholdKeys.warningDelta)
+    }
+
+    /// Saves the danger delta.
+    static func saveDangerDelta(_ value: Double) {
+        let defaults = AppGroupDefaults.shared
+        defaults?.set(value, forKey: PacemakerThresholdKeys.dangerDelta)
+    }
+
+    /// Resets to default values.
+    static func resetToDefaults() {
+        let defaults = AppGroupDefaults.shared
+        defaults?.removeObject(forKey: PacemakerThresholdKeys.warningDelta)
+        defaults?.removeObject(forKey: PacemakerThresholdKeys.dangerDelta)
     }
 }

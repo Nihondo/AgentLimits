@@ -2,19 +2,22 @@
 "tab.usage" = "Limit użycia";
 "tab.wakeUp" = "Wake Up";
 "tab.notification" = "Powiadomienie";
+"tab.pacemaker" = "Pacemaker";
 "tab.advanced" = "Zaawansowane";
+
+/* Pacemaker */
+"pacemaker.description" = "Dostosuj wyświetlanie pacemakera, progi i kolory.";
 
 /* Menu */
 "menu.openSettings" = "Ustawienia AgentLimits...";
 "menu.displayMode" = "Tryb wyświetlania";
 "menu.displayMode.used" = "Wskaźnik użycia";
 "menu.displayMode.remaining" = "Pozostały wskaźnik";
+"menu.showPacemakerValue" = "Pokaż wskaźnik pacemakera";
 "menu.about" = "O AgentLimits";
 "menu.quit" = "Zakończ";
 "menu.language" = "Język";
 "menu.language.system" = "System";
-"menu.language.japanese" = "日本語";
-"menu.language.english" = "English";
 
 /* ContentView */
 "content.login" = "Zaloguj się, aby pobrać bieżący wskaźnik użycia";
@@ -30,10 +33,8 @@
 "content.clearDataCancel" = "Anuluj";
 "content.provider" = "Usługa";
 "content.usageSummary" = "Status";
-"content.latestUsage" = "Najnowsze użycie";
 "content.5hours" = "5 godzin";
 "content.week" = "Tydzień";
-"content.updated" = "Zaktualizowano:";
 "usage.updated" = "Zaktualizowano: ";
 "content.notFetched" = "Nie pobrano. Zaloguj się poniżej.";
 "content.reset" = "Reset:";
@@ -43,6 +44,7 @@
 /* Display Mode */
 "displayMode.used" = "Wskaźnik użycia";
 "displayMode.remaining" = "Pozostały wskaźnik";
+"displayMode.usedWithPacemaker" = "Użycie + Wzorzec";
 
 /* Status */
 "status.notFetched" = "Nie pobrano";
@@ -59,10 +61,6 @@
 "error.decodeFailed" = "Nie udało się zdekodować danych";
 
 /* Relative Time */
-"time.withinMinute" = "W ciągu 1 min";
-"time.minutesAgo" = "%d min temu";
-"time.hoursAgo" = "%d godz. temu";
-"time.daysAgo" = "%d dni temu";
 "time.minutesLater" = "Za %d min";
 "time.hoursLater" = "Za %d godz.";
 "time.daysLater" = "Za %d dni";
@@ -70,8 +68,6 @@
 /* Wake Up */
 "menu.wakeUp" = "Wake up";
 "menu.wakeUpNow" = " - Uruchom teraz";
-"menu.wakeUpSettings" = "Ustawienia Wake up...";
-"wakeUp.windowTitle" = "Ustawienia Wake up";
 "wakeUp.title" = "Harmonogram Wake up";
 "wakeUp.description" = "Wywołuje CLI o zaplanowanych godzinach, aby rozpocząć 5‑godzinne sesje";
 "wakeUp.provider" = "Usługa";
@@ -86,7 +82,6 @@
 "wakeUp.additionalArgs" = "Dodatkowe argumenty";
 "wakeUp.additionalArgsPlaceholder" = "np. --model=\"<<model-name>>\"";
 "wakeUp.status" = "Status";
-"wakeUp.nextRun" = "Następne uruchomienie:";
 "wakeUp.notScheduled" = "Nie zaplanowano";
 "wakeUp.lastResult" = "Ostatni wynik:";
 "wakeUp.success" = "Sukces";
@@ -97,12 +92,9 @@
 "loginItem.notFound" = "Nie znaleziono elementu logowania";
 
 /* Threshold Notification */
-"menu.thresholdSettings" = "Ustawienia powiadomień progowych...";
-"notification.windowTitle" = "Ustawienia powiadomień progowych";
 "notification.title" = "Powiadomienie o progu wskaźnika użycia";
 "notification.description" = "Skonfiguruj progi powiadomień i kolory użycia";
 "notification.provider" = "Usługa";
-"notification.thresholds" = "Progi";
 "notification.colors" = "Kolory";
 "notification.authorization" = "Wymagane uprawnienie do powiadomień";
 "notification.requestAuth" = "Poproś o uprawnienie";
@@ -112,7 +104,6 @@
 "notification.warning" = "Poziom ostrzeżenia";
 "notification.danger" = "Poziom zagrożenia";
 "notification.resetDefaults" = "Przywróć domyślne";
-"notification.threshold" = "Próg:";
 "notification.alertTitleWarning" = "Ostrzeżenie wskaźnika użycia %@";
 "notification.alertTitleDanger" = "Zagrożenie wskaźnika użycia %@";
 "notification.alertBody5h" = "Limit użycia 5 godzin osiągnął %d%%";
@@ -120,9 +111,6 @@
 
 /* ccusage */
 "tab.ccusage" = "ccusage";
-"menu.ccusage" = "ccusage";
-"menu.ccusageSettings" = "Ustawienia ccusage...";
-"ccusage.windowTitle" = "Ustawienia ccusage";
 "ccusage.title" = "Śledzenie użycia tokenów (ccusage)";
 "ccusage.description" = "Pobieraj użycie tokenów i koszty przy użyciu CLI ccusage";
 "ccusage.settings" = "Ustawienia";
@@ -133,7 +121,6 @@
 "ccusage.testNow" = "Testuj teraz";
 "ccusage.status" = "Status";
 "ccusage.lastResult" = "Ostatni wynik:";
-"ccusage.success" = "Sukces";
 "tokenUsage.notFetched" = "Nie pobrano";
 "tokenUsage.updated" = "Zaktualizowano: ";
 "ccusage.provider" = "Usługa";
@@ -147,7 +134,6 @@
 "advancedSettings.title" = "Ustawienia zaawansowane";
 "advancedSettings.description" = "Dostosuj ścieżki CLI, skrypty i akcje widżetów.";
 "cliPaths.sectionTitle" = "Ścieżki poleceń CLI";
-"cliPaths.description" = "Podaj pełne ścieżki dla codex, claude i npx. Pozostaw puste, aby użyć PATH.";
 "cliPaths.codex" = "ścieżka codex";
 "cliPaths.claude" = "ścieżka claude";
 "cliPaths.npx" = "ścieżka npx";
@@ -159,14 +145,18 @@
 "cliPaths.notFound" = "Nie znaleziono";
 
 /* CLI Colors */
-"cliColors.title" = "Kolory wskaźnika użycia";
 "cliColors.donut" = "Kolor wykresu pierścieniowego";
 "cliColors.donutUseStatus" = "Użyj kolorów wskaźnika użycia";
 "cliColors.green" = "Wskaźnik użycia (normalny)";
 "cliColors.orange" = "Wskaźnik użycia (ostrzeżenie)";
 "cliColors.red" = "Wskaźnik użycia (zagrożenie)";
-"cliColors.note" = "Zmiany dotyczą widżetów i paska menu.";
 "cliColors.reset" = "Przywróć domyślne";
+
+/* Pacemaker Colors */
+"cliColors.pacemaker" = "Ustawienia kolorów";
+"cliColors.pacemakerRing" = "Wykres pierścieniowy";
+"cliColors.pacemakerOrange" = "Przekroczenie tempa (Ostrzeżenie)";
+"cliColors.pacemakerRed" = "Przekroczenie tempa (Niebezpieczeństwo)";
 
 /* Scripts */
 "scripts.title" = "Dołączone skrypty";
@@ -181,3 +171,10 @@
 "widgetTapAction.openWebsite" = "Otwórz stronę";
 "widgetTapAction.refreshData" = "Odśwież dane";
 "widgetTapAction.note" = "Wybierz, co ma się stać po stuknięciu widżetu";
+
+/* Pacemaker Thresholds */
+"notification.pacemakerThresholds" = "Progi rozrusznika";
+"notification.pacemakerThresholds.description" = "Ustaw progi ostrzeżenia i zagrożenia przy przekroczeniu tempa (% względny)";
+"notification.pacemakerThresholds.warning" = "Ostrzeżenie";
+"notification.pacemakerThresholds.danger" = "Zagrożenie";
+"pacemaker.showRingWarningSegment" = "Pokaż segmenty ostrzegawcze pierścienia";

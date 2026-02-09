@@ -2,19 +2,22 @@
 "tab.usage" = "Kullanım Limiti";
 "tab.wakeUp" = "Wake Up";
 "tab.notification" = "Bildirim";
+"tab.pacemaker" = "Pacemaker";
 "tab.advanced" = "Gelişmiş";
+
+/* Pacemaker */
+"pacemaker.description" = "Pacemaker görünümünü, eşikleri ve renkleri özelleştirin.";
 
 /* Menu */
 "menu.openSettings" = "AgentLimits Ayarları...";
 "menu.displayMode" = "Görüntüleme Modu";
 "menu.displayMode.used" = "Kullanım oranı";
 "menu.displayMode.remaining" = "Kalan oran";
+"menu.showPacemakerValue" = "Pacemaker göstergesini göster";
 "menu.about" = "AgentLimits Hakkında";
 "menu.quit" = "Çıkış";
 "menu.language" = "Dil";
 "menu.language.system" = "Sistem";
-"menu.language.japanese" = "日本語";
-"menu.language.english" = "English";
 
 /* ContentView */
 "content.login" = "Güncel kullanım oranını görmek için giriş yapın";
@@ -30,10 +33,8 @@
 "content.clearDataCancel" = "İptal";
 "content.provider" = "Hizmet";
 "content.usageSummary" = "Durum";
-"content.latestUsage" = "Son kullanım";
 "content.5hours" = "5 saat";
 "content.week" = "Hafta";
-"content.updated" = "Güncellendi:";
 "usage.updated" = "Güncellendi: ";
 "content.notFetched" = "Getirilemedi. Lütfen aşağıdan giriş yapın.";
 "content.reset" = "Sıfırla:";
@@ -43,6 +44,7 @@
 /* Display Mode */
 "displayMode.used" = "Kullanım oranı";
 "displayMode.remaining" = "Kalan oran";
+"displayMode.usedWithPacemaker" = "Kullanım + Referans";
 
 /* Status */
 "status.notFetched" = "Getirilemedi";
@@ -59,10 +61,6 @@
 "error.decodeFailed" = "Veri çözümlenemedi";
 
 /* Relative Time */
-"time.withinMinute" = "1 dk içinde";
-"time.minutesAgo" = "%d dk önce";
-"time.hoursAgo" = "%d saat önce";
-"time.daysAgo" = "%d gün önce";
 "time.minutesLater" = "%d dk içinde";
 "time.hoursLater" = "%d saat içinde";
 "time.daysLater" = "%d gün içinde";
@@ -70,8 +68,6 @@
 /* Wake Up */
 "menu.wakeUp" = "Wake up";
 "menu.wakeUpNow" = " - Şimdi çalıştır";
-"menu.wakeUpSettings" = "Wake up Ayarları...";
-"wakeUp.windowTitle" = "Wake up Ayarları";
 "wakeUp.title" = "Wake up Zamanlaması";
 "wakeUp.description" = "Planlanan saatlerde CLI çağırarak 5 saatlik oturumlar başlatır";
 "wakeUp.provider" = "Hizmet";
@@ -86,7 +82,6 @@
 "wakeUp.additionalArgs" = "Ek Argümanlar";
 "wakeUp.additionalArgsPlaceholder" = "örn. --model=\"<<model-name>>\"";
 "wakeUp.status" = "Durum";
-"wakeUp.nextRun" = "Sonraki çalıştırma:";
 "wakeUp.notScheduled" = "Planlanmadı";
 "wakeUp.lastResult" = "Son sonuç:";
 "wakeUp.success" = "Başarılı";
@@ -97,12 +92,9 @@
 "loginItem.notFound" = "Giriş öğesi bulunamadı";
 
 /* Threshold Notification */
-"menu.thresholdSettings" = "Eşik Bildirim Ayarları...";
-"notification.windowTitle" = "Eşik Bildirim Ayarları";
 "notification.title" = "Kullanım Oranı Eşik Bildirimi";
 "notification.description" = "Bildirim eşiklerini ve kullanım renklerini yapılandırın";
 "notification.provider" = "Hizmet";
-"notification.thresholds" = "Eşikler";
 "notification.colors" = "Renkler";
 "notification.authorization" = "Bildirim izni gerekli";
 "notification.requestAuth" = "İzin iste";
@@ -112,7 +104,6 @@
 "notification.warning" = "Uyarı düzeyi";
 "notification.danger" = "Tehlike düzeyi";
 "notification.resetDefaults" = "Varsayılanlara sıfırla";
-"notification.threshold" = "Eşik:";
 "notification.alertTitleWarning" = "%@ kullanım oranı uyarısı";
 "notification.alertTitleDanger" = "%@ kullanım oranı tehlikesi";
 "notification.alertBody5h" = "5 saatlik kullanım limiti %d%% seviyesine ulaştı";
@@ -120,9 +111,6 @@
 
 /* ccusage */
 "tab.ccusage" = "ccusage";
-"menu.ccusage" = "ccusage";
-"menu.ccusageSettings" = "ccusage Ayarları...";
-"ccusage.windowTitle" = "ccusage Ayarları";
 "ccusage.title" = "Token kullanım takibi (ccusage)";
 "ccusage.description" = "ccusage CLI ile token kullanımını ve maliyetleri al";
 "ccusage.settings" = "Ayarlar";
@@ -133,7 +121,6 @@
 "ccusage.testNow" = "Şimdi test et";
 "ccusage.status" = "Durum";
 "ccusage.lastResult" = "Son sonuç:";
-"ccusage.success" = "Başarılı";
 "tokenUsage.notFetched" = "Getirilemedi";
 "tokenUsage.updated" = "Güncellendi: ";
 "ccusage.provider" = "Hizmet";
@@ -147,7 +134,6 @@
 "advancedSettings.title" = "Gelişmiş Ayarlar";
 "advancedSettings.description" = "CLI yollarını, betikleri ve widget eylemlerini özelleştirin.";
 "cliPaths.sectionTitle" = "CLI Komut Yolları";
-"cliPaths.description" = "codex, claude ve npx için tam yolları belirtin. Boş bırakılırsa PATH kullanılır.";
 "cliPaths.codex" = "codex yolu";
 "cliPaths.claude" = "claude yolu";
 "cliPaths.npx" = "npx yolu";
@@ -159,14 +145,18 @@
 "cliPaths.notFound" = "Bulunamadı";
 
 /* CLI Colors */
-"cliColors.title" = "Kullanım oranı renkleri";
 "cliColors.donut" = "Halka grafik rengi";
 "cliColors.donutUseStatus" = "Kullanım oranı renklerini kullan";
 "cliColors.green" = "Kullanım oranı (normal)";
 "cliColors.orange" = "Kullanım oranı (uyarı)";
 "cliColors.red" = "Kullanım oranı (tehlike)";
-"cliColors.note" = "Değişiklikler widget'lar ve menü çubuğuna uygulanır.";
 "cliColors.reset" = "Varsayılanlara sıfırla";
+
+/* Pacemaker Colors */
+"cliColors.pacemaker" = "Renk Ayarları";
+"cliColors.pacemakerRing" = "Halka Grafik";
+"cliColors.pacemakerOrange" = "Tempo aşıldı (Uyarı)";
+"cliColors.pacemakerRed" = "Tempo aşıldı (Tehlike)";
 
 /* Scripts */
 "scripts.title" = "Dahil edilen betikler";
@@ -181,3 +171,10 @@
 "widgetTapAction.openWebsite" = "Web sitesini aç";
 "widgetTapAction.refreshData" = "Verileri yenile";
 "widgetTapAction.note" = "Widget'a dokunulduğunda ne olacağını seçin";
+
+/* Pacemaker Thresholds */
+"notification.pacemakerThresholds" = "Pacemaker eşikleri";
+"notification.pacemakerThresholds.description" = "Hız aşıldığında uyarı ve tehlike eşiklerini ayarlayın (göreceli %)";
+"notification.pacemakerThresholds.warning" = "Uyarı";
+"notification.pacemakerThresholds.danger" = "Tehlike";
+"pacemaker.showRingWarningSegment" = "Halka uyarı segmentlerini göster";

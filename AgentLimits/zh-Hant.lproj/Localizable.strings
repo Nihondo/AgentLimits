@@ -2,19 +2,22 @@
 "tab.usage" = "使用限制";
 "tab.wakeUp" = "Wake Up";
 "tab.notification" = "通知";
+"tab.pacemaker" = "節拍器";
 "tab.advanced" = "進階";
+
+/* Pacemaker */
+"pacemaker.description" = "自訂節拍器顯示、閾值與顏色。";
 
 /* Menu */
 "menu.openSettings" = "AgentLimits 設定...";
 "menu.displayMode" = "顯示模式";
 "menu.displayMode.used" = "使用率";
 "menu.displayMode.remaining" = "剩餘率";
+"menu.showPacemakerValue" = "顯示節拍器指示器";
 "menu.about" = "關於 AgentLimits";
 "menu.quit" = "結束";
 "menu.language" = "語言";
 "menu.language.system" = "系統";
-"menu.language.japanese" = "日本語";
-"menu.language.english" = "English";
 
 /* ContentView */
 "content.login" = "登入以取得目前使用率";
@@ -30,10 +33,8 @@
 "content.clearDataCancel" = "取消";
 "content.provider" = "服務";
 "content.usageSummary" = "狀態";
-"content.latestUsage" = "最新使用狀況";
 "content.5hours" = "5 小時";
 "content.week" = "週";
-"content.updated" = "更新：";
 "usage.updated" = "更新： ";
 "content.notFetched" = "尚未取得。請在下方登入。";
 "content.reset" = "重置：";
@@ -43,6 +44,7 @@
 /* Display Mode */
 "displayMode.used" = "使用率";
 "displayMode.remaining" = "剩餘率";
+"displayMode.usedWithPacemaker" = "使用率 + 參考";
 
 /* Status */
 "status.notFetched" = "尚未取得";
@@ -59,10 +61,6 @@
 "error.decodeFailed" = "解析資料失敗";
 
 /* Relative Time */
-"time.withinMinute" = "1 分鐘內";
-"time.minutesAgo" = "%d 分鐘前";
-"time.hoursAgo" = "%d 小時前";
-"time.daysAgo" = "%d 天前";
 "time.minutesLater" = "%d 分鐘後";
 "time.hoursLater" = "%d 小時後";
 "time.daysLater" = "%d 天後";
@@ -70,8 +68,6 @@
 /* Wake Up */
 "menu.wakeUp" = "Wake up";
 "menu.wakeUpNow" = " - 立即執行";
-"menu.wakeUpSettings" = "Wake up 設定...";
-"wakeUp.windowTitle" = "Wake up 設定";
 "wakeUp.title" = "Wake up 排程";
 "wakeUp.description" = "在排定時間呼叫 CLI 以開始 5 小時工作階段";
 "wakeUp.provider" = "服務";
@@ -86,7 +82,6 @@
 "wakeUp.additionalArgs" = "附加參數";
 "wakeUp.additionalArgsPlaceholder" = "例如：--model=\"<<model-name>>\"";
 "wakeUp.status" = "狀態";
-"wakeUp.nextRun" = "下次執行：";
 "wakeUp.notScheduled" = "未排程";
 "wakeUp.lastResult" = "上次結果：";
 "wakeUp.success" = "成功";
@@ -97,12 +92,9 @@
 "loginItem.notFound" = "找不到登入項目";
 
 /* Threshold Notification */
-"menu.thresholdSettings" = "閾值通知設定...";
-"notification.windowTitle" = "閾值通知設定";
 "notification.title" = "使用率閾值通知";
 "notification.description" = "設定通知閾值與使用率顏色";
 "notification.provider" = "服務";
-"notification.thresholds" = "閾值";
 "notification.colors" = "顏色";
 "notification.authorization" = "需要通知權限";
 "notification.requestAuth" = "請求權限";
@@ -112,7 +104,6 @@
 "notification.warning" = "警告等級";
 "notification.danger" = "危險等級";
 "notification.resetDefaults" = "還原預設值";
-"notification.threshold" = "閾值：";
 "notification.alertTitleWarning" = "%@ 使用率警告";
 "notification.alertTitleDanger" = "%@ 使用率危險";
 "notification.alertBody5h" = "5 小時使用限制已達 %d%%";
@@ -120,9 +111,6 @@
 
 /* ccusage */
 "tab.ccusage" = "ccusage";
-"menu.ccusage" = "ccusage";
-"menu.ccusageSettings" = "ccusage 設定...";
-"ccusage.windowTitle" = "ccusage 設定";
 "ccusage.title" = "代幣使用量追蹤（ccusage）";
 "ccusage.description" = "使用 ccusage CLI 取得代幣使用量與費用";
 "ccusage.settings" = "設定";
@@ -133,7 +121,6 @@
 "ccusage.testNow" = "立即測試";
 "ccusage.status" = "狀態";
 "ccusage.lastResult" = "上次結果：";
-"ccusage.success" = "成功";
 "tokenUsage.notFetched" = "尚未取得";
 "tokenUsage.updated" = "更新： ";
 "ccusage.provider" = "服務";
@@ -147,7 +134,6 @@
 "advancedSettings.title" = "進階設定";
 "advancedSettings.description" = "自訂 CLI 路徑、腳本與小工具動作。";
 "cliPaths.sectionTitle" = "CLI 指令路徑";
-"cliPaths.description" = "指定 codex、claude、npx 的完整路徑。留空則使用 PATH。";
 "cliPaths.codex" = "codex 路徑";
 "cliPaths.claude" = "claude 路徑";
 "cliPaths.npx" = "npx 路徑";
@@ -159,14 +145,18 @@
 "cliPaths.notFound" = "找不到";
 
 /* CLI Colors */
-"cliColors.title" = "使用率顏色";
 "cliColors.donut" = "甜甜圈圖顏色";
 "cliColors.donutUseStatus" = "使用使用率顏色";
 "cliColors.green" = "使用率（正常）";
 "cliColors.orange" = "使用率（警告）";
 "cliColors.red" = "使用率（危險）";
-"cliColors.note" = "變更會套用到小工具與選單列。";
 "cliColors.reset" = "還原預設值";
+
+/* Pacemaker Colors */
+"cliColors.pacemaker" = "顏色設定";
+"cliColors.pacemakerRing" = "環形圖";
+"cliColors.pacemakerOrange" = "超出節奏（警告）";
+"cliColors.pacemakerRed" = "超出節奏（危險）";
 
 /* Scripts */
 "scripts.title" = "隨附腳本";
@@ -181,3 +171,10 @@
 "widgetTapAction.openWebsite" = "開啟網站";
 "widgetTapAction.refreshData" = "重新整理資料";
 "widgetTapAction.note" = "選擇點擊小工具時的動作";
+
+/* Pacemaker Thresholds */
+"notification.pacemakerThresholds" = "節拍器閾值";
+"notification.pacemakerThresholds.description" = "設定超出節奏時的警告和危險閾值（相對%）";
+"notification.pacemakerThresholds.warning" = "警告區域";
+"notification.pacemakerThresholds.danger" = "危險區域";
+"pacemaker.showRingWarningSegment" = "顯示環形警告區段";
