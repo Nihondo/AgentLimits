@@ -44,6 +44,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 | `AgentLimits/App/AgentLimitsApp.swift` | Main app entry, menu bar UI, deep link handling |
 | `AgentLimits/App/AppSharedState.swift` | Shared app state for menu bar and settings window |
 | `AgentLimits/App/SettingsTabView.swift` | Tab-based settings UI (Usage, ccusage, Wake Up, Notification, Advanced) |
+| `AgentLimits/App/DesignTokens.swift` | Shared design tokens (spacing/corners/window min size) |
 | `AgentLimits/App/CLICommandSettingsView.swift` | Advanced Settings UI (CLI paths + scripts + widget tap action) |
 | `AgentLimits/App/LanguageManager.swift` | Language settings management (Japanese/English/System) |
 | `AgentLimits/App/LoginItemManager.swift` | Login item (start at login) management |
@@ -112,6 +113,8 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 
 #### Usage Monitoring
 - Sign in to each service in the in-app WKWebView (Codex/Claude Code)
+- Usage tab places the login WKWebView in a bottom collapsible panel (`chevron up/down`), collapsed by default
+- Expanded login panel opens upward and can be closed via the handle toggle or background tap
 - Auto refresh interval is configurable (1-10 minutes)
 - Display mode (used/remaining) shared across app + widgets
 - Color-coded percentage display in widgets based on usage level and display mode
@@ -234,5 +237,6 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 - Widget refresh frequency may be throttled by the OS
 - CLI execution uses the user login shell and prefixes PATH with `/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH`
 - Full-path overrides from Advanced Settings take precedence
+- Settings window minimum height is `620` (`DesignTokens.WindowSize.minHeight`) so the collapsed login panel remains visible
 - Usage status color thresholds are synced from notification thresholds per provider/window
 - Claude Code status line script requires `jq`

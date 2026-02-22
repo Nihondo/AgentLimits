@@ -13,7 +13,7 @@ Download the latest build: [Download](https://github.com/Nihondo/AgentLimits/rel
 1. Run AgentLimits.
 2. Add widgets in Notification Center.
 3. Open **AgentLimits Settings...** from the menu bar.
-4. In **Usage**, choose Codex or Claude Code, set refresh interval (1–10 minutes), then sign in.
+4. In **Usage**, choose Codex or Claude Code, set refresh interval (1–10 minutes), open the bottom login panel (`▲`), then sign in.
 5. Use the menu bar **Display Mode** to switch Used/Remaining, and **Refresh Now** for manual updates.
 
 ## What It Tracks
@@ -65,8 +65,9 @@ Pacemaker mode shows a time-based usage benchmark to help you stay on track.
 2. Select Codex or Claude Code.
 3. Choose refresh interval (1–10 minutes).
 4. Toggle **Show in menu bar** per provider.
-5. Sign in via the embedded WebView.
-6. Use **Clear Data** to remove login data and website storage if sign-in gets stuck.
+5. Click the bottom login bar (`▲`) to expand the embedded WebView panel.
+6. Sign in via the embedded WebView.
+7. Use **Clear Data** to remove login data and website storage if sign-in gets stuck.
 
 ### ccusage
 1. Open **ccusage**.
@@ -138,3 +139,4 @@ Snapshots are stored in the App Group container:
 - Full-path overrides in **Advanced** take precedence.
 - Claude Code logins may require multiple attempts.
 - The Claude Code status line script requires `jq`.
+- Settings window minimum height is `620` to keep the bottom login panel visible.

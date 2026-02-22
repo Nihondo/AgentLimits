@@ -41,6 +41,8 @@
 - Auto refresh: configurable 1-10 minutes while the app is running (usage limits)
 - Display mode: used% or remaining% (set from menu bar, shared across app + widgets)
 - Language preference: stored in App Group under `app_language`
+- Usage tab keeps login WKWebView in a bottom collapsible panel (`chevron up/down`), collapsed by default
+- Expanded login panel opens upward and can be collapsed by tapping the handle or dimmed background
 - Color-coded percentage display in widgets based on usage level and display mode
 - Usage screen includes **Clear Data** to remove embedded browser login data and website storage
 
@@ -95,6 +97,7 @@
 - Wake Up uses `launchctl bootstrap/bootout` (modern macOS API)
 - Threshold notification requires user permission (requested via settings UI)
 - Menu bar status uses ImageRenderer for dynamic template images
+- Settings window minimum height is `620` (`DesignTokens.WindowSize.minHeight`) so the bottom login panel is always visible
 - CLI execution uses the user login shell and prefixes PATH with `/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH`
 - Full-path overrides (Advanced Settings) take precedence
 
