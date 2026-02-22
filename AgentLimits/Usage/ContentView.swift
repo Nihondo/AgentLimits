@@ -21,6 +21,7 @@ struct ContentView: View {
     @AppStorage(UserDefaultsKeys.menuBarStatusClaudeEnabled) private var menuBarClaudeEnabled = false
     @State private var isShowingClearDataConfirm = false
     @State private var isClearingData = false
+    @State private var isWebViewExpanded = false
     @State private var popupWebView: WKWebView?
     @State private var popupWebViewStore: WebViewStore?
 
@@ -30,48 +31,57 @@ struct ContentView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.large) {
-            headerView
+        GeometryReader { geometry in
+            ZStack(alignment: .bottom) {
+                VStack(alignment: .leading, spacing: DesignTokens.Spacing.large) {
+                    headerView
 
-            Form {
-                SettingsFormSection {
-                    LabeledContent("content.provider".localized()) {
-                        providerPicker
+                    Form {
+                        SettingsFormSection {
+                            LabeledContent("content.provider".localized()) {
+                                providerPicker
+                            }
+                            LabeledContent("refreshInterval.label".localized()) {
+                                RefreshIntervalPickerRow(showsLabel: false, refreshIntervalMinutes: $refreshIntervalMinutes)
+                            }
+                        }
+
+                        SettingsFormSection {
+                            menuBarToggleRow
+                        }
+
+                        SettingsFormSection(title: "content.usageSummary".localized()) {
+                            UsageSummaryView(
+                                snapshot: viewModel.snapshot,
+                                displayMode: displayMode,
+                                fetchStatuses: viewModel.fetchStatuses
+                            )
+                        }
+
+                        SettingsFormSection {
+                            controlView
+                        }
                     }
-                    LabeledContent("refreshInterval.label".localized()) {
-                        RefreshIntervalPickerRow(showsLabel: false, refreshIntervalMinutes: $refreshIntervalMinutes)
-                    }
+                    .formStyle(.grouped)
+                    .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(DesignTokens.Spacing.large)
+                .padding(.bottom, webViewPanelCollapsedHeight + DesignTokens.Spacing.large)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                .allowsHitTesting(!isWebViewExpanded)
+
+                if isWebViewExpanded {
+                    Color.black.opacity(0.08)
+                        .ignoresSafeArea()
+                        .onTapGesture {
+                            collapseWebViewPanel()
+                        }
+                        .transition(.opacity)
                 }
 
-                SettingsFormSection {
-                    menuBarToggleRow
-                }
-
-                SettingsFormSection(title: "content.usageSummary".localized()) {
-                    UsageSummaryView(
-                        snapshot: viewModel.snapshot,
-                        displayMode: displayMode,
-                        fetchStatuses: viewModel.fetchStatuses
-                    )
-                }
-
-                SettingsFormSection {
-                    controlView
-                }
+                webViewPanel(totalHeight: geometry.size.height)
             }
-            .formStyle(.grouped)
-            .fixedSize(horizontal: false, vertical: true)
-
-            VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
-                Divider()
-                Text("content.login".localized())
-                    .font(.headline)
-                loginWebViewSection
-            }
-            .frame(maxHeight: .infinity)
-            .layoutPriority(1)
         }
-        .padding(DesignTokens.Spacing.large)
         .onChange(of: refreshIntervalMinutes) { _, _ in
             // Restart auto-refresh and notify widgets when interval changes.
             viewModel.restartAutoRefresh()
@@ -201,6 +211,75 @@ struct ContentView: View {
                 }
             }
         )
+    }
+
+    private var webViewPanelCollapsedHeight: CGFloat { 42 }
+
+    private func webViewPanel(totalHeight: CGFloat) -> some View {
+        let panelPadding = DesignTokens.Spacing.large
+        let expandedHeight = max(
+            webViewPanelCollapsedHeight,
+            totalHeight - (panelPadding * 2)
+        )
+
+        return VStack(spacing: 0) {
+            webViewPanelHandle
+
+            if isWebViewExpanded {
+                Divider()
+                loginWebViewSection
+                    .padding(DesignTokens.Spacing.small)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .frame(
+            height: isWebViewExpanded ? expandedHeight : webViewPanelCollapsedHeight,
+            alignment: .top
+        )
+        .background(.regularMaterial)
+        .clipShape(
+            RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: DesignTokens.CornerRadius.medium)
+                .strokeBorder(Color.secondary.opacity(0.25))
+        )
+        .shadow(color: .black.opacity(isWebViewExpanded ? 0.16 : 0.08), radius: isWebViewExpanded ? 10 : 4, y: 2)
+        .padding(.horizontal, panelPadding)
+        .padding(.bottom, panelPadding)
+        .animation(.easeInOut(duration: 0.2), value: isWebViewExpanded)
+    }
+
+    private var webViewPanelHandle: some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                isWebViewExpanded.toggle()
+            }
+        } label: {
+            HStack(spacing: DesignTokens.Spacing.small) {
+                Image(systemName: isWebViewExpanded ? "chevron.down" : "chevron.up")
+                    .font(.caption.bold())
+                Text("content.login".localized())
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                Spacer()
+                Text(viewModel.selectedProvider.displayName)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, DesignTokens.Spacing.medium)
+            .padding(.vertical, DesignTokens.Spacing.small)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text("content.login".localized()))
+    }
+
+    private func collapseWebViewPanel() {
+        guard isWebViewExpanded else { return }
+        withAnimation(.easeInOut(duration: 0.2)) {
+            isWebViewExpanded = false
+        }
     }
 
     private var loginWebViewSection: some View {
