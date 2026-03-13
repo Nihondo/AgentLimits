@@ -873,7 +873,7 @@ enum UsageSnapshotStoreErrorMessageResolver {
 /// Generic snapshot store for persisting data via App Group shared container.
 /// Provides common load/save functionality for any snapshot type.
 /// Used as the base implementation for UsageSnapshotStore and TokenUsageSnapshotStore.
-class AppGroupSnapshotStore<Provider: SnapshotFileNaming, Snapshot: SnapshotData>
+struct AppGroupSnapshotStore<Provider: SnapshotFileNaming, Snapshot: SnapshotData>
     where Snapshot.Provider == Provider {
 
     private let fileManager: FileManager
@@ -993,8 +993,9 @@ class AppGroupSnapshotStore<Provider: SnapshotFileNaming, Snapshot: SnapshotData
 
 /// Persists and retrieves usage snapshots via App Group shared container.
 /// Used by both the main app (for writing) and widgets (for reading).
-/// Inherits common functionality from AppGroupSnapshotStore.
-final class UsageSnapshotStore: AppGroupSnapshotStore<UsageProvider, UsageSnapshot> {
-    /// Shared singleton instance for app-wide use
-    static let shared = UsageSnapshotStore()
+typealias UsageSnapshotStore = AppGroupSnapshotStore<UsageProvider, UsageSnapshot>
+
+extension AppGroupSnapshotStore where Provider == UsageProvider, Snapshot == UsageSnapshot {
+    /// Shared store instance for app-wide use.
+    static let shared = Self()
 }

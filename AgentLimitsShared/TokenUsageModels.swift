@@ -165,10 +165,11 @@ struct TokenUsageSnapshot: Codable, SnapshotData {
 
 /// Persists and retrieves token usage snapshots via App Group shared container.
 /// Used by both the main app (for writing) and widgets (for reading).
-/// Inherits common functionality from AppGroupSnapshotStore.
-final class TokenUsageSnapshotStore: AppGroupSnapshotStore<TokenUsageProvider, TokenUsageSnapshot> {
-    /// Shared singleton instance for app-wide use
-    static let shared = TokenUsageSnapshotStore()
+typealias TokenUsageSnapshotStore = AppGroupSnapshotStore<TokenUsageProvider, TokenUsageSnapshot>
+
+extension AppGroupSnapshotStore where Provider == TokenUsageProvider, Snapshot == TokenUsageSnapshot {
+    /// Shared store instance for app-wide use.
+    static let shared = Self()
 }
 
 // MARK: - CCUsage Settings
