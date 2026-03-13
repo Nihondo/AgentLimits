@@ -29,36 +29,27 @@ struct CLICommandSettingsView: View {
     }
 
     var body: some View {
-        SettingsScrollContainer {
-            headerView
-
-            Form {
-                SettingsFormSection(title: "cliPaths.sectionTitle".localized()) {
-                    commandPathSection
-                }
-
-                SettingsFormSection(title: "scripts.title".localized()) {
-                    scriptsSection
-                }
-
-                SettingsFormSection(title: "widgetTapAction.title".localized()) {
-                    widgetTapActionSection
-                }
+        Form {
+            SettingsFormSection(title: "cliPaths.sectionTitle".localized(),
+                                footerText: "cliPaths.note".localized()) {
+                commandPathSection
             }
-            .formStyle(.grouped)
+
+            SettingsFormSection(title: "scripts.title".localized(),
+                                footerText: "scripts.claudeCode.note".localized()) {
+                scriptsSection
+            }
+
+            SettingsFormSection(title: "widgetTapAction.title".localized(),
+                                footerText: "widgetTapAction.note".localized()) {
+                widgetTapActionSection
+            }
         }
-        .frame(minWidth: 420, minHeight: 420)
+        .formStyle(.grouped)
         .onAppear { refreshAllResolvedPaths() }
         .onChange(of: codexCommandPathText) { refreshResolvedPath(for: .codex) }
         .onChange(of: claudeCommandPathText) { refreshResolvedPath(for: .claude) }
         .onChange(of: npxCommandPathText) { refreshResolvedPath(for: .npx) }
-    }
-
-    private var headerView: some View {
-        SettingsHeaderView(
-            titleText: "advancedSettings.title".localized(),
-            descriptionText: "advancedSettings.description".localized()
-        )
     }
 
     private struct CommandPathDescriptor: Identifiable {
@@ -103,64 +94,50 @@ struct CLICommandSettingsView: View {
                     isResolved: isResolvedPath(for: descriptor.kind)
                 )
             }
-            Text("cliPaths.note".localized())
-                .font(.footnote)
-                .foregroundStyle(.secondary)
         }
     }
 
     private var scriptsSection: some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
-            HStack(alignment: .top, spacing: DesignTokens.Spacing.small) {
-                VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
-                    Text("scripts.claudeCode.title".localized())
-                        .font(.body)
-                    if let path = statusLineScriptPath {
-                        Text(path)
-                            .font(.system(.footnote, design: .monospaced))
-                            .foregroundStyle(.secondary)
-                            .textSelection(.enabled)
-                    } else {
-                        Text("scripts.notFound".localized())
-                            .font(.footnote)
-                            .foregroundStyle(.red)
-                    }
-                }
-                Spacer()
-                if statusLineScriptPath != nil {
-                    Button {
-                        copyScriptPath()
-                    } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: scriptCopyFeedback ? "checkmark" : "doc.on.doc")
-                            Text(scriptCopyFeedback ? "scripts.copied".localized() : "scripts.copy".localized())
-                        }
-                    }
-                    .settingsButtonStyle(.secondary)
+        HStack(alignment: .top, spacing: DesignTokens.Spacing.small) {
+            VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
+                Text("scripts.claudeCode.title".localized())
+                    .font(.body)
+                if let path = statusLineScriptPath {
+                    Text(path)
+                        .font(.system(.footnote, design: .monospaced))
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+                } else {
+                    Text("scripts.notFound".localized())
+                        .font(.footnote)
+                        .foregroundStyle(.red)
                 }
             }
-            Text("scripts.claudeCode.note".localized())
-                .font(.footnote)
-                .foregroundStyle(.secondary)
+            Spacer()
+            if statusLineScriptPath != nil {
+                Button {
+                    copyScriptPath()
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: scriptCopyFeedback ? "checkmark" : "doc.on.doc")
+                        Text(scriptCopyFeedback ? "scripts.copied".localized() : "scripts.copy".localized())
+                    }
+                }
+                .settingsButtonStyle(.secondary)
+            }
         }
     }
 
     private var widgetTapActionSection: some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
-            Picker("", selection: $widgetTapAction) {
-                ForEach(WidgetTapAction.allCases) { action in
-                    Text(action.localizationKey.localized()).tag(action)
-                }
+        Picker("", selection: $widgetTapAction) {
+            ForEach(WidgetTapAction.allCases) { action in
+                Text(action.localizationKey.localized()).tag(action)
             }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .onChange(of: widgetTapAction) { _, newValue in
-                WidgetTapActionStore.saveAction(newValue)
-            }
-
-            Text("widgetTapAction.note".localized())
-                .font(.footnote)
-                .foregroundStyle(.secondary)
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .onChange(of: widgetTapAction) { _, newValue in
+            WidgetTapActionStore.saveAction(newValue)
         }
     }
 

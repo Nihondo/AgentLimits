@@ -17,37 +17,23 @@ struct WakeUpSettingsView: View {
     }
 
     var body: some View {
-        SettingsScrollContainer {
-            headerView
-
-            Form {
-                SettingsFormSection {
-                    LabeledContent("wakeUp.provider".localized()) {
-                        providerPicker
-                    }
-                }
-
-                SettingsFormSection(title: "wakeUp.schedule".localized()) {
-                    scheduleSection
-                }
-
-                SettingsFormSection(title: "wakeUp.status".localized()) {
-                    statusSection
-                    lastResultView
+        Form {
+            SettingsFormSection {
+                LabeledContent("wakeUp.provider".localized()) {
+                    providerPicker
                 }
             }
-            .formStyle(.grouped)
+
+            SettingsFormSection(title: "wakeUp.schedule".localized()) {
+                scheduleSection
+            }
+
+            SettingsFormSection(title: "wakeUp.status".localized()) {
+                statusSection
+                lastResultView
+            }
         }
-        .frame(minWidth: 400, minHeight: 500)
-    }
-
-    // MARK: - Header
-
-    private var headerView: some View {
-        SettingsHeaderView(
-            titleText: "wakeUp.title".localized(),
-            descriptionText: "wakeUp.description".localized()
-        )
+        .formStyle(.grouped)
     }
 
     // MARK: - Provider Picker
@@ -206,10 +192,7 @@ private struct ProviderScheduleView: View {
                     }
                 )
 
-                VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
-                    Text("wakeUp.command".localized())
-                        .font(.body)
-                        .foregroundStyle(.secondary)
+                LabeledContent("wakeUp.command".localized()) {
                     Text(schedule.cliCommand)
                         .font(.system(.footnote, design: .monospaced))
                         .foregroundStyle(.primary)

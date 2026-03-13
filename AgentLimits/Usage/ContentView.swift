@@ -34,8 +34,6 @@ struct ContentView: View {
         GeometryReader { geometry in
             ZStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: DesignTokens.Spacing.large) {
-                    headerView
-
                     Form {
                         SettingsFormSection {
                             LabeledContent("content.provider".localized()) {
@@ -129,13 +127,6 @@ struct ContentView: View {
                 )
             }
         }
-    }
-
-    private var headerView: some View {
-        SettingsHeaderView(
-            titleText: "content.usageLimit".localized(),
-            descriptionText: "content.autoRefresh".localized(refreshIntervalMinutes)
-        )
     }
 
     // MARK: - Provider Picker

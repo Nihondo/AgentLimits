@@ -18,7 +18,7 @@ enum DesignTokens {
     }
 
     enum WindowSize {
-        static let minWidth: CGFloat = 550
+        static let minWidth: CGFloat = 750
         static let minHeight: CGFloat = 620
     }
 }

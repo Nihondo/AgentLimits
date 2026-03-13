@@ -12,41 +12,30 @@ struct PacemakerSettingsView: View {
     private var isPacemakerRingWarningEnabled: Bool = PacemakerRingWarningSettings.defaultEnabled
 
     var body: some View {
-        SettingsScrollContainer {
-            headerView
-
-            Form {
-                SettingsFormSection {
-                    Toggle("menu.showPacemakerValue".localized(), isOn: $showPacemakerValue)
-                        .toggleStyle(.checkbox)
-                    Toggle("pacemaker.showRingWarningSegment".localized(), isOn: $isPacemakerRingWarningEnabled)
-                        .toggleStyle(.checkbox)
-                }
-
-                SettingsFormSection(title: "notification.pacemakerThresholds".localized()) {
-                    PacemakerThresholdSection()
-                }
-
-                SettingsFormSection(title: "cliColors.pacemaker".localized()) {
-                    PacemakerColorSettingsSection()
-                }
+        Form {
+            SettingsFormSection {
+                Toggle("menu.showPacemakerValue".localized(), isOn: $showPacemakerValue)
+                    .toggleStyle(.checkbox)
+                Toggle("pacemaker.showRingWarningSegment".localized(), isOn: $isPacemakerRingWarningEnabled)
+                    .toggleStyle(.checkbox)
             }
-            .formStyle(.grouped)
+
+            SettingsFormSection(title: "notification.pacemakerThresholds".localized(),
+                                footerText: "notification.pacemakerThresholds.description".localized()) {
+                PacemakerThresholdSection()
+            }
+
+            SettingsFormSection(title: "cliColors.pacemaker".localized()) {
+                PacemakerColorSettingsSection()
+            }
         }
-        .frame(minWidth: 400, minHeight: 400)
+        .formStyle(.grouped)
         .onChange(of: showPacemakerValue) { _, _ in
             reloadUsageTimelines()
         }
         .onChange(of: isPacemakerRingWarningEnabled) { _, _ in
             reloadUsageTimelines()
         }
-    }
-
-    private var headerView: some View {
-        SettingsHeaderView(
-            titleText: "tab.pacemaker".localized(),
-            descriptionText: "pacemaker.description".localized()
-        )
     }
 
     private func reloadUsageTimelines() {
@@ -60,18 +49,12 @@ private struct PacemakerThresholdSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("notification.pacemakerThresholds.description".localized())
-                .font(.caption)
-                .foregroundColor(.secondary)
-
             PacemakerThresholdRow(
                 title: "notification.pacemakerThresholds.warning".localized(),
                 value: $warningDelta,
                 range: 0...50,
                 color: .orange
             )
-
-            Divider()
 
             PacemakerThresholdRow(
                 title: "notification.pacemakerThresholds.danger".localized(),
@@ -80,20 +63,13 @@ private struct PacemakerThresholdSection: View {
                 color: .red
             )
 
-            Divider()
-            HStack {
-                Spacer()
-                Button("cliColors.reset".localized()) {
-                    warningDelta = PacemakerThresholdSettings.defaultWarningDelta
-                    dangerDelta = PacemakerThresholdSettings.defaultDangerDelta
-                    PacemakerThresholdSettings.resetToDefaults()
-                    reloadUsageTimelines()
-                }
+            Button("cliColors.reset".localized()) {
+                warningDelta = PacemakerThresholdSettings.defaultWarningDelta
+                dangerDelta = PacemakerThresholdSettings.defaultDangerDelta
+                PacemakerThresholdSettings.resetToDefaults()
+                reloadUsageTimelines()
             }
         }
-        .padding()
-        .background(.thinMaterial)
-        .cornerRadius(8)
         .onChange(of: warningDelta) { _, newValue in
             if newValue >= dangerDelta {
                 dangerDelta = min(newValue + 1, 50)
@@ -150,21 +126,12 @@ private struct PacemakerColorSettingsSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             ColorPicker("cliColors.pacemakerRing".localized(), selection: $pacemakerRingColor, supportsOpacity: true)
-            Divider()
             ColorPicker("cliColors.pacemakerOrange".localized(), selection: $pacemakerStatusOrangeColor, supportsOpacity: false)
-            Divider()
             ColorPicker("cliColors.pacemakerRed".localized(), selection: $pacemakerStatusRedColor, supportsOpacity: false)
-            Divider()
-            HStack {
-                Spacer()
-                Button("cliColors.reset".localized()) {
-                    resetPacemakerColors()
-                }
+            Button("cliColors.reset".localized()) {
+                resetPacemakerColors()
             }
         }
-        .padding()
-        .background(.thinMaterial)
-        .cornerRadius(8)
         .onAppear {
             reloadPacemakerColors()
         }

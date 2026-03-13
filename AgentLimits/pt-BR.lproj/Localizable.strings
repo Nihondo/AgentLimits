@@ -1,3 +1,6 @@
+/* Window */
+"window.settings.title" = "Configurações do AgentLimits";
+
 /* Tabs */
 "tab.usage" = "Limite de uso";
 "tab.wakeUp" = "Wake Up";

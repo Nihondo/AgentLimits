@@ -108,7 +108,6 @@ struct AgentLimitsApp: App {
                 tokenUsageViewModel: appState.tokenUsageViewModel
             )
         }
-        .windowToolbarStyle(.unified(showsTitle: true))
         .windowResizability(.contentSize)
         .handlesExternalEvents(matching: [])
         .commandsRemoved()

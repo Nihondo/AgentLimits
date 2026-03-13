@@ -3,22 +3,6 @@
 
 import SwiftUI
 
-struct SettingsHeaderView: View {
-    let titleText: String
-    let descriptionText: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(titleText)
-                .font(.title2)
-                .bold()
-            Text(descriptionText)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        }
-    }
-}
-
 struct RefreshIntervalPickerRow: View {
     let labelKey: String
     let showsLabel: Bool
@@ -66,24 +50,6 @@ struct RefreshIntervalPickerRow: View {
                 refreshIntervalMinutes = RefreshIntervalConfig.normalizedMinutes(newValue)
             }
         )
-    }
-}
-
-/// Scrollable container for settings content.
-struct SettingsScrollContainer<Content: View>: View {
-    let content: Content
-
-    init(@ViewBuilder content: () -> Content) {
-        self.content = content()
-    }
-
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: DesignTokens.Spacing.sectionGap) {
-                content
-            }
-            .padding(DesignTokens.Spacing.large)
-        }
     }
 }
 

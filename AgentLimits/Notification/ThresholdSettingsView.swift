@@ -18,64 +18,46 @@ struct ThresholdSettingsView: View {
     }
 
     var body: some View {
-        SettingsScrollContainer {
-            headerView
-
-            Form {
-                if !manager.isNotificationAuthorized {
-                    SettingsFormSection {
-                        authorizationSection
-                    }
-                }
-
+        Form {
+            if !manager.isNotificationAuthorized {
                 SettingsFormSection {
-                    LabeledContent("notification.provider".localized()) {
-                        providerPicker
-                    }
-                }
-
-                SettingsFormSection(title: "notification.primaryWindow".localized()) {
-                    thresholdSection(
-                        settings: manager.getSettings(for: selectedProvider).primaryWindow,
-                        windowKind: .primary
-                    )
-                }
-
-                SettingsFormSection(title: "notification.secondaryWindow".localized()) {
-                    thresholdSection(
-                        settings: manager.getSettings(for: selectedProvider).secondaryWindow,
-                        windowKind: .secondary
-                    )
-                }
-
-                SettingsFormSection {
-                    HStack {
-                        Spacer()
-                        Button("notification.resetDefaults".localized()) {
-                            manager.resetSettings(for: selectedProvider)
-                            reloadUsageWidgets(for: selectedProvider)
-                        }
-                        .settingsButtonStyle(.secondary)
-                    }
-                }
-
-
-                SettingsFormSection(title: "notification.colors".localized()) {
-                    UsageColorSettingsSection()
+                    authorizationSection
                 }
             }
-            .formStyle(.grouped)
+
+            SettingsFormSection {
+                LabeledContent("notification.provider".localized()) {
+                    providerPicker
+                }
+            }
+
+            SettingsFormSection(title: "notification.primaryWindow".localized()) {
+                thresholdSection(
+                    settings: manager.getSettings(for: selectedProvider).primaryWindow,
+                    windowKind: .primary
+                )
+            }
+
+            SettingsFormSection(title: "notification.secondaryWindow".localized()) {
+                thresholdSection(
+                    settings: manager.getSettings(for: selectedProvider).secondaryWindow,
+                    windowKind: .secondary
+                )
+            }
+
+            SettingsFormSection {
+                Button("notification.resetDefaults".localized()) {
+                    manager.resetSettings(for: selectedProvider)
+                    reloadUsageWidgets(for: selectedProvider)
+                }
+                .settingsButtonStyle(.secondary)
+            }
+
+            SettingsFormSection(title: "notification.colors".localized()) {
+                UsageColorSettingsSection()
+            }
         }
-        .frame(minWidth: 400, minHeight: 400)
-    }
-
-    // MARK: - Header
-
-    private var headerView: some View {
-        SettingsHeaderView(
-            titleText: "notification.title".localized(),
-            descriptionText: "notification.description".localized()
-        )
+        .formStyle(.grouped)
     }
 
     // MARK: - Authorization Section
@@ -272,37 +254,17 @@ private struct UsageColorSettingsSection: View {
     @State private var statusRedColor: Color = UsageColorSettings.loadStatusRedColor()
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            VStack(alignment: .leading, spacing: 6) {
-                ColorPicker("cliColors.donut".localized(), selection: $donutColor, supportsOpacity: false)
-                    .disabled(isDonutColorByUsage)
-                Toggle(isOn: $isDonutColorByUsage) {
-                    HStack {
-                        Spacer()
-                        Text("cliColors.donutUseStatus".localized())
-                    }
-                }
+            ColorPicker("cliColors.donut".localized(), selection: $donutColor, supportsOpacity: false)
+                .disabled(isDonutColorByUsage)
+            Toggle("cliColors.donutUseStatus".localized(), isOn: $isDonutColorByUsage)
                 .toggleStyle(.switch)
-            }
-
-            Divider()
             ColorPicker("cliColors.green".localized(), selection: $statusGreenColor, supportsOpacity: false)
-            Divider()
             ColorPicker("cliColors.orange".localized(), selection: $statusOrangeColor, supportsOpacity: false)
-            Divider()
             ColorPicker("cliColors.red".localized(), selection: $statusRedColor, supportsOpacity: false)
-
-            Divider()
-            HStack {
-                Spacer()
-                Button("cliColors.reset".localized()) {
-                    resetUsageColors()
-                }
+            Button("cliColors.reset".localized()) {
+                resetUsageColors()
             }
-
         }
-        .padding()
-        .background(.thinMaterial)
-        .cornerRadius(8)
         .onAppear {
             reloadUsageColorSettings()
         }

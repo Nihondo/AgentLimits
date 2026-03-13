@@ -335,6 +335,12 @@ private struct UsageDonutView: View {
         guard isPacemakerRingWarningEnabled else { return nil }
         guard displayMode != .remaining else { return nil }
         guard let window, let usedPercent else { return nil }
+        // 使用率閾値で色が変わっている場合（orange/red）、セグメント描画をスキップ
+        if let level = WidgetUsageColorResolver.donutRingLevel(
+            usedPercent: window.usedPercent,
+            provider: provider,
+            windowKind: windowKind
+        ), level != .green { return nil }
         guard let pacemakerPercent = window.calculatePacemakerPercent() else { return nil }
 
         let warningDelta = PacemakerThresholdSettings.loadWarningDelta()
@@ -561,21 +567,29 @@ private enum WidgetUsageColorResolver {
         }
     }
 
+    static func donutRingLevel(
+        usedPercent: Double?,
+        provider: UsageProvider,
+        windowKind: UsageWindowKind
+    ) -> UsageStatusLevel? {
+        let defaults = AppGroupDefaults.shared
+        let useStatusColor = defaults?.bool(forKey: UsageColorKeys.donutUseStatus) ?? false
+        guard useStatusColor, let usedPercent else { return nil }
+        let thresholds = UsageStatusThresholdStore.loadThresholds(for: provider, windowKind: windowKind)
+        return UsageStatusLevelResolver.level(
+            for: usedPercent,
+            isRemainingMode: false,
+            warningThreshold: thresholds.warningPercent,
+            dangerThreshold: thresholds.dangerPercent
+        )
+    }
+
     static func donutRingColor(
         usedPercent: Double?,
         provider: UsageProvider,
         windowKind: UsageWindowKind
     ) -> Color {
-        let defaults = AppGroupDefaults.shared
-        let useStatusColor = defaults?.bool(forKey: UsageColorKeys.donutUseStatus) ?? false
-        if useStatusColor, let usedPercent {
-            let thresholds = UsageStatusThresholdStore.loadThresholds(for: provider, windowKind: windowKind)
-            let level = UsageStatusLevelResolver.level(
-                for: usedPercent,
-                isRemainingMode: false,
-                warningThreshold: thresholds.warningPercent,
-                dangerThreshold: thresholds.dangerPercent
-            )
+        if let level = donutRingLevel(usedPercent: usedPercent, provider: provider, windowKind: windowKind) {
             return statusColor(for: level)
         }
         return resolveStoredColor(for: UsageColorKeys.donut, defaultColor: .accentColor)

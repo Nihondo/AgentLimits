@@ -22,47 +22,34 @@ struct CCUsageSettingsView: View {
     }
 
     var body: some View {
-        SettingsScrollContainer {
-            headerView
-
-            Form {
-                SettingsFormSection {
-                    LabeledContent("ccusage.provider".localized()) {
-                        providerPicker
-                    }
-                    LabeledContent("refreshInterval.label".localized()) {
-                        RefreshIntervalPickerRow(showsLabel: false, refreshIntervalMinutes: $refreshIntervalMinutes)
-                    }
+        Form {
+            SettingsFormSection {
+                LabeledContent("ccusage.provider".localized()) {
+                    providerPicker
                 }
-
-                SettingsFormSection(title: "ccusage.settings".localized()) {
-                    settingsSection
-                }
-
-                SettingsFormSection(title: "ccusage.status".localized()) {
-                    statusSection
-                    lastResultView
-                }
-
-                SettingsFormSection(footerText: "ccusage.credits.body".localized()) {
-                    creditsSection
+                LabeledContent("refreshInterval.label".localized()) {
+                    RefreshIntervalPickerRow(showsLabel: false, refreshIntervalMinutes: $refreshIntervalMinutes)
                 }
             }
-            .formStyle(.grouped)
+
+            SettingsFormSection(title: "ccusage.settings".localized()) {
+                settingsSection
+            }
+
+            SettingsFormSection(title: "ccusage.status".localized()) {
+                statusSection
+                lastResultView
+            }
+
+            SettingsFormSection(footerText: "ccusage.credits.body".localized()) {
+                creditsSection
+            }
         }
+        .formStyle(.grouped)
         .onChange(of: refreshIntervalMinutes) { _, _ in
             viewModel.restartAutoRefresh()
             WidgetCenter.shared.reloadAllTimelines()
         }
-    }
-
-    // MARK: - Header
-
-    private var headerView: some View {
-        SettingsHeaderView(
-            titleText: "ccusage.title".localized(),
-            descriptionText: "ccusage.description".localized()
-        )
     }
 
     // MARK: - Provider Picker
@@ -215,10 +202,7 @@ private struct ProviderSettingsView: View {
             Toggle("ccusage.enabled".localized(), isOn: enabledBinding)
 
             if settings.isEnabled {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("ccusage.command".localized())
-                        .font(.body)
-                        .foregroundStyle(.secondary)
+                LabeledContent("ccusage.command".localized()) {
                     Text(settings.displayCommand)
                         .font(.system(.footnote, design: .monospaced))
                         .foregroundStyle(.primary)
@@ -254,9 +238,6 @@ private struct ProviderSettingsView: View {
                 }
             }
         }
-        .padding()
-        .background(.thinMaterial)
-        .cornerRadius(8)
     }
 
     private var enabledBinding: Binding<Bool> {
