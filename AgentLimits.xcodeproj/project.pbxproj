@@ -412,7 +412,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7A1B2C3D4E5F678901234567 /* Configurations/DevelopmentTeam.xcconfig */;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AgentLimitsIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = agentlimits;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ALLOW_ENTITLEMENTS_MODIFICATION = YES;
@@ -436,7 +436,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.9.10;
+				MARKETING_VERSION = 0.9.11;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dmng.agentlimit.AgentLimit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -454,7 +454,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7A1B2C3D4E5F678901234567 /* Configurations/DevelopmentTeam.xcconfig */;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AgentLimitsIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = agentlimits;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = AgentLimits/AgentLimits.entitlements;
@@ -477,7 +477,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.9.10;
+				MARKETING_VERSION = 0.9.11;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dmng.agentlimit.AgentLimit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -513,7 +513,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.9.10;
+				MARKETING_VERSION = 0.9.11;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dmng.agentlimit.AgentLimit.AgentLimitWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -548,7 +548,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.9.10;
+				MARKETING_VERSION = 0.9.11;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dmng.agentlimit.AgentLimit.AgentLimitWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
