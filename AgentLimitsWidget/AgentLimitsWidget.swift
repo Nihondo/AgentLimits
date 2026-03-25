@@ -331,6 +331,14 @@ private struct UsageDonutView: View {
         PacemakerRingWarningSettings.isWarningEnabled()
     }
 
+    /// 内側ペースメーカーリングの等分数（5h=5、1w=7）
+    private var divisionCount: Int {
+        switch windowKind {
+        case .primary: return 5
+        case .secondary: return 7
+        }
+    }
+
     private var pacemakerSegments: PacemakerRingSegments? {
         guard isPacemakerRingWarningEnabled else { return nil }
         guard displayMode != .remaining else { return nil }
@@ -375,15 +383,25 @@ private struct UsageDonutView: View {
                 ringSegmentView(from: 0, to: progress, color: ringColor)
             }
             if let pacemakerProgress {
-                Circle()
-                    .stroke(.quaternary.opacity(0.5), lineWidth: innerLineWidth)
-                    .padding(outerLineWidth)
-                Circle()
-                    .trim(from: 0, to: pacemakerProgress)
-                    .stroke(style: StrokeStyle(lineWidth: innerLineWidth, lineCap: .butt))
-                    .rotationEffect(.degrees(-90))
-                    .foregroundStyle(pacemakerRingColor)
-                    .padding(outerLineWidth)
+                let gaps = RingDivisionParams.gapRanges(count: divisionCount)
+                // 背景トラック: 等分ギャップを除いたセグメントで描画
+                ForEach(Array(trackSegmentRanges(gaps).enumerated()), id: \.offset) { _, seg in
+                    Circle()
+                        .trim(from: seg.start, to: seg.end)
+                        .stroke(style: StrokeStyle(lineWidth: innerLineWidth, lineCap: .butt))
+                        .rotationEffect(.degrees(-90))
+                        .foregroundStyle(.quaternary.opacity(0.5))
+                        .padding(outerLineWidth)
+                }
+                // 塗りリング: ギャップを考慮して分割描画
+                ForEach(Array(clipToGaps(from: 0, to: pacemakerProgress, gaps: gaps).enumerated()), id: \.offset) { _, seg in
+                    Circle()
+                        .trim(from: seg.start, to: seg.end)
+                        .stroke(style: StrokeStyle(lineWidth: innerLineWidth, lineCap: .butt))
+                        .rotationEffect(.degrees(-90))
+                        .foregroundStyle(pacemakerRingColor)
+                        .padding(outerLineWidth)
+                }
             }
             Text(centerLabel)
                 .font(.title3)
@@ -418,6 +436,44 @@ private struct UsageDonutView: View {
         min(max(value, 0), 1)
     }
 
+    /// 全周 (0...1) からギャップを除いた可視セグメント一覧を返す
+    private func trackSegmentRanges(_ gaps: [(start: Double, end: Double)]) -> [(start: Double, end: Double)] {
+        var result: [(start: Double, end: Double)] = []
+        var cursor: Double = 0
+        for gap in gaps.sorted(by: { $0.start < $1.start }) {
+            if gap.start > cursor {
+                result.append((start: cursor, end: gap.start))
+            }
+            cursor = gap.end
+        }
+        if cursor < 1.0 {
+            result.append((start: cursor, end: 1.0))
+        }
+        return result
+    }
+
+    /// (start, end) 範囲をギャップで分割し、可視サブセグメントを返す
+    private func clipToGaps(from start: Double, to end: Double, gaps: [(start: Double, end: Double)]) -> [(start: Double, end: Double)] {
+        guard !gaps.isEmpty, end > start else {
+            return [(start: start, end: end)]
+        }
+        var result: [(start: Double, end: Double)] = []
+        var cursor = start
+        for gap in gaps.sorted(by: { $0.start < $1.start }) {
+            guard gap.end > start, gap.start < end else { continue }
+            let gapStart = max(gap.start, start)
+            let gapEnd = min(gap.end, end)
+            if gapStart > cursor {
+                result.append((start: cursor, end: gapStart))
+            }
+            cursor = gapEnd
+        }
+        if cursor < end {
+            result.append((start: cursor, end: end))
+        }
+        return result
+    }
+
     @ViewBuilder
     private func ringSegmentView(from start: Double, to end: Double, color: Color) -> some View {
         if end > start {
@@ -435,6 +491,22 @@ private struct PacemakerRingSegments {
     let warningStart: Double
     let dangerStart: Double
     let totalEnd: Double
+}
+
+private struct RingDivisionParams {
+    /// 1つのギャップが占める割合（全周=1.0）
+    static let gapFraction: Double = 0.015
+
+    /// N等分のギャップ範囲を返す。区切りは (N-1) 個。
+    static func gapRanges(count: Int) -> [(start: Double, end: Double)] {
+        guard count > 1 else { return [] }
+        let segmentSize = 1.0 / Double(count)
+        let halfGap = gapFraction / 2.0
+        return (1..<count).map { i in
+            let center = segmentSize * Double(i)
+            return (start: center - halfGap, end: center + halfGap)
+        }
+    }
 }
 
 private struct UsageDetailColumnView: View {

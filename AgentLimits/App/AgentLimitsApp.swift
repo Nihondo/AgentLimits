@@ -525,8 +525,8 @@ private struct MenuBarContentView: View {
 
     private func makeAboutCredits() -> NSAttributedString {
         let copyright = resolveAboutCopyright()
-        let repositoryURLString = "https://github.com/Nihondo/AgentLimits"
-        let creditsText = "\(copyright)\nGitHub: \(repositoryURLString)"
+        let repositoryURLString = "https://desireforwealth.com/products/agentlimits.shtml"
+        let creditsText = "\(copyright)\nWebsite: \(repositoryURLString)"
         let attributed = NSMutableAttributedString(string: creditsText)
         let linkRange = (creditsText as NSString).range(of: repositoryURLString)
         attributed.addAttribute(.link, value: repositoryURLString, range: linkRange)

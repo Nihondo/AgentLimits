@@ -108,6 +108,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
   - Danger: 10%+ ahead of pacemaker (significant excess, default threshold: 10%)
 - Widget shows dual rings when pacemaker data is available: outer = actual usage, inner = pacemaker percentage
   - When usage exceeds pacemaker in **used mode only**, the outer ring is segmented and color-coded (green → orange → red) to show warning/danger zones (toggleable via `pacemaker_ring_warning_enabled`, enabled by default)
+  - Inner pacemaker ring is always divided into equal time segments with small gaps: 5 segments for 5h window (1 per hour), 7 segments for weekly window (1 per day)
 - Menu bar shows both values with configurable colors
 - Thresholds and pacemaker colors are configurable in Pacemaker settings (warning/danger delta)
 
