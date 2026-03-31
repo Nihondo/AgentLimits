@@ -25,7 +25,7 @@ Download the latest build: [Download](https://github.com/Nihondo/AgentLimits/rel
 - **Token usage (ccusage):** daily/weekly/monthly tokens and cost via CLI.
   - Codex: `npx -y @ccusage/codex@latest daily`
   - Claude Code: `npx -y ccusage@latest daily`
-- **Billing usage (Copilot):** daily premium request count and cost via WebView.
+- **Premium request usage (Copilot):** daily premium request count and cost via WebView.
   - API: `https://github.com/settings/billing/usage_table` (fetched automatically with Copilot usage)
 
 ## Menu Bar Display
@@ -72,7 +72,7 @@ Pacemaker mode shows a time-based usage benchmark to help you stay on track.
   - Desktop pinned mode support (accented / grayscale)
 - Widget tap action is configurable (default opens `https://ccusage.com/`)
 
-### Billing Usage Widget (Copilot Premium Requests)
+### Premium Requests Usage Widget (GitHub Copilot)
 - **Small:** today / this week / this month summary (cost + premium requests)
 - **Medium:** summary + GitHub-style heatmap
 - Data is fetched automatically when Copilot usage is refreshed (via WebView, no CLI required)
