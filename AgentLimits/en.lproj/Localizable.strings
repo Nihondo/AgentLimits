@@ -181,3 +181,4 @@
 "notification.pacemakerThresholds.description" = "Set warning and danger thresholds when pace is exceeded (relative %)";
 "notification.pacemakerThresholds.warning" = "Warning";
 "notification.pacemakerThresholds.danger" = "Danger";
+"content.month" = "Monthly";

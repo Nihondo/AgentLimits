@@ -21,3 +21,4 @@
 "widget.tokenUsage.thisMonth" = "Місяць";
 "widget.tokenUsageDescription" = "Показує використання токенів та витрати.";
 "widget.pleaseOpenApp" = "Відкрийте застосунок";
+"widget.monthlyLimit" = "Monthly Limit";

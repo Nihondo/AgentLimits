@@ -181,3 +181,4 @@
 "notification.pacemakerThresholds.warning" = "경고 영역";
 "notification.pacemakerThresholds.danger" = "위험 영역";
 "pacemaker.showRingWarningSegment" = "링 경고 구간 표시";
+"content.month" = "Monthly";

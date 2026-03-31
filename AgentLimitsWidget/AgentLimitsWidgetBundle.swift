@@ -7,6 +7,7 @@ struct AgentLimitsWidgetBundle: WidgetBundle {
         // Usage Limit Widgets
         CodexUsageLimitWidget()
         ClaudeUsageLimitWidget()
+        CopilotUsageLimitWidget()
         // Token Usage Widgets (ccusage)
         ClaudeTokenUsageWidget()
         CodexTokenUsageWidget()

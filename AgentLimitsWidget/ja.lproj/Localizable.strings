@@ -21,3 +21,4 @@
 "widget.tokenUsage.thisMonth" = "今月";
 "widget.tokenUsageDescription" = "トークン使用量とコストを表示します。";
 "widget.pleaseOpenApp" = "アプリを開いてください";
+"widget.monthlyLimit" = "月間リミット";

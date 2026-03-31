@@ -40,7 +40,7 @@ struct WakeUpSettingsView: View {
 
     private var providerPicker: some View {
         Picker("", selection: $selectedProvider) {
-            ForEach(UsageProvider.allCases) { provider in
+            ForEach(WakeUpScheduler.supportedProviders) { provider in
                 Text(provider.displayName).tag(provider)
             }
         }
@@ -82,7 +82,7 @@ struct WakeUpSettingsView: View {
 
     private var statusSection: some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.small) {
-            ForEach(UsageProvider.allCases) { provider in
+            ForEach(WakeUpScheduler.supportedProviders) { provider in
                 providerStatusRow(for: provider)
             }
         }

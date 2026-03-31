@@ -19,6 +19,7 @@ struct ContentView: View {
     ) private var refreshIntervalMinutes: Int = RefreshIntervalConfig.defaultMinutes
     @AppStorage(UserDefaultsKeys.menuBarStatusCodexEnabled) private var menuBarCodexEnabled = false
     @AppStorage(UserDefaultsKeys.menuBarStatusClaudeEnabled) private var menuBarClaudeEnabled = false
+    @AppStorage(UserDefaultsKeys.menuBarStatusCopilotEnabled) private var menuBarCopilotEnabled = false
     @State private var isShowingClearDataConfirm = false
     @State private var isClearingData = false
     @State private var isWebViewExpanded = false
@@ -191,6 +192,8 @@ struct ContentView: View {
                     return menuBarCodexEnabled
                 case .claudeCode:
                     return menuBarClaudeEnabled
+                case .githubCopilot:
+                    return menuBarCopilotEnabled
                 }
             },
             set: { newValue in
@@ -199,6 +202,8 @@ struct ContentView: View {
                     menuBarCodexEnabled = newValue
                 case .claudeCode:
                     menuBarClaudeEnabled = newValue
+                case .githubCopilot:
+                    menuBarCopilotEnabled = newValue
                 }
             }
         )
@@ -386,8 +391,12 @@ private struct UsageSummaryView: View {
     private var usageSection: some View {
         Group {
             if let snapshot {
-                UsageWindowRow(title: "content.5hours".localized(), window: snapshot.primaryWindow, displayMode: displayMode)
-                UsageWindowRow(title: "content.week".localized(), window: snapshot.secondaryWindow, displayMode: displayMode)
+                if snapshot.provider == .githubCopilot {
+                    UsageWindowRow(title: "content.month".localized(), window: snapshot.primaryWindow, displayMode: displayMode)
+                } else {
+                    UsageWindowRow(title: "content.5hours".localized(), window: snapshot.primaryWindow, displayMode: displayMode)
+                    UsageWindowRow(title: "content.week".localized(), window: snapshot.secondaryWindow, displayMode: displayMode)
+                }
             } else {
                 Text("content.notFetched".localized())
                     .font(.subheadline)

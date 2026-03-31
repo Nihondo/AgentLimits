@@ -181,3 +181,4 @@
 "notification.pacemakerThresholds.description" = "ペース超過時の警告・危険域の閾値を設定します（相対%）";
 "notification.pacemakerThresholds.warning" = "警告域";
 "notification.pacemakerThresholds.danger" = "危険域";
+"content.month" = "月間";

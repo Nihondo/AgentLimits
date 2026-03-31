@@ -21,3 +21,4 @@
 "widget.tokenUsage.thisMonth" = "Mensile";
 "widget.tokenUsageDescription" = "Mostra l'utilizzo dei token e i costi.";
 "widget.pleaseOpenApp" = "Apri l'app";
+"widget.monthlyLimit" = "Monthly Limit";

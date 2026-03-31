@@ -60,6 +60,8 @@ struct WakeUpSchedule: Codable, Equatable {
         case .claudeCode:
             let claudeExecutable = CLICommandPathResolver.resolveExecutable(for: .claude, defaultName: "claude")
             return "\(claudeExecutable) -p \"hello\"\(suffix)"
+        case .githubCopilot:
+            return ""
         }
     }
 
@@ -388,6 +390,9 @@ final class WakeUpScheduleStore {
 @MainActor
 final class WakeUpScheduler: ObservableObject {
     static let shared = WakeUpScheduler()
+
+    /// Providers that support WakeUp CLI scheduling
+    static let supportedProviders: [UsageProvider] = UsageProvider.allCases.filter { $0 != .githubCopilot }
 
     @Published private(set) var schedules: [UsageProvider: WakeUpSchedule]
     @Published private(set) var lastWakeUpResults: [UsageProvider: WakeUpResult] = [:]

@@ -21,3 +21,4 @@
 "widget.tokenUsage.thisMonth" = "本月";
 "widget.tokenUsageDescription" = "显示令牌使用量和费用。";
 "widget.pleaseOpenApp" = "请打开应用";
+"widget.monthlyLimit" = "Monthly Limit";

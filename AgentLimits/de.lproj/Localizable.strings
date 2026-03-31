@@ -181,3 +181,4 @@
 "notification.pacemakerThresholds.description" = "Warn- und Gefahrenschwellen bei Überschreitung des Pace-Ziels festlegen (relativ %)";
 "notification.pacemakerThresholds.warning" = "Warnbereich";
 "notification.pacemakerThresholds.danger" = "Gefahrenbereich";
+"content.month" = "Monthly";

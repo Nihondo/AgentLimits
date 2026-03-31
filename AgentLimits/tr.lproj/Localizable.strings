@@ -181,3 +181,4 @@
 "notification.pacemakerThresholds.warning" = "Uyarı";
 "notification.pacemakerThresholds.danger" = "Tehlike";
 "pacemaker.showRingWarningSegment" = "Halka uyarı segmentlerini göster";
+"content.month" = "Monthly";

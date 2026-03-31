@@ -143,6 +143,7 @@ private struct MenuBarLabelView: View {
     @EnvironmentObject private var appState: AppSharedState
     @AppStorage(UserDefaultsKeys.menuBarStatusCodexEnabled) private var codexEnabled = false
     @AppStorage(UserDefaultsKeys.menuBarStatusClaudeEnabled) private var claudeEnabled = false
+    @AppStorage(UserDefaultsKeys.menuBarStatusCopilotEnabled) private var copilotEnabled = false
     @AppStorage(UserDefaultsKeys.displayMode) private var displayMode: UsageDisplayMode = .used
     @AppStorage(UserDefaultsKeys.menuBarShowPacemakerValue, store: AppGroupDefaults.shared)
     private var showPacemakerValue = true
@@ -184,6 +185,9 @@ private struct MenuBarLabelView: View {
             scheduleImageUpdate()
         }
         .onChange(of: claudeEnabled) { _, _ in
+            scheduleImageUpdate()
+        }
+        .onChange(of: copilotEnabled) { _, _ in
             scheduleImageUpdate()
         }
         .onChange(of: displayMode) { _, _ in
@@ -239,9 +243,11 @@ private struct MenuBarLabelView: View {
     private func updateRenderedImage() {
         let codexSnapshot = codexEnabled ? appState.viewModel.snapshots[.chatgptCodex] : nil
         let claudeSnapshot = claudeEnabled ? appState.viewModel.snapshots[.claudeCode] : nil
+        let copilotSnapshot = copilotEnabled ? appState.viewModel.snapshots[.githubCopilot] : nil
         let content = MenuBarLabelContentView(
             codexSnapshot: codexSnapshot,
             claudeSnapshot: claudeSnapshot,
+            copilotSnapshot: copilotSnapshot,
             displayMode: displayMode
         )
         .environment(\.colorScheme, colorScheme)
@@ -259,6 +265,7 @@ private struct MenuBarLabelView: View {
 private struct MenuBarLabelContentView: View {
     let codexSnapshot: UsageSnapshot?
     let claudeSnapshot: UsageSnapshot?
+    let copilotSnapshot: UsageSnapshot?
     let displayMode: UsageDisplayMode
 
     var body: some View {
@@ -277,6 +284,14 @@ private struct MenuBarLabelContentView: View {
                     provider: .claudeCode,
                     primaryWindow: claudeSnapshot.primaryWindow,
                     secondaryWindow: claudeSnapshot.secondaryWindow,
+                    displayMode: displayMode
+                )
+            }
+            if let copilotSnapshot {
+                MenuBarProviderStatusView(
+                    provider: .githubCopilot,
+                    primaryWindow: copilotSnapshot.primaryWindow,
+                    secondaryWindow: copilotSnapshot.secondaryWindow,
                     displayMode: displayMode
                 )
             }
@@ -324,9 +339,11 @@ private struct MenuBarPercentLineView: View {
     var body: some View {
         HStack(spacing: 2) {
             percentTextView(primaryWindow, windowKind: .primary)
-            Text("/")
-                .foregroundStyle(.secondary)
-            percentTextView(secondaryWindow, windowKind: .secondary)
+            if secondaryWindow != nil {
+                Text("/")
+                    .foregroundStyle(.secondary)
+                percentTextView(secondaryWindow, windowKind: .secondary)
+            }
         }
         .font(.system(size: 13.5, weight: .semibold, design: .monospaced))
         .monospacedDigit()
@@ -499,7 +516,7 @@ private struct MenuBarContentView: View {
 
     private var wakeUpMenu: some View {
         Menu {
-            ForEach(UsageProvider.allCases) { provider in
+            ForEach(WakeUpScheduler.supportedProviders) { provider in
                 Button("\(provider.displayName) " + "menu.wakeUpNow".localized()) {
                     Task { await WakeUpScheduler.shared.triggerWakeUp(for: provider) }
                 }

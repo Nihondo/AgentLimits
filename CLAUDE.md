@@ -22,10 +22,11 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 ## Architecture
 
 ### Data Flow
-1. User logs into service (chatgpt.com or claude.ai) via WKWebView
+1. User logs into service (chatgpt.com or claude.ai or github.com) via WKWebView
 2. `*UsageFetcher` executes JavaScript to extract auth token/org ID, then fetches usage API:
    - Codex: `https://chatgpt.com/backend-api/wham/usage`
    - Claude Code: `https://claude.ai/api/organizations/{orgId}/usage`
+   - GitHub Copilot: `https://github.com/github-copilot/chat/entitlement`
 3. `UsageViewModel` manages auto-refresh (configurable 1-10 minutes) and per-provider state
 4. `UsageSnapshotStore` persists usage snapshots as JSON under App Group container
 5. `CCUsageFetcher` runs CLI to fetch token usage:
@@ -53,8 +54,9 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 | `AgentLimits/App/ShellExecutor.swift` | Shell command execution utility |
 | `AgentLimits/Usage/CodexUsageFetcher.swift` | Codex API + JS token extraction |
 | `AgentLimits/Usage/ClaudeUsageFetcher.swift` | Claude API + JS org ID extraction |
+| `AgentLimits/Usage/CopilotUsageFetcher.swift` | GitHub Copilot entitlement API + JS cookie-based auth |
 | `AgentLimits/Usage/UsageViewModel.swift` | Usage limits state, auto-refresh, per-provider tracking, threshold check |
-| `AgentLimits/Usage/ProviderStateManager.swift` | Per-provider state management (Codex/Claude Code independent tracking) |
+| `AgentLimits/Usage/ProviderStateManager.swift` | Per-provider state management (Codex/Claude Code/Copilot independent tracking) |
 | `AgentLimits/Usage/UsageDisplayModeStore.swift` | Display mode persistence and snapshot conversion |
 | `AgentLimits/Usage/AppUsageModels.swift` | App-only display mode + localized errors |
 | `AgentLimits/Usage/ContentView.swift` | Usage limits settings UI with WebView |
@@ -179,6 +181,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 ~/Library/Group Containers/group.com.dmng.agentlimit/Library/Application Support/AgentLimit/
 ├── usage_snapshot.json           # Codex usage limits
 ├── usage_snapshot_claude.json    # Claude Code usage limits
+├── usage_snapshot_copilot.json   # GitHub Copilot usage limits
 ├── token_usage_codex.json        # ccusage Codex
 └── token_usage_claude.json       # ccusage Claude
 ```
@@ -191,6 +194,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 | `usage_display_mode_cached` | Cached display mode used to convert stored snapshots (also shared via App Group for widgets) |
 | `menu_bar_status_codex_enabled` | Menu bar Codex status display toggle |
 | `menu_bar_status_claude_enabled` | Menu bar Claude Code status display toggle |
+| `menu_bar_status_copilot_enabled` | Menu bar GitHub Copilot status display toggle |
 | `wake_up_schedules` | Wake Up schedules (JSON array) |
 | `threshold_notification_settings` | Threshold settings (JSON array) |
 | `app_language` | Language preference (App Group shared) |
@@ -221,6 +225,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 
 - `AgentLimitWidget` - Codex usage limits widget
 - `AgentLimitWidgetClaude` - Claude Code usage limits widget
+- `AgentLimitWidgetCopilot` - GitHub Copilot usage limits widget
 - `TokenUsageWidgetCodex` - ccusage Codex widget
 - `TokenUsageWidgetClaude` - ccusage Claude widget
 

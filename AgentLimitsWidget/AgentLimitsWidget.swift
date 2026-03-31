@@ -38,7 +38,21 @@ struct UsageTimelineProvider: TimelineProvider {
 
     /// Static placeholder snapshot to render gauges in the gallery
     private var placeholderSnapshot: UsageSnapshot {
-        UsageSnapshot(
+        if provider == .githubCopilot {
+            return UsageSnapshot(
+                provider: provider,
+                fetchedAt: Date(),
+                primaryWindow: UsageWindow(
+                    kind: .primary,
+                    usedPercent: 62,
+                    resetAt: Date().addingTimeInterval(60 * 60 * 24 * 4),
+                    limitWindowSeconds: UsageLimitDuration.thirtyDays
+                ),
+                secondaryWindow: nil,
+                displayMode: .used
+            )
+        }
+        return UsageSnapshot(
             provider: provider,
             fetchedAt: Date(),
             primaryWindow: UsageWindow(
@@ -124,6 +138,7 @@ struct AgentLimitsWidgetEntryView: View {
                             Spacer(minLength: 0)
 
                             UsageDetailColumnView(
+                                provider: entry.provider,
                                 primaryWindow: snapshot.primaryWindow,
                                 secondaryWindow: snapshot.secondaryWindow
                             )
@@ -188,6 +203,12 @@ struct ClaudeUsageLimitWidget: Widget {
     }
 }
 
+struct CopilotUsageLimitWidget: Widget {
+    var body: some WidgetConfiguration {
+        usageConfiguration(for: .githubCopilot)
+    }
+}
+
 private struct UsageDonutRow: View {
     let provider: UsageProvider
     let displayMode: UsageDisplayModeRaw
@@ -197,26 +218,45 @@ private struct UsageDonutRow: View {
     let spacing: CGFloat
     let columnHeight: CGFloat
 
+    private var primaryCenterLabel: String {
+        provider == .githubCopilot ? "1mo" : "5h"
+    }
+
     var body: some View {
-        HStack(spacing: spacing) {
+        if secondaryWindow == nil {
+            // Single donut centered layout for monthly providers
             UsageDonutColumnView(
                 provider: provider,
                 displayMode: displayMode,
-                centerLabel: "5h",
+                centerLabel: primaryCenterLabel,
                 windowKind: .primary,
                 window: primaryWindow,
                 donutSize: donutSize,
                 columnHeight: columnHeight
             )
-            UsageDonutColumnView(
-                provider: provider,
-                displayMode: displayMode,
-                centerLabel: "1w",
-                windowKind: .secondary,
-                window: secondaryWindow,
-                donutSize: donutSize,
-                columnHeight: columnHeight
-            )
+            .frame(maxWidth: .infinity)
+        } else {
+            // Dual donut layout for providers with two windows
+            HStack(spacing: spacing) {
+                UsageDonutColumnView(
+                    provider: provider,
+                    displayMode: displayMode,
+                    centerLabel: primaryCenterLabel,
+                    windowKind: .primary,
+                    window: primaryWindow,
+                    donutSize: donutSize,
+                    columnHeight: columnHeight
+                )
+                UsageDonutColumnView(
+                    provider: provider,
+                    displayMode: displayMode,
+                    centerLabel: "1w",
+                    windowKind: .secondary,
+                    window: secondaryWindow,
+                    donutSize: donutSize,
+                    columnHeight: columnHeight
+                )
+            }
         }
     }
 }
@@ -331,12 +371,9 @@ private struct UsageDonutView: View {
         PacemakerRingWarningSettings.isWarningEnabled()
     }
 
-    /// 内側ペースメーカーリングの等分数（5h=5、1w=7）
+    /// 内側ペースメーカーリングの等分数（5h=5、1w=7、月間=週数）
     private var divisionCount: Int {
-        switch windowKind {
-        case .primary: return 5
-        case .secondary: return 7
-        }
+        window?.pacemakerDivisionCount ?? (windowKind == .primary ? 5 : 7)
     }
 
     private var pacemakerSegments: PacemakerRingSegments? {
@@ -510,23 +547,32 @@ private struct RingDivisionParams {
 }
 
 private struct UsageDetailColumnView: View {
+    let provider: UsageProvider
     let primaryWindow: UsageWindow?
     let secondaryWindow: UsageWindow?
+
+    private var primaryTitle: String {
+        provider == .githubCopilot
+            ? "widget.monthlyLimit".widgetLocalized()
+            : "widget.5hourLimit".widgetLocalized()
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             UsageDetailSectionView(
-                title: "widget.5hourLimit".widgetLocalized(),
+                title: primaryTitle,
                 window: primaryWindow,
-                showRelative: true,
-                showDateTime: false
+                showRelative: provider != .githubCopilot,
+                showDateTime: provider == .githubCopilot
             )
-            UsageDetailSectionView(
-                title: "widget.weeklyLimit".widgetLocalized(),
-                window: secondaryWindow,
-                showRelative: false,
-                showDateTime: true
-            )
+            if let secondaryWindow {
+                UsageDetailSectionView(
+                    title: "widget.weeklyLimit".widgetLocalized(),
+                    window: secondaryWindow,
+                    showRelative: false,
+                    showDateTime: true
+                )
+            }
         }
     }
 }

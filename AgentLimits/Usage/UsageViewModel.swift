@@ -26,6 +26,7 @@ final class UsageViewModel: ObservableObject {
     private let store: UsageSnapshotStore
     private let codexFetcher: CodexUsageFetcher
     private let claudeFetcher: ClaudeUsageFetcher
+    private let copilotFetcher: CopilotUsageFetcher
     private let webViewPool: UsageWebViewPool
     private let displayModeStore: UsageDisplayModeStore
     private let stateManager: ProviderStateManager
@@ -39,6 +40,7 @@ final class UsageViewModel: ObservableObject {
         store: UsageSnapshotStore? = nil,
         codexFetcher: CodexUsageFetcher? = nil,
         claudeFetcher: ClaudeUsageFetcher? = nil,
+        copilotFetcher: CopilotUsageFetcher? = nil,
         displayModeStore: UsageDisplayModeStore? = nil,
         stateManager: ProviderStateManager? = nil,
         selectedProvider: UsageProvider = .chatgptCodex
@@ -47,6 +49,7 @@ final class UsageViewModel: ObservableObject {
         let useDisplayModeStore = displayModeStore ?? UsageDisplayModeStore()
         let useCodexFetcher = codexFetcher ?? CodexUsageFetcher()
         let useClaudeFetcher = claudeFetcher ?? ClaudeUsageFetcher()
+        let useCopilotFetcher = copilotFetcher ?? CopilotUsageFetcher()
         let useStateManager = stateManager ?? ProviderStateManager()
         // Load cached snapshots into state manager
         useStateManager.loadCachedSnapshots(from: useStore)
@@ -57,6 +60,7 @@ final class UsageViewModel: ObservableObject {
         self.store = useStore
         self.codexFetcher = useCodexFetcher
         self.claudeFetcher = useClaudeFetcher
+        self.copilotFetcher = useCopilotFetcher
         self.displayModeStore = useDisplayModeStore
         self.stateManager = useStateManager
         self.selectedProvider = selectedProvider
@@ -183,7 +187,7 @@ final class UsageViewModel: ObservableObject {
 
     /// Called when cookies change; triggers login-based navigation for Claude
     func handleCookieChange(for provider: UsageProvider) {
-        guard provider == .claudeCode else { return }
+        guard provider == .claudeCode || provider == .githubCopilot else { return }
         let store = webViewPool.getWebViewStore(for: provider)
         Task {
             // Only redirect when a valid session is detected and cooldown allows it.
@@ -284,6 +288,8 @@ final class UsageViewModel: ObservableObject {
             return await codexFetcher.hasValidSession(using: webView)
         case .claudeCode:
             return await claudeFetcher.hasValidSession(using: webView)
+        case .githubCopilot:
+            return await copilotFetcher.hasValidSession(using: webView)
         }
     }
 
@@ -308,6 +314,8 @@ final class UsageViewModel: ObservableObject {
             return try await codexFetcher.fetchUsageSnapshot(using: webView)
         case .claudeCode:
             return try await claudeFetcher.fetchUsageSnapshot(using: webView)
+        case .githubCopilot:
+            return try await copilotFetcher.fetchUsageSnapshot(using: webView)
         }
     }
 
@@ -330,6 +338,14 @@ final class UsageViewModel: ObservableObject {
             case .scriptFailed(let message):
                 return isLoginRequiredMessage(message)
             case .invalidResponse:
+                return false
+            }
+        case .githubCopilot:
+            guard let error = error as? CopilotUsageFetcherError else { return false }
+            switch error {
+            case .scriptFailed(let message):
+                return isLoginRequiredMessage(message)
+            case .invalidResponse, .pageNotReady:
                 return false
             }
         }

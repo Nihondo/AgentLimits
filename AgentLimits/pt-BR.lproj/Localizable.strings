@@ -181,3 +181,4 @@
 "notification.pacemakerThresholds.warning" = "Aviso";
 "notification.pacemakerThresholds.danger" = "Perigo";
 "pacemaker.showRingWarningSegment" = "Mostrar segmentos de aviso do anel";
+"content.month" = "Monthly";

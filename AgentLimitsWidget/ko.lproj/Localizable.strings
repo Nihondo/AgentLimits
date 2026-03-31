@@ -21,3 +21,4 @@
 "widget.tokenUsage.thisMonth" = "월간";
 "widget.tokenUsageDescription" = "토큰 사용량과 비용을 표시합니다.";
 "widget.pleaseOpenApp" = "앱을 열어주세요";
+"widget.monthlyLimit" = "Monthly Limit";

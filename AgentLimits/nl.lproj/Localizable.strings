@@ -181,3 +181,4 @@
 "notification.pacemakerThresholds.warning" = "Waarschuwing";
 "notification.pacemakerThresholds.danger" = "Gevaar";
 "pacemaker.showRingWarningSegment" = "Waarschuwingssegmenten van ring weergeven";
+"content.month" = "Monthly";

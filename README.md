@@ -2,7 +2,7 @@
 
 **In Development**
 
-AgentLimits is a macOS Sonoma+ menu bar app with Notification Center widgets. It shows usage limits for ChatGPT Codex / Claude Code (5-hour and weekly windows) and ccusage token usage.
+AgentLimits is a macOS Sonoma+ menu bar app with Notification Center widgets. It shows usage limits for ChatGPT Codex / Claude Code (5-hour and weekly windows), GitHub Copilot (monthly premium requests), and ccusage token usage.
 
 ![](./images/agentlimit_sample.png)
 
@@ -13,13 +13,15 @@ Download the latest build: [Download](https://github.com/Nihondo/AgentLimits/rel
 1. Run AgentLimits.
 2. Add widgets in Notification Center.
 3. Open **AgentLimits Settings...** from the menu bar.
-4. In **Usage**, choose Codex or Claude Code, set refresh interval (1–10 minutes), open the bottom login panel (`▲`), then sign in.
+4. In **Usage**, choose Codex, Claude Code, or Copilot, set refresh interval (1–10 minutes), open the bottom login panel (`▲`), then sign in.
 5. Use the menu bar **Display Mode** to switch Used/Remaining, and **Refresh Now** for manual updates.
 
 ## What It Tracks
 - **Usage limits (Codex / Claude Code):** 5-hour and weekly usage via internal APIs.
   - Codex: `https://chatgpt.com/backend-api/wham/usage`
   - Claude Code: `https://claude.ai/api/organizations/{orgId}/usage`
+- **Usage limits (GitHub Copilot):** Monthly premium interaction quota via entitlement API.
+  - Copilot: `https://github.com/github-copilot/chat/entitlement`
 - **Token usage (ccusage):** daily/weekly/monthly tokens and cost via CLI.
   - Codex: `npx -y @ccusage/codex@latest daily`
   - Claude Code: `npx -y ccusage@latest daily`
@@ -28,6 +30,7 @@ Download the latest build: [Download](https://github.com/Nihondo/AgentLimits/rel
 - Two-line layout per provider
   - Line 1: provider name
   - Line 2: `X% / Y%` (5-hour / weekly)
+  - For Copilot: `X%` (monthly)
 - Display mode: **Used** or **Remaining** (shared across app and widgets)
 - Status colors are based on pacemaker comparison when available (colors are configurable in **Notification** settings)
 - Pacemaker mode: shows `<used>% (<pacemaker>)%` where pacemaker is elapsed time percentage
@@ -47,6 +50,14 @@ Pacemaker mode shows a time-based usage benchmark to help you stay on track.
 
 ## Widgets
 ### Usage Widgets (Codex / Claude Code)
+- Dual donut gauge: 5-hour and weekly windows side by side
+- Color-coded percentage based on usage level and display mode
+- Update time shown as `HH:mm` (or `--:--` if older than 24h)
+
+### Usage Widget (GitHub Copilot)
+- Single centered donut gauge: monthly premium interaction quota
+- Pacemaker inner ring divided into weekly segments (4–5 segments based on billing period)
+- Center label: `1mo`
 - Color-coded percentage based on usage level and display mode
 - Update time shown as `HH:mm` (or `--:--` if older than 24h)
 
@@ -62,11 +73,11 @@ Pacemaker mode shows a time-based usage benchmark to help you stay on track.
 ## Settings Guide
 ### Usage
 1. Open **Usage**.
-2. Select Codex or Claude Code.
+2. Select Codex, Claude Code, or Copilot.
 3. Choose refresh interval (1–10 minutes).
 4. Toggle **Show in menu bar** per provider.
 5. Click the bottom login bar (`▲`) to expand the embedded WebView panel.
-6. Sign in via the embedded WebView.
+6. Sign in via the embedded WebView (chatgpt.com / claude.ai / github.com).
 7. Use **Clear Data** to remove login data and website storage if sign-in gets stuck.
 
 ### ccusage
@@ -78,7 +89,7 @@ Pacemaker mode shows a time-based usage benchmark to help you stay on track.
 
 ### Wake Up
 1. Open **Wake Up**.
-2. Select provider (Codex / Claude Code).
+2. Select provider (Codex / Claude Code). Note: Copilot is not supported.
 3. Enable schedule.
 4. Choose hours to run (0–23).
 5. Use **Test Now** to verify CLI execution.
@@ -86,8 +97,8 @@ Pacemaker mode shows a time-based usage benchmark to help you stay on track.
 ### Notification
 1. Open **Notification**.
 2. Request notification permission (first time only).
-3. Select provider (Codex / Claude Code).
-4. Configure thresholds for 5-hour and weekly windows.
+3. Select provider (Codex / Claude Code / Copilot).
+4. Configure thresholds for each window (5-hour/weekly for Codex/Claude Code, monthly for Copilot).
 5. Adjust usage colors (donut + status colors) if needed.
 
 ### Pacemaker
@@ -126,6 +137,7 @@ Snapshots are stored in the App Group container:
 ~/Library/Group Containers/group.com.dmng.agentlimit/Library/Application Support/AgentLimit/
 ├── usage_snapshot.json
 ├── usage_snapshot_claude.json
+├── usage_snapshot_copilot.json
 ├── token_usage_codex.json
 └── token_usage_claude.json
 ```

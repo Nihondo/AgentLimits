@@ -598,6 +598,7 @@ protocol AIProviderProtocol: Hashable, CaseIterable, Identifiable where ID == St
 enum UsageProvider: String, Codable, CaseIterable, Identifiable, SnapshotFileNaming, AIProviderProtocol {
     case chatgptCodex
     case claudeCode
+    case githubCopilot
 
     var id: String { rawValue }
 
@@ -609,6 +610,8 @@ enum UsageProvider: String, Codable, CaseIterable, Identifiable, SnapshotFileNam
     private static let codexUsageURL = URL(string: "https://chatgpt.com/codex/settings/usage")
     /// Claude usage settings page URL
     private static let claudeUsageURL = URL(string: "https://claude.ai/settings/usage")
+    /// GitHub Copilot billing usage page URL
+    private static let copilotUsageURL = URL(string: "https://github.com/settings/billing/usage")
 
     // MARK: - Instance Properties
 
@@ -619,6 +622,8 @@ enum UsageProvider: String, Codable, CaseIterable, Identifiable, SnapshotFileNam
             return "Codex"
         case .claudeCode:
             return "Claude Code"
+        case .githubCopilot:
+            return "Copilot"
         }
     }
 
@@ -636,6 +641,11 @@ enum UsageProvider: String, Codable, CaseIterable, Identifiable, SnapshotFileNam
                 preconditionFailure("Invalid static URL: claudeUsageURL")
             }
             return url
+        case .githubCopilot:
+            guard let url = Self.copilotUsageURL else {
+                preconditionFailure("Invalid static URL: copilotUsageURL")
+            }
+            return url
         }
     }
 
@@ -646,6 +656,8 @@ enum UsageProvider: String, Codable, CaseIterable, Identifiable, SnapshotFileNam
             return "chatgpt.com"
         case .claudeCode:
             return "claude.ai"
+        case .githubCopilot:
+            return "github.com"
         }
     }
 
@@ -656,6 +668,8 @@ enum UsageProvider: String, Codable, CaseIterable, Identifiable, SnapshotFileNam
             return "AgentLimitWidget"
         case .claudeCode:
             return "AgentLimitWidgetClaude"
+        case .githubCopilot:
+            return "AgentLimitWidgetCopilot"
         }
     }
 
@@ -666,6 +680,8 @@ enum UsageProvider: String, Codable, CaseIterable, Identifiable, SnapshotFileNam
             return "usage_snapshot.json"
         case .claudeCode:
             return "usage_snapshot_claude.json"
+        case .githubCopilot:
+            return "usage_snapshot_copilot.json"
         }
     }
 
@@ -681,13 +697,15 @@ enum UsageProvider: String, Codable, CaseIterable, Identifiable, SnapshotFileNam
     // MARK: - Provider Conversion
 
     /// Converts this UsageProvider to its corresponding TokenUsageProvider.
-    /// Useful when working with ccusage CLI features for the same AI provider.
-    var tokenUsageProvider: TokenUsageProvider {
+    /// Returns nil for providers that don't have ccusage CLI support.
+    var tokenUsageProvider: TokenUsageProvider? {
         switch self {
         case .chatgptCodex:
             return .codex
         case .claudeCode:
             return .claude
+        case .githubCopilot:
+            return nil
         }
     }
 }
@@ -707,6 +725,9 @@ enum UsageLimitDuration {
     static let fiveHours: TimeInterval = 5 * 60 * 60
     /// 7-day window duration in seconds (7 * 24 * 60 * 60 = 604,800)
     static let sevenDays: TimeInterval = 7 * 24 * 60 * 60
+    /// Approximate 30-day window duration in seconds.
+    /// Actual monthly duration is computed dynamically from resetDate.
+    static let thirtyDays: TimeInterval = 30 * 24 * 60 * 60
 }
 
 /// Represents a single usage limit window with percentage and reset time
@@ -745,6 +766,24 @@ extension UsageWindow {
         case .used, .usedWithPacemaker:
             return pacemakerPercent
         }
+    }
+
+    /// Returns the number of segments for pacemaker ring division.
+    /// 5h window → 5 (1 per hour), 7-day window → 7 (1 per day),
+    /// monthly window → weeks in billing period (4-6).
+    var pacemakerDivisionCount: Int {
+        if limitWindowSeconds <= UsageLimitDuration.fiveHours + 1 {
+            return 5
+        }
+        if limitWindowSeconds <= UsageLimitDuration.sevenDays + 1 {
+            return 7
+        }
+        // Monthly: compute weeks overlapping the billing period
+        guard let resetAt = resetAt else { return 4 }
+        let start = resetAt.addingTimeInterval(-limitWindowSeconds)
+        let cal = Calendar.current
+        let weeks = cal.dateComponents([.weekOfMonth], from: start, to: resetAt).weekOfMonth ?? 4
+        return max(4, min(6, weeks))
     }
 }
 

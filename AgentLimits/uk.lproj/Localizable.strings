@@ -181,3 +181,4 @@
 "notification.pacemakerThresholds.warning" = "Попередження";
 "notification.pacemakerThresholds.danger" = "Небезпека";
 "pacemaker.showRingWarningSegment" = "Показати сегменти попередження кільця";
+"content.month" = "Monthly";

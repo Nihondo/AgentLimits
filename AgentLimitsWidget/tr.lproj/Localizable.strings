@@ -21,3 +21,4 @@
 "widget.tokenUsage.thisMonth" = "Aylık";
 "widget.tokenUsageDescription" = "Token kullanımını ve maliyetleri gösterir.";
 "widget.pleaseOpenApp" = "Lütfen uygulamayı açın";
+"widget.monthlyLimit" = "Monthly Limit";
