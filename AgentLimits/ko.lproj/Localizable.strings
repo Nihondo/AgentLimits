@@ -134,6 +134,7 @@
 "ccusage.credits.body" = "ccusage 제작자 ryoppippi에게 특별한 감사를 전합니다.";
 "ccusage.credits.site" = "ccusage 웹사이트";
 "ccusage.credits.repo" = "GitHub: ryoppippi/ccusage";
+"ccusage.copilot.autoFetchNote" = "Copilot 사용량 조회 시 자동으로 가져옵니다.";
 
 /* Advanced Settings */
 "advancedSettings.title" = "고급 설정";

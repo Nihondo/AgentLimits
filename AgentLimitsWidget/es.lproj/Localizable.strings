@@ -22,3 +22,4 @@
 "widget.tokenUsageDescription" = "Muestra el uso de tokens y costos.";
 "widget.pleaseOpenApp" = "Por favor abra la app";
 "widget.monthlyLimit" = "Monthly Limit";
+"widget.copilotBillingDescription" = "Muestra el uso de facturación y costos de Copilot.";

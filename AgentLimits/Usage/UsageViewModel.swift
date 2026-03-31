@@ -4,6 +4,7 @@
 
 import Combine
 import Foundation
+import OSLog
 import WebKit
 import WidgetKit
 
@@ -27,6 +28,7 @@ final class UsageViewModel: ObservableObject {
     private let codexFetcher: CodexUsageFetcher
     private let claudeFetcher: ClaudeUsageFetcher
     private let copilotFetcher: CopilotUsageFetcher
+    private let copilotBillingFetcher: CopilotBillingFetcher
     private let webViewPool: UsageWebViewPool
     private let displayModeStore: UsageDisplayModeStore
     private let stateManager: ProviderStateManager
@@ -61,6 +63,7 @@ final class UsageViewModel: ObservableObject {
         self.codexFetcher = useCodexFetcher
         self.claudeFetcher = useClaudeFetcher
         self.copilotFetcher = useCopilotFetcher
+        self.copilotBillingFetcher = CopilotBillingFetcher()
         self.displayModeStore = useDisplayModeStore
         self.stateManager = useStateManager
         self.selectedProvider = selectedProvider
@@ -247,6 +250,11 @@ final class UsageViewModel: ObservableObject {
 
             // Check thresholds and send notifications if needed
             await ThresholdNotificationManager.shared.checkThresholdsIfNeeded(for: fetchedSnapshot)
+
+            // Fetch Copilot billing data alongside usage limits
+            if provider == .githubCopilot {
+                Task { await fetchCopilotBilling(using: webViewStore.webView) }
+            }
         } catch {
             // Disable auto-refresh on auth-related errors to prevent repeated failures.
             if shouldDisableAutoRefresh(for: provider, error: error) {
@@ -371,5 +379,19 @@ final class UsageViewModel: ObservableObject {
         }
         lastLoginRedirectAt[provider] = now
         return true
+    }
+
+    // MARK: - Copilot Billing
+
+    /// Fetches Copilot billing data and saves to token usage snapshot store.
+    /// Fire-and-forget: errors are logged but do not affect usage limits UI.
+    private func fetchCopilotBilling(using webView: WKWebView) async {
+        do {
+            let snapshot = try await copilotBillingFetcher.fetchBillingSnapshot(using: webView)
+            try TokenUsageSnapshotStore.shared.saveSnapshot(snapshot)
+            WidgetCenter.shared.reloadTimelines(ofKind: TokenUsageProvider.copilot.widgetKind)
+        } catch {
+            Logger.usage.error("Copilot billing fetch failed: \(error.localizedDescription)")
+        }
     }
 }

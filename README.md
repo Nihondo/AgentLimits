@@ -25,6 +25,8 @@ Download the latest build: [Download](https://github.com/Nihondo/AgentLimits/rel
 - **Token usage (ccusage):** daily/weekly/monthly tokens and cost via CLI.
   - Codex: `npx -y @ccusage/codex@latest daily`
   - Claude Code: `npx -y ccusage@latest daily`
+- **Billing usage (Copilot):** daily premium request count and cost via WebView.
+  - API: `https://github.com/settings/billing/usage_table` (fetched automatically with Copilot usage)
 
 ## Menu Bar Display
 - Two-line layout per provider
@@ -62,12 +64,18 @@ Pacemaker mode shows a time-based usage benchmark to help you stay on track.
 - Update time shown as `HH:mm` (or `--:--` if older than 24h)
 
 ### Token Usage Widgets (Codex / Claude Code)
-- **Small:** today / this week / this month summary
+- **Small:** today / this week / this month summary (cost + tokens)
 - **Medium:** summary + GitHub-style heatmap
   - 7 rows (Sun–Sat) × 4–6 columns (weeks)
   - 5 levels by quartile distribution
   - Weekday labels (Mon, Wed, Fri)
   - Desktop pinned mode support (accented / grayscale)
+- Widget tap action is configurable (default opens `https://ccusage.com/`)
+
+### Billing Usage Widget (Copilot Premium Requests)
+- **Small:** today / this week / this month summary (cost + premium requests)
+- **Medium:** summary + GitHub-style heatmap
+- Data is fetched automatically when Copilot usage is refreshed (via WebView, no CLI required)
 - Widget tap action is configurable (default opens `https://ccusage.com/`)
 
 ## Settings Guide
@@ -82,10 +90,11 @@ Pacemaker mode shows a time-based usage benchmark to help you stay on track.
 
 ### ccusage
 1. Open **ccusage**.
-2. Select provider.
+2. Select provider (Codex / Claude Code).
 3. Choose refresh interval (1–10 minutes).
 4. Enable periodic fetch and set additional CLI args if needed.
 5. Use **Test Now** to verify CLI execution.
+6. For Copilot: billing data is fetched automatically when Copilot usage is refreshed — just enable the toggle.
 
 ### Wake Up
 1. Open **Wake Up**.
@@ -139,7 +148,8 @@ Snapshots are stored in the App Group container:
 ├── usage_snapshot_claude.json
 ├── usage_snapshot_copilot.json
 ├── token_usage_codex.json
-└── token_usage_claude.json
+├── token_usage_claude.json
+└── token_usage_copilot.json
 ```
 
 ## Notes / Troubleshooting

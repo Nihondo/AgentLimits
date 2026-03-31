@@ -697,7 +697,6 @@ enum UsageProvider: String, Codable, CaseIterable, Identifiable, SnapshotFileNam
     // MARK: - Provider Conversion
 
     /// Converts this UsageProvider to its corresponding TokenUsageProvider.
-    /// Returns nil for providers that don't have ccusage CLI support.
     var tokenUsageProvider: TokenUsageProvider? {
         switch self {
         case .chatgptCodex:
@@ -705,7 +704,7 @@ enum UsageProvider: String, Codable, CaseIterable, Identifiable, SnapshotFileNam
         case .claudeCode:
             return .claude
         case .githubCopilot:
-            return nil
+            return .copilot
         }
     }
 }

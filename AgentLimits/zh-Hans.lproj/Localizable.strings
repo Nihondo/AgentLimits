@@ -134,6 +134,7 @@
 "ccusage.credits.body" = "特别感谢 ccusage 的作者 ryoppippi。";
 "ccusage.credits.site" = "ccusage 网站";
 "ccusage.credits.repo" = "GitHub: ryoppippi/ccusage";
+"ccusage.copilot.autoFetchNote" = "随Copilot使用量一起自动获取。";
 
 /* Advanced Settings */
 "advancedSettings.title" = "高级设置";

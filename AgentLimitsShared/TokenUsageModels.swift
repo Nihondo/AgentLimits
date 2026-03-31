@@ -6,13 +6,25 @@ import Foundation
 
 // MARK: - Token Usage Provider
 
-/// Provider identifier for ccusage CLI tools.
-/// Uses `codex` and `claude` as rawValue for JSON compatibility.
+/// Provider identifier for token usage tracking.
+/// Uses `codex`, `claude`, and `copilot` as rawValue for JSON compatibility.
 enum TokenUsageProvider: String, Codable, CaseIterable, Identifiable, SnapshotFileNaming, AIProviderProtocol {
     case codex       // @ccusage/codex (Codex)
     case claude      // ccusage (Claude Code)
+    case copilot     // GitHub Copilot billing (WebView-based)
 
     var id: String { rawValue }
+
+    /// Whether this provider uses CLI-based fetching.
+    /// Copilot uses WebView-based fetch instead.
+    var isCLIBased: Bool {
+        switch self {
+        case .codex, .claude:
+            return true
+        case .copilot:
+            return false
+        }
+    }
 
     /// Display name for UI (implements AIProviderProtocol)
     var displayName: String {
@@ -21,6 +33,8 @@ enum TokenUsageProvider: String, Codable, CaseIterable, Identifiable, SnapshotFi
             return "Codex"
         case .claude:
             return "Claude Code"
+        case .copilot:
+            return "Copilot"
         }
     }
 
@@ -28,13 +42,16 @@ enum TokenUsageProvider: String, Codable, CaseIterable, Identifiable, SnapshotFi
     var widgetDisplayName: String {
         switch self {
         case .codex:
-            return "ccusage (Codex)"
+            return "Codex usage"
         case .claude:
-            return "ccusage (Claude)"
+            return "Claude Code usage"
+        case .copilot:
+            return "Copilot usage"
         }
     }
 
-    /// Base CLI command (without arguments)
+    /// Base CLI command (without arguments).
+    /// Returns empty string for non-CLI providers.
     var cliCommandBase: String {
         let npxExecutable = CLICommandPathResolver.resolveExecutable(for: .npx, defaultName: "npx")
         switch self {
@@ -42,6 +59,8 @@ enum TokenUsageProvider: String, Codable, CaseIterable, Identifiable, SnapshotFi
             return "\(npxExecutable) -y @ccusage/codex@latest daily"
         case .claude:
             return "\(npxExecutable) -y ccusage@latest daily"
+        case .copilot:
+            return ""
         }
     }
 
@@ -52,6 +71,8 @@ enum TokenUsageProvider: String, Codable, CaseIterable, Identifiable, SnapshotFi
             return "TokenUsageWidgetCodex"
         case .claude:
             return "TokenUsageWidgetClaude"
+        case .copilot:
+            return "TokenUsageWidgetCopilot"
         }
     }
 
@@ -62,6 +83,8 @@ enum TokenUsageProvider: String, Codable, CaseIterable, Identifiable, SnapshotFi
             return "token_usage_codex.json"
         case .claude:
             return "token_usage_claude.json"
+        case .copilot:
+            return "token_usage_copilot.json"
         }
     }
 
@@ -84,6 +107,8 @@ enum TokenUsageProvider: String, Codable, CaseIterable, Identifiable, SnapshotFi
             return .chatgptCodex
         case .claude:
             return .claudeCode
+        case .copilot:
+            return .githubCopilot
         }
     }
 }

@@ -121,6 +121,16 @@ final class TokenUsageViewModel: ObservableObject {
     // MARK: - Private Methods
 
     private func refresh(for provider: TokenUsageProvider) async {
+        // Copilot billing is fetched via UsageViewModel (WebView-based).
+        // Only reload the cached snapshot here.
+        guard provider.isCLIBased else {
+            if let cached = snapshotStore.loadSnapshot(for: provider) {
+                snapshots[provider] = cached
+                statusMessages[provider] = formatLastUpdated(cached.fetchedAt)
+            }
+            return
+        }
+
         // Prevent overlapping fetches per provider.
         guard isFetching[provider] != true else { return }
         isFetching[provider] = true

@@ -32,7 +32,9 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 5. `CCUsageFetcher` runs CLI to fetch token usage:
    - Codex: `npx -y @ccusage/codex@latest daily`
    - Claude Code: `npx -y ccusage@latest daily`
-6. `TokenUsageViewModel` manages auto-refresh (configurable 1-10 minutes) and snapshot persistence
+6. `CopilotBillingFetcher` fetches billing usage via WebView JS (triggered after Copilot entitlement fetch):
+   - API: `https://github.com/settings/billing/usage_table?group=0&period=3&product=&query=`
+7. `TokenUsageViewModel` manages auto-refresh (configurable 1-10 minutes) and snapshot persistence
 7. Widgets read their respective snapshot files (no network access)
 8. `ThresholdNotificationManager` checks usage against thresholds and sends notifications
 9. Menu bar label displays real-time usage percentages for enabled providers
@@ -55,6 +57,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 | `AgentLimits/Usage/CodexUsageFetcher.swift` | Codex API + JS token extraction |
 | `AgentLimits/Usage/ClaudeUsageFetcher.swift` | Claude API + JS org ID extraction |
 | `AgentLimits/Usage/CopilotUsageFetcher.swift` | GitHub Copilot entitlement API + JS cookie-based auth |
+| `AgentLimits/Usage/CopilotBillingFetcher.swift` | GitHub Copilot billing usage_table API + daily aggregation |
 | `AgentLimits/Usage/UsageViewModel.swift` | Usage limits state, auto-refresh, per-provider tracking, threshold check |
 | `AgentLimits/Usage/ProviderStateManager.swift` | Per-provider state management (Codex/Claude Code/Copilot independent tracking) |
 | `AgentLimits/Usage/UsageDisplayModeStore.swift` | Display mode persistence and snapshot conversion |
@@ -183,7 +186,8 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 ├── usage_snapshot_claude.json    # Claude Code usage limits
 ├── usage_snapshot_copilot.json   # GitHub Copilot usage limits
 ├── token_usage_codex.json        # ccusage Codex
-└── token_usage_claude.json       # ccusage Claude
+├── token_usage_claude.json       # ccusage Claude
+└── token_usage_copilot.json      # Copilot billing
 ```
 
 ### UserDefaults Keys
@@ -228,6 +232,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 - `AgentLimitWidgetCopilot` - GitHub Copilot usage limits widget
 - `TokenUsageWidgetCodex` - ccusage Codex widget
 - `TokenUsageWidgetClaude` - ccusage Claude widget
+- `TokenUsageWidgetCopilot` - Copilot billing widget
 
 ### Entitlements
 

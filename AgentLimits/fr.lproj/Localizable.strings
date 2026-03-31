@@ -134,6 +134,7 @@
 "ccusage.credits.body" = "Remerciements particuliers à ryoppippi, le créateur de ccusage.";
 "ccusage.credits.site" = "Site web ccusage";
 "ccusage.credits.repo" = "GitHub : ryoppippi/ccusage";
+"ccusage.copilot.autoFetchNote" = "Récupéré automatiquement avec l'utilisation de Copilot.";
 
 /* Advanced Settings */
 "advancedSettings.title" = "Paramètres avancés";

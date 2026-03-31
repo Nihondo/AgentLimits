@@ -22,3 +22,4 @@
 "widget.tokenUsageDescription" = "显示令牌使用量和费用。";
 "widget.pleaseOpenApp" = "请打开应用";
 "widget.monthlyLimit" = "Monthly Limit";
+"widget.copilotBillingDescription" = "显示Copilot账单使用量和费用。";

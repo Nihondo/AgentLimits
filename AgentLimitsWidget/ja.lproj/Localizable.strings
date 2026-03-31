@@ -22,3 +22,4 @@
 "widget.tokenUsageDescription" = "トークン使用量とコストを表示します。";
 "widget.pleaseOpenApp" = "アプリを開いてください";
 "widget.monthlyLimit" = "月間リミット";
+"widget.copilotBillingDescription" = "Copilotの課金使用量とコストを表示します。";

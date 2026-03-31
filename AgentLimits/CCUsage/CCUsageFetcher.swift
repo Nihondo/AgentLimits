@@ -186,6 +186,9 @@ final class CCUsageFetcher {
                 todayString: todayString,
                 startOfWeek: startOfWeek
             )
+        case .copilot:
+            // Copilot billing is fetched via WebView, not CLI.
+            throw CCUsageFetcherError.parseError("Copilot billing does not use CLI fetching")
         }
     }
 

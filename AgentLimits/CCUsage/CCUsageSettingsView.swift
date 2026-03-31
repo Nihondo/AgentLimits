@@ -71,23 +71,34 @@ struct CCUsageSettingsView: View {
     private var settingsSection: some View {
         Group {
             if let settings = viewModel.settings[selectedProvider] {
-                ProviderSettingsView(
-                    settings: settings,
-                    isFetching: viewModel.isFetching[selectedProvider] ?? false,
-                    onEnabledChange: { newEnabled in
-                        var updated = settings
-                        updated.isEnabled = newEnabled
-                        viewModel.updateSettings(updated)
-                    },
-                    onUpdate: { updatedSettings in
-                        viewModel.updateSettings(updatedSettings)
-                    },
-                    onTest: {
-                        Task {
-                            await viewModel.refreshNow(for: selectedProvider)
+                if selectedProvider.isCLIBased {
+                    ProviderSettingsView(
+                        settings: settings,
+                        isFetching: viewModel.isFetching[selectedProvider] ?? false,
+                        onEnabledChange: { newEnabled in
+                            var updated = settings
+                            updated.isEnabled = newEnabled
+                            viewModel.updateSettings(updated)
+                        },
+                        onUpdate: { updatedSettings in
+                            viewModel.updateSettings(updatedSettings)
+                        },
+                        onTest: {
+                            Task {
+                                await viewModel.refreshNow(for: selectedProvider)
+                            }
                         }
-                    }
-                )
+                    )
+                } else {
+                    CopilotBillingSettingsView(
+                        settings: settings,
+                        onEnabledChange: { newEnabled in
+                            var updated = settings
+                            updated.isEnabled = newEnabled
+                            viewModel.updateSettings(updated)
+                        }
+                    )
+                }
             }
         }
     }
@@ -162,7 +173,9 @@ struct CCUsageSettingsView: View {
                         Label(TokenUsageFormatter.formatCost(snapshot.thisMonth.costUSD), systemImage: "dollarsign.circle")
                             .font(.footnote)
                         Spacer()
-                        Text(TokenUsageFormatter.formatTokens(snapshot.thisMonth.totalTokens))
+                        Text(selectedProvider == .copilot
+                            ? TokenUsageFormatter.formatRequests(snapshot.thisMonth.totalTokens)
+                            : TokenUsageFormatter.formatTokens(snapshot.thisMonth.totalTokens))
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     }
@@ -259,6 +272,33 @@ private struct ProviderSettingsView: View {
                     additionalArgs: newValue
                 ))
             }
+        )
+    }
+}
+
+// MARK: - Copilot Billing Settings View
+
+/// Simplified settings for Copilot billing (no CLI configuration needed)
+private struct CopilotBillingSettingsView: View {
+    let settings: CCUsageSettings
+    let onEnabledChange: (Bool) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Toggle("ccusage.enabled".localized(), isOn: enabledBinding)
+
+            if settings.isEnabled {
+                Text("ccusage.copilot.autoFetchNote".localized())
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private var enabledBinding: Binding<Bool> {
+        Binding(
+            get: { settings.isEnabled },
+            set: { newValue in onEnabledChange(newValue) }
         )
     }
 }

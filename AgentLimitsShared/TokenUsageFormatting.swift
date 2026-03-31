@@ -1,6 +1,6 @@
 import Foundation
 
-/// Formats cost and token counts for ccusage output.
+/// Formats cost, token counts, and request counts for usage output.
 enum TokenUsageFormatter {
     /// Returns a cost string formatted in USD.
     static func formatCost(_ cost: Double) -> String {
@@ -17,5 +17,17 @@ enum TokenUsageFormatter {
             return String(format: "%.0fK Tokens", kTokens)
         }
         return "\(tokens) Tokens"
+    }
+
+    /// Returns a compact request count string in K/M units.
+    static func formatRequests(_ requests: Int) -> String {
+        let kRequests = Double(requests) / 1000.0
+        if kRequests >= 1000 {
+            return String(format: "%.1fK Requests", kRequests / 1000.0)
+        }
+        if kRequests >= 1 {
+            return String(format: "%.0fK Requests", kRequests)
+        }
+        return "\(requests) Requests"
     }
 }

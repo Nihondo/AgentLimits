@@ -135,6 +135,7 @@
 "ccusage.credits.body" = "ccusage の作者 ryoppippi さんへの感謝を込めて。";
 "ccusage.credits.site" = "ccusage 公式サイト";
 "ccusage.credits.repo" = "GitHub: ryoppippi/ccusage";
+"ccusage.copilot.autoFetchNote" = "Copilotの使用量取得時に自動的に取得されます。";
 
 /* Advanced Settings */
 "advancedSettings.title" = "詳細設定";

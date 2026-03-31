@@ -35,7 +35,17 @@ struct TokenUsageTimelineProvider: TimelineProvider {
     }
 
     private var placeholderSnapshot: TokenUsageSnapshot {
-        TokenUsageSnapshot(
+        if provider == .copilot {
+            return TokenUsageSnapshot(
+                provider: provider,
+                fetchedAt: Date(),
+                today: TokenUsagePeriod(costUSD: 0.12, totalTokens: 3),
+                thisWeek: TokenUsagePeriod(costUSD: 1.20, totalTokens: 30),
+                thisMonth: TokenUsagePeriod(costUSD: 4.80, totalTokens: 120),
+                dailyUsage: generatePlaceholderDailyUsage()
+            )
+        }
+        return TokenUsageSnapshot(
             provider: provider,
             fetchedAt: Date(),
             today: TokenUsagePeriod(costUSD: 0.28, totalTokens: 6378000),
@@ -230,7 +240,9 @@ struct TokenUsageWidgetEntryView: View {
             }
             HStack {
                 Spacer()
-                Text(TokenUsageFormatter.formatTokens(period.totalTokens))
+                Text(entry.provider == .copilot
+                    ? TokenUsageFormatter.formatRequests(period.totalTokens)
+                    : TokenUsageFormatter.formatTokens(period.totalTokens))
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .monospacedDigit()
@@ -267,6 +279,21 @@ struct CodexTokenUsageWidget: Widget {
         }
         .configurationDisplayName(TokenUsageProvider.codex.widgetDisplayName)
         .description("widget.tokenUsageDescription".widgetLocalized())
+        .supportedFamilies([.systemSmall, .systemMedium])
+    }
+}
+
+struct CopilotTokenUsageWidget: Widget {
+    var body: some WidgetConfiguration {
+        StaticConfiguration(
+            kind: TokenUsageProvider.copilot.widgetKind,
+            provider: TokenUsageTimelineProvider(provider: .copilot)
+        ) { entry in
+            TokenUsageWidgetEntryView(entry: entry)
+                .containerBackground(.fill.tertiary, for: .widget)
+        }
+        .configurationDisplayName(TokenUsageProvider.copilot.widgetDisplayName)
+        .description("widget.copilotBillingDescription".widgetLocalized())
         .supportedFamilies([.systemSmall, .systemMedium])
     }
 }
