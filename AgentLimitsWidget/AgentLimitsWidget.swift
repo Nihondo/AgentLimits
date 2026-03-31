@@ -46,7 +46,9 @@ struct UsageTimelineProvider: TimelineProvider {
                     kind: .primary,
                     usedPercent: 62,
                     resetAt: Date().addingTimeInterval(60 * 60 * 24 * 4),
-                    limitWindowSeconds: UsageLimitDuration.thirtyDays
+                    limitWindowSeconds: UsageLimitDuration.thirtyDays,
+                    usedCount: 186,
+                    limitCount: 300
                 ),
                 secondaryWindow: nil,
                 displayMode: .used
@@ -573,6 +575,15 @@ private struct UsageDetailColumnView: View {
                     showDateTime: true
                 )
             }
+            if provider == .githubCopilot,
+               let usedCount = primaryWindow?.usedCount,
+               let limitCount = primaryWindow?.limitCount {
+                UsageCountSectionView(
+                    title: "widget.premiumRequests".widgetLocalized(),
+                    usedCount: usedCount,
+                    limitCount: limitCount
+                )
+            }
         }
     }
 }
@@ -633,6 +644,24 @@ private struct UsageDetailSectionView: View {
         formatter.maximumFractionDigits = 1
         formatter.locale = Locale.current
         return formatter.string(from: NSNumber(value: hours)) ?? String(format: "%.1f", hours)
+    }
+}
+
+private struct UsageCountSectionView: View {
+    let title: String
+    let usedCount: Int
+    let limitCount: Int
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(title)
+                .font(.title3)
+                .fontWeight(.bold)
+                .monospacedDigit()
+            Text("  \(usedCount) / \(limitCount)")
+                .font(.headline)
+                .monospacedDigit()
+        }
     }
 }
 

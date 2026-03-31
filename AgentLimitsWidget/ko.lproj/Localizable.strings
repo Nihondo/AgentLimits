@@ -22,4 +22,5 @@
 "widget.tokenUsageDescription" = "토큰 사용량과 비용을 표시합니다.";
 "widget.pleaseOpenApp" = "앱을 열어주세요";
 "widget.monthlyLimit" = "Monthly Limit";
+"widget.premiumRequests" = "프리미엄 요청";
 "widget.copilotBillingDescription" = "Copilot 청구 사용량과 비용을 표시합니다.";

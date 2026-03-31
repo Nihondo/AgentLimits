@@ -172,6 +172,14 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 
 `AgentLimitsShared/UsageModels.swift` defines the shared usage model and snapshot store. App/widget add target-specific extensions in `AgentLimits/Usage/AppUsageModels.swift` and `AgentLimitsWidget/WidgetUsageModels.swift`.
 
+`UsageWindow` stores per-window usage data:
+- `kind`: `.primary` or `.secondary`
+- `usedPercent`: 0-100
+- `resetAt`: Date?
+- `limitWindowSeconds`: TimeInterval
+- `usedCount`: Int? — used count (Copilot premium interactions)
+- `limitCount`: Int? — limit count (Copilot premium interactions quota)
+
 `AgentLimitsShared/TokenUsageModels.swift` defines token usage snapshots:
 - `provider`: `.codex` or `.claude`
 - `today` / `thisWeek` / `thisMonth`: `TokenUsagePeriod` with `costUSD`, `totalTokens`

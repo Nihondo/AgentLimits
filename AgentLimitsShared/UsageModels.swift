@@ -738,9 +738,19 @@ struct UsageWindow: Codable {
     let resetAt: Date?
     /// Duration of the window in seconds
     let limitWindowSeconds: TimeInterval
+    /// Used count (e.g., premium interactions consumed). Optional, Copilot only.
+    let usedCount: Int?
+    /// Limit count (e.g., total premium interactions quota). Optional, Copilot only.
+    let limitCount: Int?
 }
 
 extension UsageWindow {
+    /// Convenience initializer without count fields (defaults to nil).
+    init(kind: UsageWindowKind, usedPercent: Double, resetAt: Date?, limitWindowSeconds: TimeInterval) {
+        self.init(kind: kind, usedPercent: usedPercent, resetAt: resetAt,
+                  limitWindowSeconds: limitWindowSeconds, usedCount: nil, limitCount: nil)
+    }
+
     /// Calculates the pacemaker percentage based on elapsed time within the window.
     /// Returns nil if resetAt is unavailable.
     func calculatePacemakerPercent() -> Double? {
@@ -769,7 +779,7 @@ extension UsageWindow {
 
     /// Returns the number of segments for pacemaker ring division.
     /// 5h window → 5 (1 per hour), 7-day window → 7 (1 per day),
-    /// monthly window → weeks in billing period (4-6).
+    /// monthly window → 1 (no division, single continuous ring).
     var pacemakerDivisionCount: Int {
         if limitWindowSeconds <= UsageLimitDuration.fiveHours + 1 {
             return 5
@@ -777,12 +787,8 @@ extension UsageWindow {
         if limitWindowSeconds <= UsageLimitDuration.sevenDays + 1 {
             return 7
         }
-        // Monthly: compute weeks overlapping the billing period
-        guard let resetAt = resetAt else { return 4 }
-        let start = resetAt.addingTimeInterval(-limitWindowSeconds)
-        let cal = Calendar.current
-        let weeks = cal.dateComponents([.weekOfMonth], from: start, to: resetAt).weekOfMonth ?? 4
-        return max(4, min(6, weeks))
+        // Monthly: no division (single continuous ring)
+        return 1
     }
 }
 

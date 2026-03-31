@@ -22,4 +22,5 @@
 "widget.tokenUsageDescription" = "Показує використання токенів та витрати.";
 "widget.pleaseOpenApp" = "Відкрийте застосунок";
 "widget.monthlyLimit" = "Monthly Limit";
+"widget.premiumRequests" = "Преміум запити";
 "widget.copilotBillingDescription" = "Показує використання білінгу та витрати Copilot.";

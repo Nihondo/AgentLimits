@@ -62,11 +62,21 @@ extension CopilotUsageResponse {
         let resetAt = quotas.resetDate.flatMap { Self.resetDateFormatter.date(from: $0) }
         let limitWindowSeconds = computeLimitWindowSeconds(resetAt: resetAt)
 
+        let limitCount = quotas.limits?.premiumInteractions
+        let usedCount: Int?
+        if let limit = limitCount, let rem = remaining.premiumInteractions {
+            usedCount = max(0, limit - rem)
+        } else {
+            usedCount = nil
+        }
+
         return UsageWindow(
             kind: .primary,
             usedPercent: usedPercent,
             resetAt: resetAt,
-            limitWindowSeconds: limitWindowSeconds
+            limitWindowSeconds: limitWindowSeconds,
+            usedCount: usedCount,
+            limitCount: limitCount
         )
     }
 

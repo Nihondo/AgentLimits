@@ -22,4 +22,5 @@
 "widget.tokenUsageDescription" = "顯示 Token 使用量和費用。";
 "widget.pleaseOpenApp" = "請開啟應用程式";
 "widget.monthlyLimit" = "Monthly Limit";
+"widget.premiumRequests" = "進階請求";
 "widget.copilotBillingDescription" = "顯示Copilot帳單使用量和費用。";
