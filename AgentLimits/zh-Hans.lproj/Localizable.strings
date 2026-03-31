@@ -111,6 +111,8 @@
 "notification.alertTitleDanger" = "%@ 使用率危险";
 "notification.alertBody5h" = "5 小时使用限制已达到 %d%%";
 "notification.alertBodyWeek" = "每周使用限制已达到 %d%%";
+"notification.alertBodyMonth" = "每月使用限制已达到 %d%%";
+"notification.monthlyWindow" = "每月限制";
 
 /* ccusage */
 "tab.ccusage" = "ccusage";

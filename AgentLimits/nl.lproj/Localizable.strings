@@ -111,6 +111,8 @@
 "notification.alertTitleDanger" = "Gevaar gebruikspercentage %@";
 "notification.alertBody5h" = "De 5-uur gebruikslimiet heeft %d%% bereikt";
 "notification.alertBodyWeek" = "De wekelijkse gebruikslimiet heeft %d%% bereikt";
+"notification.alertBodyMonth" = "De maandelijkse gebruikslimiet heeft %d%% bereikt";
+"notification.monthlyWindow" = "Maandelijkse limiet";
 
 /* ccusage */
 "tab.ccusage" = "ccusage";

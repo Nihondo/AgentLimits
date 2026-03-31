@@ -111,6 +111,8 @@
 "notification.alertTitleDanger" = "%@ 사용률 위험";
 "notification.alertBody5h" = "5시간 사용 제한이 %d%%에 도달했습니다";
 "notification.alertBodyWeek" = "주간 사용 제한이 %d%%에 도달했습니다";
+"notification.alertBodyMonth" = "월간 사용 제한이 %d%%에 도달했습니다";
+"notification.monthlyWindow" = "월간 제한";
 
 /* ccusage */
 "tab.ccusage" = "ccusage";

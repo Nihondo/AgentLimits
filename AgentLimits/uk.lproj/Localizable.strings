@@ -111,6 +111,8 @@
 "notification.alertTitleDanger" = "Небезпека рівня використання %@";
 "notification.alertBody5h" = "Ліміт використання 5 годин досяг %d%%";
 "notification.alertBodyWeek" = "Тижневий ліміт використання досяг %d%%";
+"notification.alertBodyMonth" = "Місячний ліміт використання досяг %d%%";
+"notification.monthlyWindow" = "Місячний ліміт";
 
 /* ccusage */
 "tab.ccusage" = "ccusage";

@@ -31,18 +31,20 @@ struct ThresholdSettingsView: View {
                 }
             }
 
-            SettingsFormSection(title: "notification.primaryWindow".localized()) {
+            SettingsFormSection(title: primaryWindowTitle) {
                 thresholdSection(
                     settings: manager.getSettings(for: selectedProvider).primaryWindow,
                     windowKind: .primary
                 )
             }
 
-            SettingsFormSection(title: "notification.secondaryWindow".localized()) {
-                thresholdSection(
-                    settings: manager.getSettings(for: selectedProvider).secondaryWindow,
-                    windowKind: .secondary
-                )
+            if selectedProvider != .githubCopilot {
+                SettingsFormSection(title: "notification.secondaryWindow".localized()) {
+                    thresholdSection(
+                        settings: manager.getSettings(for: selectedProvider).secondaryWindow,
+                        windowKind: .secondary
+                    )
+                }
             }
 
             SettingsFormSection {
@@ -82,6 +84,12 @@ struct ThresholdSettingsView: View {
     }
 
     // MARK: - Provider Picker
+
+    private var primaryWindowTitle: String {
+        selectedProvider == .githubCopilot
+            ? "notification.monthlyWindow".localized()
+            : "notification.primaryWindow".localized()
+    }
 
     private var providerPicker: some View {
         Picker("", selection: $selectedProvider) {

@@ -248,7 +248,15 @@ final class ThresholdNotificationManager: ObservableObject {
         )
 
         // Body: window-specific message
-        let bodyKey = windowKind == .primary ? "notification.alertBody5h" : "notification.alertBodyWeek"
+        let bodyKey: String
+        switch (provider, windowKind) {
+        case (.githubCopilot, .primary):
+            bodyKey = "notification.alertBodyMonth"
+        case (_, .primary):
+            bodyKey = "notification.alertBody5h"
+        case (_, .secondary):
+            bodyKey = "notification.alertBodyWeek"
+        }
         content.body = String(format: bodyKey.localized(), usedPercent)
 
         content.sound = .default

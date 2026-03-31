@@ -29,7 +29,11 @@ final class ThresholdNotificationStore: @unchecked Sendable {
             Logger.notification.info("ThresholdNotificationStore: No saved settings, returning defaults")
             return makeDefaultSettings()
         }
-        let result = Dictionary(uniqueKeysWithValues: settings.map { ($0.provider, $0) })
+        var result = Dictionary(uniqueKeysWithValues: settings.map { ($0.provider, $0) })
+        // Fill in defaults for any newly added providers not yet in persisted data.
+        for provider in UsageProvider.allCases where result[provider] == nil {
+            result[provider] = ProviderThresholdSettings.defaultSettings(for: provider)
+        }
         for (provider, providerSettings) in result {
             let primaryWarningLastNotified = providerSettings.primaryWindow.warning.lastNotifiedResetAt
                 .map { Int($0.timeIntervalSince1970) } ?? -1

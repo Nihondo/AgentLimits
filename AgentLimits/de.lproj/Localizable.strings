@@ -112,6 +112,8 @@
 "notification.alertTitleDanger" = "%@ Nutzungsrate Gefahr";
 "notification.alertBody5h" = "Das 5‑Stunden-Nutzungslimit hat %d%% erreicht";
 "notification.alertBodyWeek" = "Das wöchentliche Nutzungslimit hat %d%% erreicht";
+"notification.alertBodyMonth" = "Das monatliche Nutzungslimit hat %d%% erreicht";
+"notification.monthlyWindow" = "Monatliches Limit";
 
 /* ccusage */
 "tab.ccusage" = "ccusage";
