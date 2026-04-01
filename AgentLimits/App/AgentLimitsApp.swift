@@ -339,7 +339,7 @@ private struct MenuBarPercentLineView: View {
     var body: some View {
         HStack(spacing: 2) {
             percentTextView(primaryWindow, windowKind: .primary)
-            if secondaryWindow != nil {
+            if provider != .githubCopilot {
                 Text("/")
                     .foregroundStyle(.secondary)
                 percentTextView(secondaryWindow, windowKind: .secondary)
