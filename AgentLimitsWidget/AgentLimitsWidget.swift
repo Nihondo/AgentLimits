@@ -225,7 +225,7 @@ private struct UsageDonutRow: View {
     }
 
     var body: some View {
-        if secondaryWindow == nil {
+        if provider == .githubCopilot {
             // Single donut centered layout for monthly providers
             UsageDonutColumnView(
                 provider: provider,
@@ -567,7 +567,7 @@ private struct UsageDetailColumnView: View {
                 showRelative: provider != .githubCopilot,
                 showDateTime: provider == .githubCopilot
             )
-            if let secondaryWindow {
+            if provider != .githubCopilot {
                 UsageDetailSectionView(
                     title: "widget.weeklyLimit".widgetLocalized(),
                     window: secondaryWindow,
