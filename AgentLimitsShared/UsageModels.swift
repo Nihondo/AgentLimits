@@ -607,7 +607,7 @@ enum UsageProvider: String, Codable, CaseIterable, Identifiable, SnapshotFileNam
     // These are defined as static properties to ensure they are only created once.
 
     /// Codex usage settings page URL
-    private static let codexUsageURL = URL(string: "https://chatgpt.com/codex/settings/usage")
+    private static let codexUsageURL = URL(string: "https://chatgpt.com/codex/cloud/settings/usage")
     /// Claude usage settings page URL
     private static let claudeUsageURL = URL(string: "https://claude.ai/settings/usage")
     /// GitHub Copilot billing usage page URL
