@@ -177,6 +177,8 @@ final class UsageViewModel: ObservableObject {
     /// Called when WebView page finishes loading; triggers fetch if logged in
     func handlePageReadyChange(for provider: UsageProvider, isReady: Bool) {
         guard isReady else { return }
+        // Recovery Task が SPA 初期化待機を担うため、recovery 中は page-ready 経由の fetch をスキップ。
+        guard !autoRecoveryInFlight.contains(provider) else { return }
         // Manual refresh has priority; otherwise honor auto-refresh eligibility.
         let isManualRefresh = consumeManualRefreshRequest(for: provider)
         let state = stateManager.getState(for: provider)
@@ -207,6 +209,8 @@ final class UsageViewModel: ObservableObject {
         // Refresh providers that are enabled or selected.
         let eligibleProviders = stateManager.autoRefreshEligibleProviders(selectedProvider: selectedProvider)
         for provider in eligibleProviders {
+            // Recovery Task が進行中のプロバイダは auto refresh をスキップ。
+            guard !autoRecoveryInFlight.contains(provider) else { continue }
             await refreshSnapshot(for: provider)
         }
     }
@@ -264,14 +268,18 @@ final class UsageViewModel: ObservableObject {
                     autoRecoveryInFlight.remove(provider)
                     stateManager.setAutoRefreshEnabled(false, for: provider)
                 } else {
-                    // 初回失敗: stale な lastActiveOrg Cookie を削除してからリロードし orgId を再取得する
+                    // 初回失敗: stale な lastActiveOrg Cookie を削除してからリロードし orgId を再取得する。
+                    // page-ready 直後ではなく SPA が API コールを完了した後に fetch するため delayed Task を使う。
                     autoRecoveryInFlight.insert(provider)
-                    manualRefreshRequests.insert(provider)
                     await clearOrgIdCookie(for: provider)
                     webViewPool.getWebViewStore(for: provider).reloadFromOrigin()
                     stateManager.setStatusMessage("status.loadingLogin".localized(), for: provider)
                     if provider == selectedProvider {
                         statusMessage = "status.loadingLogin".localized()
+                    }
+                    Task { [weak self] in
+                        guard let self else { return }
+                        await self.waitForRecoveryFetch(for: provider)
                     }
                     return
                 }
@@ -383,6 +391,27 @@ final class UsageViewModel: ObservableObject {
             || normalized.contains("unauthorized")
             || normalized.contains("http 401")
             || normalized.contains("http 403")
+    }
+
+    /// ページ再ロード後、SPA の API コール完了を待ってから fetch を実行する。
+    /// handlePageReadyChange は autoRecoveryInFlight によりスキップされるため、ここで直接呼ぶ。
+    private func waitForRecoveryFetch(for provider: UsageProvider) async {
+        let webViewStore = webViewPool.getWebViewStore(for: provider)
+        // ページロード完了を最大 15 秒待機
+        let deadline = Date().addingTimeInterval(15)
+        while !webViewStore.isPageReady && Date() < deadline {
+            try? await Task.sleep(for: .milliseconds(500))
+        }
+        guard webViewStore.isPageReady else {
+            // タイムアウト: recovery フラグを解除して通常の auto refresh に戻す
+            autoRecoveryInFlight.remove(provider)
+            return
+        }
+        // SPA が初期 API コールを performance.getEntriesByType("resource") に登録するまで待機
+        try? await Task.sleep(for: .seconds(3))
+        await handleLoginAndFetch(for: provider)
+        // handleLoginAndFetch → refreshSnapshot が早期リターンした場合 (ページ未準備等) にフラグが残る可能性があるため解除
+        autoRecoveryInFlight.remove(provider)
     }
 
     /// missingOrganization エラー後の自動復旧用。stale な lastActiveOrg Cookie を削除し、
