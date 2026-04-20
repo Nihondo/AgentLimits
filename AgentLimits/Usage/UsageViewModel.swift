@@ -35,6 +35,7 @@ final class UsageViewModel: ObservableObject {
     private var autoRefreshCoordinator: AutoRefreshCoordinator?
     private var displayMode: UsageDisplayMode = .used
     private var manualRefreshRequests: Set<UsageProvider> = []
+    private var autoRecoveryInFlight: Set<UsageProvider> = []
     private var lastLoginRedirectAt: [UsageProvider: Date] = [:]
 
     init(
@@ -240,6 +241,7 @@ final class UsageViewModel: ObservableObject {
             try store.saveSnapshot(snapshotToSave)
             displayModeStore.saveCachedDisplayMode(displayMode)
             stateManager.updateAfterSuccessfulFetch(snapshot: snapshotToSave, for: provider)
+            autoRecoveryInFlight.remove(provider)
             stateManager.setStatusMessage("status.updated".localized(), for: provider)
             if provider == selectedProvider {
                 self.snapshot = snapshotToSave
@@ -256,9 +258,22 @@ final class UsageViewModel: ObservableObject {
                 Task { await fetchCopilotBilling(using: webViewStore.webView) }
             }
         } catch {
-            // Disable auto-refresh on auth-related errors to prevent repeated failures.
             if shouldDisableAutoRefresh(for: provider, error: error) {
-                stateManager.setAutoRefreshEnabled(false, for: provider)
+                if autoRecoveryInFlight.contains(provider) {
+                    // reload 後の再 fetch でも失敗 → 復旧不能と判定して auto refresh を無効化
+                    autoRecoveryInFlight.remove(provider)
+                    stateManager.setAutoRefreshEnabled(false, for: provider)
+                } else {
+                    // 初回失敗: reloadFromOrigin で orgId / Cookie を再取得して 1 回だけ自動復旧を試みる
+                    autoRecoveryInFlight.insert(provider)
+                    manualRefreshRequests.insert(provider)
+                    webViewPool.getWebViewStore(for: provider).reloadFromOrigin()
+                    stateManager.setStatusMessage("status.loadingLogin".localized(), for: provider)
+                    if provider == selectedProvider {
+                        statusMessage = "status.loadingLogin".localized()
+                    }
+                    return
+                }
             }
             stateManager.setFetchStatus(.failure(error.localizedDescription), for: provider)
             stateManager.setStatusMessage(error.localizedDescription, for: provider)
