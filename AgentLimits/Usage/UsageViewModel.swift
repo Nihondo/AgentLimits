@@ -264,9 +264,10 @@ final class UsageViewModel: ObservableObject {
                     autoRecoveryInFlight.remove(provider)
                     stateManager.setAutoRefreshEnabled(false, for: provider)
                 } else {
-                    // 初回失敗: reloadFromOrigin で orgId / Cookie を再取得して 1 回だけ自動復旧を試みる
+                    // 初回失敗: stale な lastActiveOrg Cookie を削除してからリロードし orgId を再取得する
                     autoRecoveryInFlight.insert(provider)
                     manualRefreshRequests.insert(provider)
+                    await clearOrgIdCookie(for: provider)
                     webViewPool.getWebViewStore(for: provider).reloadFromOrigin()
                     stateManager.setStatusMessage("status.loadingLogin".localized(), for: provider)
                     if provider == selectedProvider {
@@ -382,6 +383,17 @@ final class UsageViewModel: ObservableObject {
             || normalized.contains("unauthorized")
             || normalized.contains("http 401")
             || normalized.contains("http 403")
+    }
+
+    /// missingOrganization エラー後の自動復旧用。stale な lastActiveOrg Cookie を削除し、
+    /// リロード後の JS が resource / HTML フォールバックで最新 orgId を取得できるようにする。
+    private func clearOrgIdCookie(for provider: UsageProvider) async {
+        guard provider == .claudeCode else { return }
+        let cookieStore = WKWebsiteDataStore.default().httpCookieStore
+        let cookies = await cookieStore.allCookies()
+        for cookie in cookies where cookie.name == "lastActiveOrg" {
+            await cookieStore.deleteCookie(cookie)
+        }
     }
 
     private func canRedirectLogin(for provider: UsageProvider) -> Bool {
