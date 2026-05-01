@@ -259,3 +259,34 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 - Settings window minimum height is `620` (`DesignTokens.WindowSize.minHeight`) so the collapsed login panel remains visible
 - Usage status color thresholds are synced from notification thresholds per provider/window
 - Claude Code status line script requires `jq`
+
+## Release Process
+
+1. Bump `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` in project settings
+2. Archive → Developer ID Application signing → Notarize → create ZIP (`AgentLimits.zip`)
+3. Create GitHub Release with tag `v{MARKETING_VERSION}` and attach `AgentLimits.zip`
+4. In the Products repository, run `python3 tools/build_appcast.py agentlimits`
+   - This resolves the version from the latest GitHub Release URL, downloads the ZIP,
+     runs `generate_appcast`, updates TOML `release.version` / `release.release_date`,
+     and regenerates all product pages
+5. Review the diff, then `git commit & push` → Cloudflare Workers auto-deploys `appcast.xml`
+
+### Sparkle EdDSA Key
+
+The EdDSA private key is stored in macOS Keychain (added by `generate_keys` from the Sparkle package).
+**It is not committed to the repository.**
+
+- **Public key**: stored in `Info.plist` under `SUPublicEDKey`
+- **Private key backup**: exported from Keychain and saved as a secure note in Bitwarden
+
+#### Key Recovery (new Mac or re-install)
+
+1. Retrieve the private key from Bitwarden secure note
+2. Import it into Keychain with:
+   ```bash
+   security import <private_key_file> -k ~/Library/Keychains/login.keychain-db
+   ```
+3. Verify with `generate_appcast` — it should sign without prompting for a key
+
+If the private key is lost, generate a new key pair with `generate_keys`, update `SUPublicEDKey` in `Info.plist`,
+and publish a new release. Users on old builds will need to update manually once.

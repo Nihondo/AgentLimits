@@ -185,3 +185,13 @@
 "notification.pacemakerThresholds.danger" = "Peligro";
 "pacemaker.showRingWarningSegment" = "Mostrar segmentos de advertencia del anillo";
 "content.month" = "Monthly";
+
+/* Update */
+"menu.checkForUpdates" = "Check for Updates...";
+"tab.update" = "Update";
+"update.currentVersion" = "Current Version";
+"update.lastChecked" = "Last checked";
+"update.checkNow" = "Check for Updates Now";
+"update.automaticChecks" = "Check for updates automatically";
+"update.releasesPage" = "View All Releases";
+"update.neverChecked" = "Never";

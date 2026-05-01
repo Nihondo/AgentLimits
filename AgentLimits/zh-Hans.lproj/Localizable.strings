@@ -185,3 +185,13 @@
 "notification.pacemakerThresholds.danger" = "危险区域";
 "pacemaker.showRingWarningSegment" = "显示环形警告分段";
 "content.month" = "Monthly";
+
+/* Update */
+"menu.checkForUpdates" = "Check for Updates...";
+"tab.update" = "Update";
+"update.currentVersion" = "Current Version";
+"update.lastChecked" = "Last checked";
+"update.checkNow" = "Check for Updates Now";
+"update.automaticChecks" = "Check for updates automatically";
+"update.releasesPage" = "View All Releases";
+"update.neverChecked" = "Never";

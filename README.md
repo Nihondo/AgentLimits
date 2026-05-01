@@ -162,3 +162,12 @@ Snapshots are stored in the App Group container:
 - Claude Code logins may require multiple attempts.
 - The Claude Code status line script requires `jq`.
 - Settings window minimum height is `620` to keep the bottom login panel visible.
+
+## Automatic Updates
+
+AgentLimits uses [Sparkle](https://sparkle-project.org/) for automatic updates.
+
+- **Startup check**: Checks for updates automatically when the app launches.
+- **Scheduled check**: Rechecks every 24 hours in the background.
+- **Manual check**: Open the **Update** tab in Settings or choose **Check for Updates...** from the menu bar menu.
+- Updates are downloaded and installed with one click after you confirm.

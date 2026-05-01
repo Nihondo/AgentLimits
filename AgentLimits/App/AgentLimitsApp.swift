@@ -458,6 +458,13 @@ private struct MenuBarContentView: View {
         loginAtStartupButton
         Divider()
         Button {
+            AppUpdateController.shared.checkForUpdates()
+        } label: {
+            Label("menu.checkForUpdates".localized(), systemImage: "arrow.down.circle")
+        }
+        .disabled(!AppUpdateController.shared.canCheckForUpdates)
+        Divider()
+        Button {
             presentAboutPanel()
         } label: {
             Label("menu.about".localized(), systemImage: "info.circle")
@@ -475,6 +482,7 @@ private struct MenuBarContentView: View {
             appState.viewModel.updateDisplayMode(displayMode)
             appState.startBackgroundRefresh()
             loginItemManager.updateStatus()
+            _ = AppUpdateController.shared
         }
     }
 

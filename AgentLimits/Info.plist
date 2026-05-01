@@ -15,5 +15,17 @@
 	</array>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2025-2026 Nihondo</string>
+	<key>SUFeedURL</key>
+	<string>https://products.desireforwealth.com/appcast/agentlimits/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>b9r2q3yPDKJLydZwCV2Qls9xunAINPzU1fYCFwfqga8=</string>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUScheduledCheckInterval</key>
+	<integer>86400</integer>
+	<key>SUAutomaticallyUpdate</key>
+	<false/>
+	<key>SUAllowsAutomaticUpdates</key>
+	<true/>
 </dict>
 </plist>

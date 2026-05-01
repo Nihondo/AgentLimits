@@ -185,3 +185,13 @@
 "notification.pacemakerThresholds.warning" = "警告域";
 "notification.pacemakerThresholds.danger" = "危険域";
 "content.month" = "月間";
+
+/* アップデート */
+"menu.checkForUpdates" = "アップデートを確認...";
+"tab.update" = "アップデート";
+"update.currentVersion" = "現在のバージョン";
+"update.lastChecked" = "最終チェック";
+"update.checkNow" = "今すぐ確認";
+"update.automaticChecks" = "自動でアップデートを確認する";
+"update.releasesPage" = "すべてのリリースを表示";
+"update.neverChecked" = "未確認";

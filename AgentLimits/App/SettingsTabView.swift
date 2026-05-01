@@ -11,6 +11,7 @@ enum SettingsTab: String, Hashable, CaseIterable, Identifiable {
     case threshold
     case pacemaker
     case ccusage
+    case update
     case advanced
 
     var id: String { rawValue }
@@ -22,6 +23,7 @@ enum SettingsTab: String, Hashable, CaseIterable, Identifiable {
         case .threshold: return "tab.notification".localized()
         case .pacemaker: return "tab.pacemaker".localized()
         case .ccusage: return "tab.ccusage".localized()
+        case .update: return "tab.update".localized()
         case .advanced: return "tab.advanced".localized()
         }
     }
@@ -33,6 +35,7 @@ enum SettingsTab: String, Hashable, CaseIterable, Identifiable {
         case .threshold: return "bell"
         case .pacemaker: return "gauge"
         case .ccusage: return "chart.bar"
+        case .update: return "arrow.down.circle"
         case .advanced: return "gearshape"
         }
     }
@@ -92,6 +95,8 @@ struct SettingsTabView: View {
             PacemakerSettingsView()
         case .ccusage:
             CCUsageSettingsView(viewModel: tokenUsageViewModel)
+        case .update:
+            UpdateSettingsView(releasesURL: URL(string: "https://github.com/Nihondo/AgentLimits/releases")!)
         case .advanced:
             CLICommandSettingsView()
         }
