@@ -48,6 +48,9 @@ When you open the menu bar menu, a dashboard appears at the top showing per-prov
 - Dashboard visibility is configurable per provider in **Usage** settings (**Show dashboard in menu**)
 - Menu also includes: **Display Mode**, **Language** (System/Japanese/English), **Wake Up → Run Now**, **Start app at login**, and **Check for Updates...**
 
+![](./images/agentlimits_menu.png)
+
+
 ## Pacemaker
 Pacemaker shows a time-based usage benchmark to help you stay on track.
 
