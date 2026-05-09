@@ -204,3 +204,4 @@
 "update.automaticChecks" = "自動でアップデートを確認する";
 "update.releasesPage" = "すべてのリリースを表示";
 "update.neverChecked" = "未確認";
+"settings.providerOrder" = "表示順";

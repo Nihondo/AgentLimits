@@ -37,6 +37,7 @@ Download the latest build: [Download](https://github.com/Nihondo/AgentLimits/rel
 - Status colors are based on pacemaker comparison when available (colors are configurable in **Notification** settings)
 - Pacemaker indicator: optionally shows `<used>%↑` when over pace
 - Toggle icon visibility per provider in **Usage** settings
+- Provider display order (Codex / Claude Code / Copilot) is configurable in **Usage** settings (**Display Order**)
 
 ### Menu Dashboard
 When you open the menu bar menu, a dashboard appears at the top showing per-provider usage at a glance:
@@ -93,9 +94,10 @@ Pacemaker shows a time-based usage benchmark to help you stay on track.
 3. Choose refresh interval (1–10 minutes).
 4. Toggle **Show in menu bar** to show the usage percentage in the icon area.
 5. Toggle **Show dashboard in menu** to show/hide the provider's row in the menu dashboard.
-6. Click the bottom login bar (`▲`) to expand the embedded WebView panel.
-7. Sign in via the embedded WebView (chatgpt.com / claude.ai / github.com).
-8. Use **Clear Data** to remove login data and website storage if sign-in gets stuck.
+6. Drag rows in **Display Order** to change the order of providers in the menu bar icon and dashboard.
+7. Click the bottom login bar (`▲`) to expand the embedded WebView panel.
+8. Sign in via the embedded WebView (chatgpt.com / claude.ai / github.com).
+9. Use **Clear Data** to remove login data and website storage if sign-in gets stuck.
 
 ### ccusage
 1. Open **ccusage**.

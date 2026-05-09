@@ -23,6 +23,7 @@ struct ContentView: View {
     @AppStorage(UserDefaultsKeys.menuBarDashboardCodexEnabled) private var menuBarDashboardCodexEnabled = true
     @AppStorage(UserDefaultsKeys.menuBarDashboardClaudeEnabled) private var menuBarDashboardClaudeEnabled = true
     @AppStorage(UserDefaultsKeys.menuBarDashboardCopilotEnabled) private var menuBarDashboardCopilotEnabled = true
+    @State private var orderedProviders: [UsageProvider] = ProviderOrderStore.loadProviderOrder()
     @State private var isShowingClearDataConfirm = false
     @State private var isClearingData = false
     @State private var isWebViewExpanded = false
@@ -50,6 +51,26 @@ struct ContentView: View {
 
                         SettingsFormSection {
                             menuBarToggleRow
+                        }
+
+                        SettingsFormSection(title: "settings.providerOrder".localized()) {
+                            List {
+                                ForEach(orderedProviders, id: \.self) { provider in
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "line.3.horizontal")
+                                            .foregroundStyle(.secondary)
+                                        Text(provider.displayName)
+                                        Spacer()
+                                    }
+                                    .padding(.vertical, 2)
+                                }
+                                .onMove { source, destination in
+                                    orderedProviders.move(fromOffsets: source, toOffset: destination)
+                                    ProviderOrderStore.saveProviderOrder(orderedProviders)
+                                }
+                            }
+                            .listStyle(.bordered(alternatesRowBackgrounds: true))
+                            .frame(height: CGFloat(orderedProviders.count) * 34)
                         }
 
                         SettingsFormSection(title: "content.usageSummary".localized()) {
@@ -88,6 +109,9 @@ struct ContentView: View {
             // Restart auto-refresh and notify widgets when interval changes.
             viewModel.restartAutoRefresh()
             WidgetCenter.shared.reloadAllTimelines()
+        }
+        .onAppear {
+            orderedProviders = ProviderOrderStore.loadProviderOrder()
         }
         .confirmationDialog(
             "content.clearDataConfirmTitle".localized(),

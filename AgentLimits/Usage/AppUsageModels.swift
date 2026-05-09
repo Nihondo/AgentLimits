@@ -17,6 +17,31 @@ enum UserDefaultsKeys {
     static let menuBarDashboardCopilotEnabled = "menu_bar_dashboard_copilot_enabled"
     static let menuBarShowPacemakerValue = SharedUserDefaultsKeys.menuBarShowPacemakerValue
     static let pacemakerRingWarningEnabled = SharedUserDefaultsKeys.pacemakerRingWarningEnabled
+    static let providerDisplayOrder = "provider_display_order"
+}
+
+/// プロバイダ表示順の読み書きを担当する
+enum ProviderOrderStore {
+    /// UserDefaults から表示順を読み込む。未設定の場合は allCases 順を返す。
+    /// 将来プロバイダが増えた場合、保存済みリストにない分を末尾に追加する。
+    static func loadProviderOrder() -> [UsageProvider] {
+        guard let rawValues = UserDefaults.standard.stringArray(
+            forKey: UserDefaultsKeys.providerDisplayOrder
+        ), !rawValues.isEmpty else {
+            return UsageProvider.allCases
+        }
+        let stored = rawValues.compactMap(UsageProvider.init(rawValue:))
+        let missing = UsageProvider.allCases.filter { !stored.contains($0) }
+        return stored + missing
+    }
+
+    /// 表示順を UserDefaults に保存する。
+    static func saveProviderOrder(_ providers: [UsageProvider]) {
+        UserDefaults.standard.set(
+            providers.map(\.rawValue),
+            forKey: UserDefaultsKeys.providerDisplayOrder
+        )
+    }
 }
 
 /// Display mode for usage percent: used vs remaining

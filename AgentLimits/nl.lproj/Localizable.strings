@@ -204,3 +204,5 @@
 "update.automaticChecks" = "Check for updates automatically";
 "update.releasesPage" = "View All Releases";
 "update.neverChecked" = "Never";
+
+"settings.providerOrder" = "Weergavevolgorde";

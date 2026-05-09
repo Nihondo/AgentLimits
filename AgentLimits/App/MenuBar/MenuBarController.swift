@@ -44,10 +44,11 @@ final class MenuBarController: NSObject {
         let isDarkMode = NSApp.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
         let colorScheme: ColorScheme = isDarkMode ? .dark : .light
 
+        let orderedSnapshots = ProviderOrderStore.loadProviderOrder().map { provider in
+            (provider: provider, snapshot: isMenuBarEnabled(provider) ? snapshots[provider] : nil)
+        }
         let content = MenuBarLabelContentView(
-            codexSnapshot: isMenuBarEnabled(.chatgptCodex) ? snapshots[.chatgptCodex] : nil,
-            claudeSnapshot: isMenuBarEnabled(.claudeCode) ? snapshots[.claudeCode] : nil,
-            copilotSnapshot: isMenuBarEnabled(.githubCopilot) ? snapshots[.githubCopilot] : nil,
+            orderedSnapshots: orderedSnapshots,
             displayMode: displayMode
         )
         .environment(\.colorScheme, colorScheme)
@@ -126,7 +127,7 @@ extension MenuBarController: NSMenuDelegate {
         // ダッシュボード行
         let displayMode = loadDisplayMode()
         let snapshots = appState.viewModel.snapshots
-        let visibleProviders = UsageProvider.allCases.filter {
+        let visibleProviders = ProviderOrderStore.loadProviderOrder().filter {
             isDashboardEnabled($0) && snapshots[$0] != nil
         }
         for (index, provider) in visibleProviders.enumerated() {

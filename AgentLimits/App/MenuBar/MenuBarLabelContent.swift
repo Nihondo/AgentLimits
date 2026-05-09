@@ -6,39 +6,24 @@ import SwiftUI
 
 /// メニューバーアイコン全体のレイアウト（プロバイダーステータスを横並びで表示）
 struct MenuBarLabelContentView: View {
-    let codexSnapshot: UsageSnapshot?
-    let claudeSnapshot: UsageSnapshot?
-    let copilotSnapshot: UsageSnapshot?
+    /// 表示順序付きの (プロバイダ, スナップショット?) 配列。nil は非表示。
+    let orderedSnapshots: [(provider: UsageProvider, snapshot: UsageSnapshot?)]
     let displayMode: UsageDisplayMode
 
     var body: some View {
         HStack(spacing: 6) {
-            if codexSnapshot == nil && claudeSnapshot == nil && copilotSnapshot == nil {
+            if orderedSnapshots.allSatisfy({ $0.snapshot == nil }) {
                 Image(.menuBarIcon)
             }
-            if let codexSnapshot {
-                MenuBarProviderStatusView(
-                    provider: .chatgptCodex,
-                    primaryWindow: codexSnapshot.primaryWindow,
-                    secondaryWindow: codexSnapshot.secondaryWindow,
-                    displayMode: displayMode
-                )
-            }
-            if let claudeSnapshot {
-                MenuBarProviderStatusView(
-                    provider: .claudeCode,
-                    primaryWindow: claudeSnapshot.primaryWindow,
-                    secondaryWindow: claudeSnapshot.secondaryWindow,
-                    displayMode: displayMode
-                )
-            }
-            if let copilotSnapshot {
-                MenuBarProviderStatusView(
-                    provider: .githubCopilot,
-                    primaryWindow: copilotSnapshot.primaryWindow,
-                    secondaryWindow: copilotSnapshot.secondaryWindow,
-                    displayMode: displayMode
-                )
+            ForEach(orderedSnapshots, id: \.provider.id) { item in
+                if let snapshot = item.snapshot {
+                    MenuBarProviderStatusView(
+                        provider: item.provider,
+                        primaryWindow: snapshot.primaryWindow,
+                        secondaryWindow: snapshot.secondaryWindow,
+                        displayMode: displayMode
+                    )
+                }
             }
         }
     }

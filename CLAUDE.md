@@ -68,7 +68,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 | `AgentLimits/Usage/UsageViewModel.swift` | Usage limits state, auto-refresh, per-provider tracking, threshold check |
 | `AgentLimits/Usage/ProviderStateManager.swift` | Per-provider state management (Codex/Claude Code/Copilot independent tracking) |
 | `AgentLimits/Usage/UsageDisplayModeStore.swift` | Display mode persistence and snapshot conversion |
-| `AgentLimits/Usage/AppUsageModels.swift` | App-only display mode + localized errors |
+| `AgentLimits/Usage/AppUsageModels.swift` | App-only display mode + localized errors + `ProviderOrderStore` (provider display order persistence) |
 | `AgentLimits/Usage/ContentView.swift` | Usage limits settings UI with WebView |
 | `AgentLimits/Usage/WebViewStore.swift` | WKWebView lifecycle, page-ready detection |
 | `AgentLimits/Usage/WebViewScriptRunner.swift` | JavaScript injection executor |
@@ -113,6 +113,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
   - Per-window linear bars: usage bar (pacemaker segment coloring) + pacemaker bar (N divisions with gaps)
   - Clicking a dashboard row opens the provider's usage page in the browser
   - Dashboard visibility is configurable per provider (`menu_bar_dashboard_*_enabled`, default: true)
+  - Provider display order is user-configurable via drag-and-drop in Usage settings; persisted as `provider_display_order` (`[String]` rawValue array); managed by `ProviderOrderStore` in `AppUsageModels.swift`
 - Per-provider menu bar icon toggle (Codex/Claude Code/Copilot separately)
 - Status colors customizable from Notification settings
 - Menu includes: Display Mode, Language, Wake Up → Run Now, Start app at login, Check for Updates
@@ -223,6 +224,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 | `menu_bar_dashboard_codex_enabled` | Dashboard row visibility for Codex (default: true) |
 | `menu_bar_dashboard_claude_enabled` | Dashboard row visibility for Claude Code (default: true) |
 | `menu_bar_dashboard_copilot_enabled` | Dashboard row visibility for Copilot (default: true) |
+| `provider_display_order` | Provider display order in menu bar icon and dashboard (`[String]` rawValue array; default: allCases order) |
 | `wake_up_schedules` | Wake Up schedules (JSON array) |
 | `threshold_notification_settings` | Threshold settings (JSON array) |
 | `app_language` | Language preference (App Group shared) |
