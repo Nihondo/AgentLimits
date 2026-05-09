@@ -162,7 +162,7 @@ extension MenuBarController: NSMenuDelegate {
         // ログイン時に起動
         let loginItem = makeActionItem(
             title: "wakeUp.startAtLogin".localized(),
-            image: nil,
+            image: NSImage(systemSymbolName: "arrow.up.circle", accessibilityDescription: nil),
             action: #selector(toggleLoginItem)
         )
         loginItem.state = LoginItemManager.shared.isEnabled ? .on : .off

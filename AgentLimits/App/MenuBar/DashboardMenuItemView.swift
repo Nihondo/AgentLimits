@@ -37,6 +37,7 @@ struct DashboardMenuItemView: View {
             .padding(.leading, 22)
             .padding(.trailing, 18)
             .padding(.vertical, 4)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .foregroundStyle(isHovered ? Color.white : Color.primary)
