@@ -13,7 +13,9 @@ struct MenuBarLabelContentView: View {
 
     var body: some View {
         HStack(spacing: 6) {
-            Image(.menuBarIcon)
+            if codexSnapshot == nil && claudeSnapshot == nil && copilotSnapshot == nil {
+                Image(.menuBarIcon)
+            }
             if let codexSnapshot {
                 MenuBarProviderStatusView(
                     provider: .chatgptCodex,
