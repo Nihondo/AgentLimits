@@ -13,6 +13,15 @@
 
 /* Menu */
 "menu.openSettings" = "Ustawienia AgentLimits...";
+"settings.showMenuDashboard" = "Pokaż pulpit w menu";
+"menu.dashboard.remaining5h" = "🕔%@";
+"menu.dashboard.remainingHours" = "za %.1f godz.";
+"menu.dashboard.remainingMinutes" = "za %d min";
+"menu.dashboard.weeklyReset" = "📅%@";
+"menu.dashboard.resetDaysLater" = "za %.1f d";
+"menu.dashboard.resetHoursLater" = "za %.1f godz.";
+"menu.dashboard.resetMinutesLater" = "za %d min";
+"menu.dashboard.soon" = "wkrótce";
 "menu.displayMode" = "Tryb wyświetlania";
 "menu.displayMode.used" = "Wskaźnik użycia";
 "menu.displayMode.remaining" = "Pozostały wskaźnik";

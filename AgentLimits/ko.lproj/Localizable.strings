@@ -13,6 +13,15 @@
 
 /* Menu */
 "menu.openSettings" = "AgentLimits 설정...";
+"settings.showMenuDashboard" = "메뉴에 대시보드 표시";
+"menu.dashboard.remaining5h" = "🕔%@";
+"menu.dashboard.remainingHours" = "%.1f시간 후";
+"menu.dashboard.remainingMinutes" = "%d분 후";
+"menu.dashboard.weeklyReset" = "📅%@";
+"menu.dashboard.resetDaysLater" = "%.1f일 후";
+"menu.dashboard.resetHoursLater" = "%.1f시간 후";
+"menu.dashboard.resetMinutesLater" = "%d분 후";
+"menu.dashboard.soon" = "곧";
 "menu.displayMode" = "표시 모드";
 "menu.displayMode.used" = "사용률";
 "menu.displayMode.remaining" = "잔여 사용률";

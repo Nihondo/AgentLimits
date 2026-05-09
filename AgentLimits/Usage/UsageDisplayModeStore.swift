@@ -28,11 +28,12 @@ final class UsageDisplayModeStore {
         guard let rawValue = userDefaults.string(forKey: UserDefaultsKeys.cachedDisplayMode) else {
             return nil
         }
-        return UsageDisplayMode(rawValue: rawValue)
+        return UsageDisplayMode.makeSelectableMode(from: rawValue)
     }
 
     /// Persists the given display mode for future sessions
     func saveCachedDisplayMode(_ displayMode: UsageDisplayMode) {
+        let displayMode = displayMode.normalizedSelectableMode
         // Persist to both app and App Group for widget access.
         userDefaults.set(displayMode.rawValue, forKey: UserDefaultsKeys.cachedDisplayMode)
         appGroupDefaults?.set(displayMode.rawValue, forKey: SharedUserDefaultsKeys.cachedDisplayMode)
@@ -40,6 +41,7 @@ final class UsageDisplayModeStore {
 
     /// Updates stored snapshots with the new display mode and refreshes widgets
     func applyDisplayMode(_ displayMode: UsageDisplayMode) {
+        let displayMode = displayMode.normalizedSelectableMode
         let cachedMode = loadCachedDisplayMode() ?? .used
         let rawMode = displayMode.makeDisplayModeRaw()
 

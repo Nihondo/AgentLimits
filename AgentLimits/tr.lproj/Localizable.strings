@@ -13,6 +13,15 @@
 
 /* Menu */
 "menu.openSettings" = "AgentLimits Ayarları...";
+"settings.showMenuDashboard" = "Menüde panoyu göster";
+"menu.dashboard.remaining5h" = "🕔%@";
+"menu.dashboard.remainingHours" = "%.1f sa sonra";
+"menu.dashboard.remainingMinutes" = "%d dk sonra";
+"menu.dashboard.weeklyReset" = "📅%@";
+"menu.dashboard.resetDaysLater" = "%.1f gün sonra";
+"menu.dashboard.resetHoursLater" = "%.1f sa sonra";
+"menu.dashboard.resetMinutesLater" = "%d dk sonra";
+"menu.dashboard.soon" = "yakında";
 "menu.displayMode" = "Görüntüleme Modu";
 "menu.displayMode.used" = "Kullanım oranı";
 "menu.displayMode.remaining" = "Kalan oran";

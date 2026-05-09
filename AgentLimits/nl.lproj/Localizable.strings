@@ -13,6 +13,15 @@
 
 /* Menu */
 "menu.openSettings" = "AgentLimits-instellingen...";
+"settings.showMenuDashboard" = "Dashboard in menu tonen";
+"menu.dashboard.remaining5h" = "🕔%@";
+"menu.dashboard.remainingHours" = "over %.1fu";
+"menu.dashboard.remainingMinutes" = "over %d min";
+"menu.dashboard.weeklyReset" = "📅%@";
+"menu.dashboard.resetDaysLater" = "over %.1fd";
+"menu.dashboard.resetHoursLater" = "over %.1fu";
+"menu.dashboard.resetMinutesLater" = "over %d min";
+"menu.dashboard.soon" = "binnenkort";
 "menu.displayMode" = "Weergavemodus";
 "menu.displayMode.used" = "Gebruikspercentage";
 "menu.displayMode.remaining" = "Resterend percentage";

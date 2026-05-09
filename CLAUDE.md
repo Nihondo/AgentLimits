@@ -37,15 +37,22 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 7. `TokenUsageViewModel` manages auto-refresh (configurable 1-10 minutes) and snapshot persistence
 7. Widgets read their respective snapshot files (no network access)
 8. `ThresholdNotificationManager` checks usage against thresholds and sends notifications
-9. Menu bar label displays real-time usage percentages for enabled providers
+9. `MenuBarController` (AppKit `NSStatusItem`) manages the menu bar icon and dropdown menu
+   - Icon label: `MenuBarLabelContentView` rendered via `ImageRenderer` → `NSStatusItem.button.image`
+   - Menu dropdown: dashboard rows use `NSHostingView<DashboardMenuItemView>` as `NSMenuItem.view`
 10. Bundled Claude Code status line script reads snapshots + App Group settings for CLI display
 
 ### Key Components
 
 | File | Purpose |
 |------|---------|
-| `AgentLimits/App/AgentLimitsApp.swift` | Main app entry, menu bar UI, deep link handling |
-| `AgentLimits/App/AppSharedState.swift` | Shared app state for menu bar and settings window |
+| `AgentLimits/App/AgentLimitsApp.swift` | Main app entry (`@main`), settings Window scene, deep link handling |
+| `AgentLimits/App/AppSharedState.swift` | Shared app state; holds `openSettingsAction` callback for AppKit → SwiftUI window bridging |
+| `AgentLimits/App/MenuBar/MenuBarController.swift` | `NSStatusItem` + `NSMenu` management; renders icon via `ImageRenderer`, dashboard rows via `NSHostingView` |
+| `AgentLimits/App/MenuBar/MenuBarLabelContent.swift` | SwiftUI views for menu bar icon (`MenuBarLabelContentView`, `MenuBarProviderStatusView`, `MenuBarPercentLineView`) |
+| `AgentLimits/App/MenuBar/DashboardMenuItemView.swift` | Per-provider dashboard row (header + linear bars + percent labels) used as `NSMenuItem.view` |
+| `AgentLimits/App/MenuBar/UsageLinearBarView.swift` | Linear progress bar (usage bar + pacemaker bar) — linear equivalent of `UsageDonutView` |
+| `AgentLimits/App/MenuBar/AppUsageColorResolver.swift` | App-side color resolver equivalent to `WidgetUsageColorResolver` in the widget target |
 | `AgentLimits/App/SettingsTabView.swift` | Tab-based settings UI (Usage, ccusage, Wake Up, Notification, Advanced) |
 | `AgentLimits/App/DesignTokens.swift` | Shared design tokens (spacing/corners/window min size) |
 | `AgentLimits/App/CLICommandSettingsView.swift` | Advanced Settings UI (CLI paths + scripts + widget tap action) |
@@ -95,16 +102,22 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 ### Features
 
 #### Menu Bar Status Display
-- Real-time usage percentage display in menu bar for enabled providers
-- Two-line layout (line 1: provider name, line 2: `X% / Y%` for 5h/weekly)
-- Color-coded status based on pacemaker comparison when available (otherwise secondary)
-- Per-provider toggle (Codex/Claude Code separately)
-- Responds to display mode changes (used/remaining)
-- Pacemaker indicator: shows `<used>%↑` when over budget (toggleable in Pacemaker settings, used by widgets as well)
-- Status colors are customizable from Notification settings
-- Menu bar menu includes Display Mode, Language selection, Wake Up → Run Now, and Start app at login
+- Menu bar is implemented with AppKit `NSStatusItem` + `NSMenu` via `MenuBarController` (no `MenuBarExtra`)
+- Icon label: `MenuBarLabelContentView` rendered to `NSImage` via `ImageRenderer` and set on `NSStatusItem.button`
+  - Two-line layout per provider: line 1 = provider name, line 2 = `X% / Y%` (5h/weekly)
+  - Color-coded status; pacemaker indicator `↑` shown when over budget
+  - Responds to display mode (used/remaining) and color settings changes via Combine + debounce
+- Dashboard section at the top of the menu (collapsible per provider via Usage settings):
+  - Each row is `NSMenuItem.view = NSHostingView<DashboardMenuItemView>` for full SwiftUI rendering
+  - Header: provider name + remaining time (clock) + reset time (calendar)
+  - Per-window linear bars: usage bar (pacemaker segment coloring) + pacemaker bar (N divisions with gaps)
+  - Clicking a dashboard row opens the provider's usage page in the browser
+  - Dashboard visibility is configurable per provider (`menu_bar_dashboard_*_enabled`, default: true)
+- Per-provider menu bar icon toggle (Codex/Claude Code/Copilot separately)
+- Status colors customizable from Notification settings
+- Menu includes: Display Mode, Language, Wake Up → Run Now, Start app at login, Check for Updates
 
-#### Pacemaker Mode
+#### Pacemaker
 - Time-based usage benchmark that calculates what percentage of the window has elapsed
 - Compares actual usage against elapsed time to determine if user is on track
 - Status levels based on difference (usedPercent - pacemakerPercent):
@@ -202,11 +215,14 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 
 | Key | Purpose |
 |-----|---------|
-| `usage_display_mode` | Display mode (used% / remaining% / pacemaker) |
+| `usage_display_mode` | Display mode (used% / remaining%; legacy pacemaker values are treated as used%) |
 | `usage_display_mode_cached` | Cached display mode used to convert stored snapshots (also shared via App Group for widgets) |
 | `menu_bar_status_codex_enabled` | Menu bar Codex status display toggle |
 | `menu_bar_status_claude_enabled` | Menu bar Claude Code status display toggle |
 | `menu_bar_status_copilot_enabled` | Menu bar GitHub Copilot status display toggle |
+| `menu_bar_dashboard_codex_enabled` | Dashboard row visibility for Codex (default: true) |
+| `menu_bar_dashboard_claude_enabled` | Dashboard row visibility for Claude Code (default: true) |
+| `menu_bar_dashboard_copilot_enabled` | Dashboard row visibility for Copilot (default: true) |
 | `wake_up_schedules` | Wake Up schedules (JSON array) |
 | `threshold_notification_settings` | Threshold settings (JSON array) |
 | `app_language` | Language preference (App Group shared) |
@@ -256,6 +272,11 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 - Widget refresh frequency may be throttled by the OS
 - CLI execution uses the user login shell and prefixes PATH with `/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH`
 - Full-path overrides from Advanced Settings take precedence
+- Menu bar is managed by `MenuBarController` (AppKit `NSStatusItem`), not SwiftUI `MenuBarExtra`; `AgentLimitsApp` only declares a `Window` scene for the settings window
+- `AppSharedState.openSettingsAction` bridges AppKit menu → SwiftUI `openWindow`; set in `SettingsTabView.onAppear`
+- Dashboard rows use `NSHostingView<DashboardMenuItemView>` with `fittingSize` + `autoresizingMask: [.width]`; `menuNeedsUpdate` uses `MainActor.assumeIsolated` for synchronous rebuild
+- `UsageLinearBarView` mirrors `UsageDonutView` logic: warning segment clipped to `min(dangerStart, totalEnd)`, pacemaker bar hidden when `calculatePacemakerPercent()` returns nil
+- `AppUsageColorResolver` duplicates `WidgetUsageColorResolver` for the app target (widgets are a separate build target)
 - Settings window minimum height is `620` (`DesignTokens.WindowSize.minHeight`) so the collapsed login panel remains visible
 - Usage status color thresholds are synced from notification thresholds per provider/window
 - Claude Code status line script requires `jq`

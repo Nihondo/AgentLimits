@@ -29,18 +29,26 @@ Download the latest build: [Download](https://github.com/Nihondo/AgentLimits/rel
   - API: `https://github.com/settings/billing/usage_table` (fetched automatically with Copilot usage)
 
 ## Menu Bar Display
-- Two-line layout per provider
+- Two-line layout per provider in the icon area
   - Line 1: provider name
   - Line 2: `X% / Y%` (5-hour / weekly)
   - For Copilot: `X%` (monthly)
 - Display mode: **Used** or **Remaining** (shared across app and widgets)
 - Status colors are based on pacemaker comparison when available (colors are configurable in **Notification** settings)
-- Pacemaker mode: shows `<used>% (<pacemaker>)%` where pacemaker is elapsed time percentage
-- Toggle visibility per provider in **Usage** settings
-- Menu bar menu includes **Language** (System/Japanese/English), **Wake Up → Run Now**, and **Start app at login**
+- Pacemaker indicator: optionally shows `<used>%↑` when over pace
+- Toggle icon visibility per provider in **Usage** settings
 
-## Pacemaker Mode
-Pacemaker mode shows a time-based usage benchmark to help you stay on track.
+### Menu Dashboard
+When you open the menu bar menu, a dashboard appears at the top showing per-provider usage at a glance:
+- Header: provider name · remaining time (5h window) · days until weekly reset
+- **Usage bar**: linear progress bar color-coded by usage level; when pacemaker is exceeded, the bar is segmented (green → orange → red) matching the widget donut ring behavior
+- **Pacemaker bar**: divided into time segments (5h: 5 segments, weekly: 7 segments) with gaps, matching the widget inner ring
+- Clicking a dashboard row opens the provider's usage page in the browser
+- Dashboard visibility is configurable per provider in **Usage** settings (**Show dashboard in menu**)
+- Menu also includes: **Display Mode**, **Language** (System/Japanese/English), **Wake Up → Run Now**, **Start app at login**, and **Check for Updates...**
+
+## Pacemaker
+Pacemaker shows a time-based usage benchmark to help you stay on track.
 
 - **Calculation**: Elapsed percentage of the usage window (e.g., 50% = halfway through the 5h or weekly window)
 - **Comparison**: Green = on track or ahead, Orange = slightly over pace, Red = 10%+ over pace
@@ -83,10 +91,11 @@ Pacemaker mode shows a time-based usage benchmark to help you stay on track.
 1. Open **Usage**.
 2. Select Codex, Claude Code, or Copilot.
 3. Choose refresh interval (1–10 minutes).
-4. Toggle **Show in menu bar** per provider.
-5. Click the bottom login bar (`▲`) to expand the embedded WebView panel.
-6. Sign in via the embedded WebView (chatgpt.com / claude.ai / github.com).
-7. Use **Clear Data** to remove login data and website storage if sign-in gets stuck.
+4. Toggle **Show in menu bar** to show the usage percentage in the icon area.
+5. Toggle **Show dashboard in menu** to show/hide the provider's row in the menu dashboard.
+6. Click the bottom login bar (`▲`) to expand the embedded WebView panel.
+7. Sign in via the embedded WebView (chatgpt.com / claude.ai / github.com).
+8. Use **Clear Data** to remove login data and website storage if sign-in gets stuck.
 
 ### ccusage
 1. Open **ccusage**.

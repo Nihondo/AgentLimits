@@ -23,7 +23,7 @@
 - Status colors are customizable from Notification settings
 - Menu bar menu includes Display Mode, Language selection, Wake Up → Run Now, and Start app at login
 
-### Pacemaker Mode
+### Pacemaker
 - Time-based usage benchmark: calculates elapsed percentage of usage window
 - Formula: `(elapsed time / window duration) × 100`
 - Compares actual usage against elapsed time to determine if user is on track
@@ -136,7 +136,7 @@
 ### UserDefaults Keys
 | Key | Purpose |
 |-----|---------|
-| `usage_display_mode` | Display mode (used% / remaining% / pacemaker) |
+| `usage_display_mode` | Display mode (used% / remaining%; legacy pacemaker values are treated as used%) |
 | `usage_display_mode_cached` | Cached display mode used to convert stored snapshots (shared via App Group for widgets) |
 | `menu_bar_status_codex_enabled` | Menu bar Codex status display toggle |
 | `menu_bar_status_claude_enabled` | Menu bar Claude Code status display toggle |

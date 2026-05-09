@@ -17,6 +17,9 @@ final class AppSharedState: ObservableObject {
     let webViewPool: UsageWebViewPool
     let viewModel: UsageViewModel
     let tokenUsageViewModel: TokenUsageViewModel
+    /// MenuBarController（AppKit）から設定ウィンドウを開くためのコールバック。
+    /// AgentLimitsApp の Window シーン側で openWindow アクションを注入する。
+    var openSettingsAction: (() -> Void)?
 
     private var isStarted = false
     private var cancellables: Set<AnyCancellable> = []
@@ -28,8 +31,9 @@ final class AppSharedState: ObservableObject {
         self.tokenUsageViewModel = TokenUsageViewModel()
         observePageReadyChanges()
         observeCookieChanges()
-        let storedMode = UserDefaults.standard.string(forKey: UserDefaultsKeys.displayMode)
-            .flatMap { UsageDisplayMode(rawValue: $0) } ?? .used
+        let storedMode = UsageDisplayMode.makeSelectableMode(
+            from: UserDefaults.standard.string(forKey: UserDefaultsKeys.displayMode)
+        )
         viewModel.updateDisplayMode(storedMode)
         startBackgroundRefresh()
 

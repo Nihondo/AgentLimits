@@ -27,6 +27,27 @@ enum UsageDisplayMode: String, Codable, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
+    /// メニューに表示する表示モード。ペースメーカーは常時補助表示のため選択肢から除外する。
+    static let selectableCases: [UsageDisplayMode] = [.used, .remaining]
+
+    /// 保存済みの旧ペースメーカーモードを現在の使用率モードへ正規化する。
+    var normalizedSelectableMode: UsageDisplayMode {
+        switch self {
+        case .usedWithPacemaker:
+            return .used
+        case .used, .remaining:
+            return self
+        }
+    }
+
+    /// 保存文字列から現在選択可能な表示モードを復元する。
+    static func makeSelectableMode(from rawValue: String?) -> UsageDisplayMode {
+        guard let rawValue, let displayMode = UsageDisplayMode(rawValue: rawValue) else {
+            return .used
+        }
+        return displayMode.normalizedSelectableMode
+    }
+
     /// Localized display name resolved via `Localizable.strings`
     var localizedDisplayName: String {
         switch self {
@@ -75,7 +96,7 @@ enum UsageDisplayMode: String, Codable, CaseIterable, Identifiable {
 extension UsageDisplayMode {
     /// Maps app display mode to the shared raw mode stored in snapshots.
     func makeDisplayModeRaw() -> UsageDisplayModeRaw {
-        switch self {
+        switch normalizedSelectableMode {
         case .used:
             return .used
         case .remaining:
@@ -95,7 +116,7 @@ extension UsageDisplayModeRaw {
         case .remaining:
             return .remaining
         case .usedWithPacemaker:
-            return .usedWithPacemaker
+            return .used
         }
     }
 }

@@ -166,6 +166,7 @@ final class UsageViewModel: ObservableObject {
 
     /// Updates display mode and persists to all snapshots
     func updateDisplayMode(_ displayMode: UsageDisplayMode) {
+        let displayMode = displayMode.normalizedSelectableMode
         // Apply new mode, persist it, and refresh UI state.
         self.displayMode = displayMode
         displayModeStore.applyDisplayMode(displayMode)

@@ -13,6 +13,15 @@
 
 /* Menu */
 "menu.openSettings" = "Налаштування AgentLimits...";
+"settings.showMenuDashboard" = "Показувати панель у меню";
+"menu.dashboard.remaining5h" = "🕔%@";
+"menu.dashboard.remainingHours" = "через %.1f год";
+"menu.dashboard.remainingMinutes" = "через %d хв";
+"menu.dashboard.weeklyReset" = "📅%@";
+"menu.dashboard.resetDaysLater" = "через %.1f дн";
+"menu.dashboard.resetHoursLater" = "через %.1f год";
+"menu.dashboard.resetMinutesLater" = "через %d хв";
+"menu.dashboard.soon" = "незабаром";
 "menu.displayMode" = "Режим відображення";
 "menu.displayMode.used" = "Рівень використання";
 "menu.displayMode.remaining" = "Залишок";

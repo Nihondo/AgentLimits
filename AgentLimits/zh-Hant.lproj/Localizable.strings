@@ -13,6 +13,15 @@
 
 /* Menu */
 "menu.openSettings" = "AgentLimits 設定...";
+"settings.showMenuDashboard" = "在選單中顯示儀表板";
+"menu.dashboard.remaining5h" = "🕔%@";
+"menu.dashboard.remainingHours" = "%.1f 小時後";
+"menu.dashboard.remainingMinutes" = "%d 分鐘後";
+"menu.dashboard.weeklyReset" = "📅%@";
+"menu.dashboard.resetDaysLater" = "%.1f 天後";
+"menu.dashboard.resetHoursLater" = "%.1f 小時後";
+"menu.dashboard.resetMinutesLater" = "%d 分鐘後";
+"menu.dashboard.soon" = "即將";
 "menu.displayMode" = "顯示模式";
 "menu.displayMode.used" = "使用率";
 "menu.displayMode.remaining" = "剩餘率";
