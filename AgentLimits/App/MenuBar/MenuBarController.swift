@@ -207,6 +207,9 @@ extension MenuBarController: NSMenuDelegate {
             displayMode: displayMode
         )
         let hosting = NSHostingView(rootView: view)
+        // NSMenu の NSVisualEffectView 背景との合成を正確にするため透明に設定
+        hosting.wantsLayer = true
+        hosting.layer?.backgroundColor = .clear
         // fittingSize で自然な高さを取得しつつ、幅は最小 300px を確保してメニューが狭くならないようにする
         let fittingSize = hosting.fittingSize
         hosting.frame = NSRect(x: 0, y: 0, width: max(300, fittingSize.width), height: fittingSize.height)
@@ -306,7 +309,7 @@ extension MenuBarController: NSMenuDelegate {
     // MARK: - Actions
 
     @objc private func openSettings() {
-        AppSharedState.shared.openSettingsAction?()
+        SettingsWindowController.shared.showSettingsWindow()
     }
 
     @objc private func toggleLoginItem() {

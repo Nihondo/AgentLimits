@@ -11,6 +11,21 @@ struct DashboardMenuItemView: View {
     let snapshot: UsageSnapshot
     let displayMode: UsageDisplayMode
 
+    @State private var isHovered = false
+    @Environment(\.colorScheme) private var colorScheme
+
+    // NSVisualEffectView のmaterial selectionはアクセントカラーより暗く合成されるため、
+    // ダークモード時のみHSB空間で明度を下げてネイティブに近づける
+    private var menuHighlightColor: Color {
+        guard colorScheme == .dark,
+              let rgb = NSColor.controlAccentColor.usingColorSpace(.deviceRGB) else {
+            return Color.accentColor
+        }
+        var h: CGFloat = 0, s: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        rgb.getHue(&h, saturation: &s, brightness: &b, alpha: &a)
+        return Color(NSColor(hue: h, saturation: s, brightness: b * 0.78, alpha: a))
+    }
+
     var body: some View {
         Button {
             NSWorkspace.shared.open(provider.usageURL)
@@ -19,11 +34,18 @@ struct DashboardMenuItemView: View {
                 headerRow
                 windowRows
             }
-            .padding(.leading, 17)
-            .padding(.trailing, 13)
+            .padding(.leading, 22)
+            .padding(.trailing, 18)
             .padding(.vertical, 4)
         }
         .buttonStyle(.plain)
+        .foregroundStyle(isHovered ? Color.white : Color.primary)
+        .background(
+            RoundedRectangle(cornerRadius: 7, style: .continuous)
+                .fill(isHovered ? menuHighlightColor : .clear)
+                .padding(.horizontal, 5)
+        )
+        .onHover { isHovered = $0 }
     }
 
     // MARK: - ヘッダー行
@@ -86,8 +108,8 @@ struct DashboardMenuItemView: View {
     // MARK: - 時間テキスト
 
     private var primaryRemainingText: String {
-        guard let window = snapshot.primaryWindow else { return "--" }
-        let remaining = max(0, window.limitWindowSeconds * (1.0 - window.usedPercent / 100.0))
+        guard let window = snapshot.primaryWindow, let resetAt = window.resetAt else { return "--" }
+        let remaining = max(0, resetAt.timeIntervalSinceNow)
         if remaining >= 3600 {
             return String(format: "menu.dashboard.remainingHours".localized(), remaining / 3600.0)
         }

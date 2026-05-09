@@ -17,7 +17,7 @@ struct UsageLinearBarView: View {
     /// ペースメーカーバーの高さ（ドーナツの innerLineWidth = 4 に相当）
     private let pacemakerBarHeight: CGFloat = 4
     /// バー間の縦スペース
-    private let verticalSpacing: CGFloat = 3
+    private let verticalSpacing: CGFloat = 2
     /// バーの角丸
     private let cornerRadius: CGFloat = 2
 

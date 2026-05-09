@@ -4,13 +4,6 @@
 
 import SwiftUI
 import AppKit
-import Combine
-
-// MARK: - Window Configuration
-
-private enum WindowId {
-    static let settings = "settings"
-}
 
 // MARK: - Deep Link Handling
 
@@ -42,7 +35,7 @@ private enum DeepLinkHandler {
                 refresh: { await AppSharedState.shared.tokenUsageViewModel.refreshNow(for: provider) }
             )
         case "open-settings":
-            AppSharedState.shared.openSettingsAction?()
+            SettingsWindowController.shared.showSettingsWindow()
         default:
             break
         }
@@ -72,19 +65,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var menuBarController: MenuBarController?
 
     func applicationWillFinishLaunching(_ notification: Notification) {
-        // できるだけ早く accessory に設定し、SwiftUI が起動時にウィンドウを表示しないようにする
+        // できるだけ早く accessory に設定し、Dock アイコンを表示しない。
         NSApp.setActivationPolicy(.accessory)
-        // ウィンドウ状態の復元を無効化（前回終了時に開いていたウィンドウを復元しない）
-        UserDefaults.standard.set(false, forKey: "NSQuitAlwaysKeepsWindows")
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         menuBarController = MenuBarController(appState: AppSharedState.shared)
-        // SwiftUI Window シーンが applicationDidFinishLaunching 後に非同期でウィンドウを
-        // 作成・表示する場合があるため、次のランループで改めて非表示にする
-        DispatchQueue.main.async {
-            NSApp.windows.forEach { $0.orderOut(nil) }
-        }
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
@@ -101,43 +87,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
 // MARK: - Main App
 
-/// Main SwiftUI App providing settings window (menu bar は AppDelegate 側の MenuBarController が管理)
+/// Main SwiftUI App entry point. Menu bar and settings window are managed from AppKit controllers.
 @main
 struct AgentLimitsApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
-    @Environment(\.openWindow) private var openWindow
-
-    private var appState: AppSharedState { AppSharedState.shared }
 
     init() {
         Self.migrateIdealToPacemakerKeys()
     }
 
     var body: some Scene {
-        Window("AgentLimits", id: WindowId.settings) {
-            SettingsTabView(
-                viewModel: appState.viewModel,
-                webViewPool: appState.webViewPool,
-                tokenUsageViewModel: appState.tokenUsageViewModel
-            )
-            .onAppear {
-                // MenuBarController（AppKit）から設定ウィンドウを開けるようにコールバックを注入
-                appState.openSettingsAction = {
-                    openWindow(id: WindowId.settings)
-                    NSApp.activate(ignoringOtherApps: true)
-                }
-                appState.viewModel.updateDisplayMode(
-                    UsageDisplayMode.makeSelectableMode(
-                        from: UserDefaults.standard.string(forKey: UserDefaultsKeys.displayMode)
-                    )
-                )
-                appState.startBackgroundRefresh()
-                LoginItemManager.shared.updateStatus()
-                _ = AppUpdateController.shared
-            }
+        Settings {
+            EmptyView()
         }
-        .windowResizability(.contentSize)
-        .handlesExternalEvents(matching: [])
         .commandsRemoved()
     }
 

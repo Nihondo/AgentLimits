@@ -17,9 +17,6 @@ final class AppSharedState: ObservableObject {
     let webViewPool: UsageWebViewPool
     let viewModel: UsageViewModel
     let tokenUsageViewModel: TokenUsageViewModel
-    /// MenuBarController（AppKit）から設定ウィンドウを開くためのコールバック。
-    /// AgentLimitsApp の Window シーン側で openWindow アクションを注入する。
-    var openSettingsAction: (() -> Void)?
 
     private var isStarted = false
     private var cancellables: Set<AnyCancellable> = []
