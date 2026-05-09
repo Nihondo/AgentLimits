@@ -435,15 +435,84 @@ private struct CheckmarkLabel: View {
     }
 }
 
+/// ダッシュボード行: 1プロバイダーの5h残り時間と週次リセット時刻を1行で表示
+/// macOS メニューの Button ラベルは VStack 複数行を描画できないため単一 Label を使用する
+private struct MenuBarDashboardRowView: View {
+    let provider: UsageProvider
+    let primaryWindow: UsageWindow?
+    let secondaryWindow: UsageWindow?
+
+    var body: some View {
+        Button {
+            NSWorkspace.shared.open(provider.usageURL)
+        } label: {
+            Label(summaryText, systemImage: "chart.bar.fill")
+                .font(.system(.body, design: .monospaced))
+        }
+    }
+
+    private var summaryText: String {
+        if provider == .githubCopilot {
+            return "\(provider.displayName)  \(copilotResetText)"
+        }
+        return "\(provider.displayName)  \(remainingText)  \(weeklyResetText)"
+    }
+
+    // MARK: - Codex / Claude Code
+
+    private var remainingText: String {
+        guard let window = primaryWindow else { return "--" }
+        let remainingSeconds = max(0, window.limitWindowSeconds * (1.0 - window.usedPercent / 100.0))
+        let timeString: String
+        if remainingSeconds >= 3600 {
+            timeString = String(format: "menu.dashboard.remainingHours".localized(), remainingSeconds / 3600.0)
+        } else {
+            timeString = String(format: "menu.dashboard.remainingMinutes".localized(), max(1, Int(remainingSeconds) / 60))
+        }
+        return String(format: "menu.dashboard.remaining5h".localized(), timeString)
+    }
+
+    private var weeklyResetText: String {
+        guard let window = secondaryWindow, let resetAt = window.resetAt else { return "--" }
+        return String(format: "menu.dashboard.weeklyReset".localized(), formatResetRelative(resetAt))
+    }
+
+    // MARK: - Copilot (月次)
+
+    private var copilotResetText: String {
+        guard let window = primaryWindow, let resetAt = window.resetAt else { return "--" }
+        return String(format: "menu.dashboard.weeklyReset".localized(), formatResetRelative(resetAt))
+    }
+
+    // MARK: - 共通
+
+    private func formatResetRelative(_ resetAt: Date) -> String {
+        let remaining = resetAt.timeIntervalSinceNow
+        if remaining <= 60 {
+            return "menu.dashboard.soon".localized()
+        } else if remaining >= 86400 {
+            return String(format: "menu.dashboard.resetDaysLater".localized(), remaining / 86400.0)
+        } else if remaining >= 3600 {
+            return String(format: "menu.dashboard.resetHoursLater".localized(), remaining / 3600.0)
+        } else {
+            return String(format: "menu.dashboard.resetMinutesLater".localized(), max(1, Int(remaining) / 60))
+        }
+    }
+}
+
 /// Menu bar dropdown content with settings, display mode, and language options
 private struct MenuBarContentView: View {
     @AppStorage(UserDefaultsKeys.displayMode) private var displayMode: UsageDisplayMode = .used
+    @AppStorage(UserDefaultsKeys.menuBarDashboardCodexEnabled) private var dashboardCodexEnabled = true
+    @AppStorage(UserDefaultsKeys.menuBarDashboardClaudeEnabled) private var dashboardClaudeEnabled = true
+    @AppStorage(UserDefaultsKeys.menuBarDashboardCopilotEnabled) private var dashboardCopilotEnabled = true
     @Environment(\.openWindow) private var openWindow
     @EnvironmentObject private var appState: AppSharedState
     @ObservedObject private var languageManager = LanguageManager.shared
     @ObservedObject private var loginItemManager = LoginItemManager.shared
 
     var body: some View {
+        dashboardSection
         Button {
             openWindow(id: WindowId.settings)
             NSApp.activate(ignoringOtherApps: true)
@@ -487,6 +556,31 @@ private struct MenuBarContentView: View {
     }
 
     // MARK: - Menu Sections
+
+    @ViewBuilder
+    private var dashboardSection: some View {
+        let snapshots = appState.viewModel.snapshots
+        let dashboardFlags: [UsageProvider: Bool] = [
+            .chatgptCodex: dashboardCodexEnabled,
+            .claudeCode: dashboardClaudeEnabled,
+            .githubCopilot: dashboardCopilotEnabled
+        ]
+        let visibleProviders = UsageProvider.allCases.filter {
+            dashboardFlags[$0] == true && snapshots[$0] != nil
+        }
+        if !visibleProviders.isEmpty {
+            ForEach(visibleProviders) { provider in
+                if let snapshot = snapshots[provider] {
+                    MenuBarDashboardRowView(
+                        provider: provider,
+                        primaryWindow: snapshot.primaryWindow,
+                        secondaryWindow: snapshot.secondaryWindow
+                    )
+                }
+            }
+            Divider()
+        }
+    }
 
     private var displayModeMenu: some View {
         Menu {

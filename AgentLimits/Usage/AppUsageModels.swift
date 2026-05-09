@@ -12,6 +12,9 @@ enum UserDefaultsKeys {
     static let menuBarStatusCodexEnabled = "menu_bar_status_codex_enabled"
     static let menuBarStatusClaudeEnabled = "menu_bar_status_claude_enabled"
     static let menuBarStatusCopilotEnabled = "menu_bar_status_copilot_enabled"
+    static let menuBarDashboardCodexEnabled = "menu_bar_dashboard_codex_enabled"
+    static let menuBarDashboardClaudeEnabled = "menu_bar_dashboard_claude_enabled"
+    static let menuBarDashboardCopilotEnabled = "menu_bar_dashboard_copilot_enabled"
     static let menuBarShowPacemakerValue = SharedUserDefaultsKeys.menuBarShowPacemakerValue
     static let pacemakerRingWarningEnabled = SharedUserDefaultsKeys.pacemakerRingWarningEnabled
 }

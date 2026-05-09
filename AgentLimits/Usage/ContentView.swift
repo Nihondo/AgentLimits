@@ -20,6 +20,9 @@ struct ContentView: View {
     @AppStorage(UserDefaultsKeys.menuBarStatusCodexEnabled) private var menuBarCodexEnabled = false
     @AppStorage(UserDefaultsKeys.menuBarStatusClaudeEnabled) private var menuBarClaudeEnabled = false
     @AppStorage(UserDefaultsKeys.menuBarStatusCopilotEnabled) private var menuBarCopilotEnabled = false
+    @AppStorage(UserDefaultsKeys.menuBarDashboardCodexEnabled) private var menuBarDashboardCodexEnabled = true
+    @AppStorage(UserDefaultsKeys.menuBarDashboardClaudeEnabled) private var menuBarDashboardClaudeEnabled = true
+    @AppStorage(UserDefaultsKeys.menuBarDashboardCopilotEnabled) private var menuBarDashboardCopilotEnabled = true
     @State private var isShowingClearDataConfirm = false
     @State private var isClearingData = false
     @State private var isWebViewExpanded = false
@@ -180,8 +183,12 @@ struct ContentView: View {
     }
 
     private var menuBarToggleRow: some View {
-        Toggle("settings.showInMenuBar".localized(), isOn: menuBarEnabledBinding)
-            .toggleStyle(.checkbox)
+        Group {
+            Toggle("settings.showInMenuBar".localized(), isOn: menuBarEnabledBinding)
+                .toggleStyle(.checkbox)
+            Toggle("settings.showMenuDashboard".localized(), isOn: menuBarDashboardEnabledBinding)
+                .toggleStyle(.checkbox)
+        }
     }
 
     private var menuBarEnabledBinding: Binding<Bool> {
@@ -204,6 +211,31 @@ struct ContentView: View {
                     menuBarClaudeEnabled = newValue
                 case .githubCopilot:
                     menuBarCopilotEnabled = newValue
+                }
+            }
+        )
+    }
+
+    private var menuBarDashboardEnabledBinding: Binding<Bool> {
+        Binding(
+            get: {
+                switch viewModel.selectedProvider {
+                case .chatgptCodex:
+                    return menuBarDashboardCodexEnabled
+                case .claudeCode:
+                    return menuBarDashboardClaudeEnabled
+                case .githubCopilot:
+                    return menuBarDashboardCopilotEnabled
+                }
+            },
+            set: { newValue in
+                switch viewModel.selectedProvider {
+                case .chatgptCodex:
+                    menuBarDashboardCodexEnabled = newValue
+                case .claudeCode:
+                    menuBarDashboardClaudeEnabled = newValue
+                case .githubCopilot:
+                    menuBarDashboardCopilotEnabled = newValue
                 }
             }
         )

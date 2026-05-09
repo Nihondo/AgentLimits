@@ -13,6 +13,15 @@
 
 /* Menu */
 "menu.openSettings" = "AgentLimits 設定...";
+"settings.showMenuDashboard" = "メニューにダッシュボードを表示";
+"menu.dashboard.remaining5h" = "🕔%@";
+"menu.dashboard.remainingHours" = "%.1f時間後";
+"menu.dashboard.remainingMinutes" = "%d分後";
+"menu.dashboard.weeklyReset" = "📅%@";
+"menu.dashboard.resetDaysLater" = "%.1f日後";
+"menu.dashboard.resetHoursLater" = "%.1f時間後";
+"menu.dashboard.resetMinutesLater" = "%d分後";
+"menu.dashboard.soon" = "まもなく";
 "menu.displayMode" = "表示モード";
 "menu.displayMode.used" = "使用率";
 "menu.displayMode.remaining" = "残り使用率";
