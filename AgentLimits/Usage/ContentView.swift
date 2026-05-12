@@ -86,7 +86,6 @@ struct ContentView: View {
                         }
                     }
                     .formStyle(.grouped)
-                    .fixedSize(horizontal: false, vertical: true)
                 }
                 .padding(DesignTokens.Spacing.large)
                 .padding(.bottom, webViewPanelCollapsedHeight + DesignTokens.Spacing.large)
