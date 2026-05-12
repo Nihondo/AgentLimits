@@ -3,12 +3,14 @@
 // ImageRenderer でレンダリングして NSStatusItem.button.image に設定する。
 
 import SwiftUI
+import AppKit
 
 /// メニューバーアイコン全体のレイアウト（プロバイダーステータスを横並びで表示）
 struct MenuBarLabelContentView: View {
     /// 表示順序付きの (プロバイダ, スナップショット?) 配列。nil は非表示。
     let orderedSnapshots: [(provider: UsageProvider, snapshot: UsageSnapshot?)]
     let displayMode: UsageDisplayMode
+    let colorScheme: ColorScheme
 
     var body: some View {
         HStack(spacing: 6) {
@@ -21,7 +23,8 @@ struct MenuBarLabelContentView: View {
                         provider: item.provider,
                         primaryWindow: snapshot.primaryWindow,
                         secondaryWindow: snapshot.secondaryWindow,
-                        displayMode: displayMode
+                        displayMode: displayMode,
+                        colorScheme: colorScheme
                     )
                 }
             }
@@ -35,6 +38,7 @@ struct MenuBarProviderStatusView: View {
     let primaryWindow: UsageWindow?
     let secondaryWindow: UsageWindow?
     let displayMode: UsageDisplayMode
+    let colorScheme: ColorScheme
 
     var body: some View {
         VStack(alignment: .leading, spacing: -2) {
@@ -45,7 +49,8 @@ struct MenuBarProviderStatusView: View {
                 provider: provider,
                 primaryWindow: primaryWindow,
                 secondaryWindow: secondaryWindow,
-                displayMode: displayMode
+                displayMode: displayMode,
+                colorScheme: colorScheme
             )
         }
     }
@@ -57,6 +62,7 @@ struct MenuBarPercentLineView: View {
     let primaryWindow: UsageWindow?
     let secondaryWindow: UsageWindow?
     let displayMode: UsageDisplayMode
+    let colorScheme: ColorScheme
     @AppStorage(UserDefaultsKeys.menuBarShowPacemakerValue, store: AppGroupDefaults.shared)
     private var showPacemakerValue: Bool = true
     @AppStorage(UsageColorKeys.statusGreen, store: AppGroupDefaults.shared)
@@ -85,6 +91,10 @@ struct MenuBarPercentLineView: View {
     private func percentTextView(_ window: UsageWindow?, windowKind: UsageWindowKind) -> some View {
         if let window {
             let statusColor = resolveStatusColor(window, windowKind: windowKind)
+            let adjustedStatusColor = MenuBarTextColorAdjuster.adjustedColor(
+                statusColor,
+                for: colorScheme
+            )
             let percent = displayMode.displayPercent(from: window.usedPercent, window: window)
             let displayText = UsagePercentFormatter.formatPercentText(percent)
             if showPacemakerValue,
@@ -97,14 +107,18 @@ struct MenuBarPercentLineView: View {
                 )
                 let arrowIcon = level.pacemakerArrowIcon
                 let indicatorColor = level.pacemakerIndicatorColor
+                let adjustedIndicatorColor = MenuBarTextColorAdjuster.adjustedColor(
+                    indicatorColor,
+                    for: colorScheme
+                )
                 if arrowIcon.isEmpty {
-                    Text(displayText).foregroundColor(statusColor)
+                    Text(displayText).foregroundColor(adjustedStatusColor)
                 } else {
-                    Text(displayText).foregroundColor(statusColor)
-                    + Text(arrowIcon).foregroundColor(indicatorColor)
+                    Text(displayText).foregroundColor(adjustedStatusColor)
+                    + Text(arrowIcon).foregroundColor(adjustedIndicatorColor)
                 }
             } else {
-                Text(displayText).foregroundColor(statusColor)
+                Text(displayText).foregroundColor(adjustedStatusColor)
             }
         } else {
             Text(UsagePercentFormatter.formatPercentText(nil)).foregroundStyle(.secondary)
@@ -130,5 +144,31 @@ struct MenuBarPercentLineView: View {
     private func resolveStoredColor(from storedValue: String, defaultColor: Color) -> Color {
         let trimmed = storedValue.trimmingCharacters(in: .whitespacesAndNewlines)
         return ColorHexCodec.resolveColor(from: trimmed.isEmpty ? nil : trimmed, defaultColor: defaultColor)
+    }
+}
+
+private enum MenuBarTextColorAdjuster {
+    private static let darkenAmount = 0.3
+    private static let lightenAmount = 0.3
+
+    static func adjustedColor(_ color: Color, for colorScheme: ColorScheme) -> Color {
+        guard let nsColor = NSColor(color).usingColorSpace(.sRGB) else {
+            return color
+        }
+        let target = colorScheme == .light ? 0.0 : 1.0
+        let amount = colorScheme == .light ? darkenAmount : lightenAmount
+
+        return Color(
+            .sRGB,
+            red: blend(nsColor.redComponent, toward: target, amount: amount),
+            green: blend(nsColor.greenComponent, toward: target, amount: amount),
+            blue: blend(nsColor.blueComponent, toward: target, amount: amount),
+            opacity: Double(nsColor.alphaComponent)
+        )
+    }
+
+    private static func blend(_ component: CGFloat, toward target: Double, amount: Double) -> Double {
+        let value = Double(component)
+        return value + ((target - value) * amount)
     }
 }

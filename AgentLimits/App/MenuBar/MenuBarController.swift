@@ -49,7 +49,8 @@ final class MenuBarController: NSObject {
         }
         let content = MenuBarLabelContentView(
             orderedSnapshots: orderedSnapshots,
-            displayMode: displayMode
+            displayMode: displayMode,
+            colorScheme: colorScheme
         )
         .environment(\.colorScheme, colorScheme)
 

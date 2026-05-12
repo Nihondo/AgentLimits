@@ -35,6 +35,7 @@ Download the latest build: [Download](https://github.com/Nihondo/AgentLimits/rel
   - For Copilot: `X%` (monthly)
 - Display mode: **Used** or **Remaining** (shared across app and widgets)
 - Status colors are based on pacemaker comparison when available (colors are configurable in **Notification** settings)
+- Status colors in the menu bar are automatically darkened or lightened to match the current menu bar text color.
 - Pacemaker indicator: optionally shows `<used>%↑` when over pace
 - Toggle icon visibility per provider in **Usage** settings
 - Provider display order (Codex / Claude Code / Copilot) is configurable in **Usage** settings (**Display Order**)

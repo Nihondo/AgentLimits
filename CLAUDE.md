@@ -106,6 +106,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 - Icon label: `MenuBarLabelContentView` rendered to `NSImage` via `ImageRenderer` and set on `NSStatusItem.button`
   - Two-line layout per provider: line 1 = provider name, line 2 = `X% / Y%` (5h/weekly)
   - Color-coded status; pacemaker indicator `↑` shown when over budget
+  - Percentage and arrow colors are adjusted only at menu bar render time: darken by 22% in light color scheme, lighten by 28% in dark color scheme
   - Responds to display mode (used/remaining) and color settings changes via Combine + debounce
 - Dashboard section at the top of the menu (collapsible per provider via Usage settings):
   - Each row is `NSMenuItem.view = NSHostingView<DashboardMenuItemView>` for full SwiftUI rendering
