@@ -13,6 +13,7 @@ final class MenuBarController: NSObject {
     private let statusItem: NSStatusItem
     private let appState: AppSharedState
     private var cancellables: Set<AnyCancellable> = []
+    private var appearanceObservation: NSKeyValueObservation?
     private var debounceTask: Task<Void, Never>?
     private static let debounceMs: UInt64 = 50
 
@@ -40,9 +41,8 @@ final class MenuBarController: NSObject {
         let snapshots = appState.viewModel.snapshots
         let displayMode = loadDisplayMode()
 
-        // メニューバーボタンの実際のカラースキームを取得して ImageRenderer に渡す
-        let isDarkMode = NSApp.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
-        let colorScheme: ColorScheme = isDarkMode ? .dark : .light
+        // メニューバーボタン自身の見た目を基準に ImageRenderer の色を決める。
+        let colorScheme = resolveButtonColorScheme()
 
         let orderedSnapshots = ProviderOrderStore.loadProviderOrder().map { provider in
             (provider: provider, snapshot: isMenuBarEnabled(provider) ? snapshots[provider] : nil)
@@ -98,6 +98,30 @@ final class MenuBarController: NSObject {
             .publisher(for: UserDefaults.didChangeNotification)
             .sink { [weak self] _ in self?.scheduleImageUpdate() }
             .store(in: &cancellables)
+
+        NotificationCenter.default
+            .publisher(for: NSApplication.didChangeScreenParametersNotification)
+            .sink { [weak self] _ in self?.scheduleImageUpdate() }
+            .store(in: &cancellables)
+
+        NSWorkspace.shared.notificationCenter
+            .publisher(for: NSWorkspace.activeSpaceDidChangeNotification)
+            .sink { [weak self] _ in self?.scheduleImageUpdate() }
+            .store(in: &cancellables)
+
+        DistributedNotificationCenter.default()
+            .publisher(for: Notification.Name("AppleInterfaceThemeChangedNotification"))
+            .sink { [weak self] _ in self?.scheduleImageUpdate() }
+            .store(in: &cancellables)
+
+        appearanceObservation = statusItem.button?.observe(
+            \.effectiveAppearance,
+            options: [.new]
+        ) { [weak self] _, _ in
+            MainActor.assumeIsolated {
+                self?.scheduleImageUpdate()
+            }
+        }
     }
 
     private func scheduleImageUpdate() {
@@ -106,6 +130,24 @@ final class MenuBarController: NSObject {
             try? await Task.sleep(nanoseconds: Self.debounceMs * 1_000_000)
             guard !Task.isCancelled else { return }
             updateButtonImage()
+        }
+    }
+
+    private func resolveButtonColorScheme() -> ColorScheme {
+        let appearance = statusItem.button?.effectiveAppearance ?? NSApp.effectiveAppearance
+        let matched = appearance.bestMatch(from: [
+            .darkAqua,
+            .aqua,
+            .vibrantDark,
+            .vibrantLight,
+            .accessibilityHighContrastDarkAqua,
+            .accessibilityHighContrastAqua
+        ])
+        switch matched {
+        case .darkAqua, .vibrantDark, .accessibilityHighContrastDarkAqua:
+            return .dark
+        default:
+            return .light
         }
     }
 }
