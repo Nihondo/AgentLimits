@@ -72,6 +72,19 @@
 "error.appGroupUnavailable" = "App Group が利用できません。Signing & Capabilities を確認してください。";
 "error.readFailed" = "データの読み込みに失敗しました";
 "error.decodeFailed" = "データの解析に失敗しました";
+"error.codexAuthExpired" = "認証が切れました — codex login を実行してください";
+"error.claudeReLogin" = "再ログインが必要です: claude /login";
+"error.rateLimited" = "レート制限中";
+
+/* Native auth panel (Codex/Claude — read credentials from disk/keychain) */
+"nativeAuth.loggedIn" = "%@ — サインイン済み";
+"nativeAuth.notLoggedIn" = "%@ — 未サインイン";
+"nativeAuth.refresh" = "今すぐ更新";
+"nativeAuth.runCodexLogin" = "codex login を実行";
+"nativeAuth.runClaudeLogin" = "claude /login を実行";
+"nativeAuth.explanationCodex" = "~/.codex/auth.json を読み込みます。トークンは Codex CLI が自動でローテーションします。期限切れの場合は codex login を実行してください。";
+"nativeAuth.explanationClaude" = "claude /login が書き込んだ Claude Code-credentials キーチェーン項目を読み込みます。トークンは自動更新されます。スコープ不足の場合は claude /login を再実行してください。";
+"nativeAuth.waitingForLogin" = "キーチェーン更新を待機中…";
 
 /* Relative Time */
 "time.minutesLater" = "%d分後";

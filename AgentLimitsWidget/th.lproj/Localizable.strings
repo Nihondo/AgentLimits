@@ -1,0 +1,26 @@
+/* Widget */
+"widget.description" = "แสดงอัตราการใช้งานในรอบ 5 ชั่วโมงและรายสัปดาห์";
+"widget.notFetched" = "ยังไม่ได้ดึงข้อมูล";
+"widget.pleaseLogin" = "กรุณาเข้าสู่ระบบในแอป";
+"widget.5hourLimit" = "ขีดจำกัด 5 ชั่วโมง";
+"widget.weeklyLimit" = "ขีดจำกัดรายสัปดาห์";
+"widget.reset" = "รีเซ็ตเมื่อ";
+"widget.updatedAt" = "อัปเดตเมื่อ:";
+"error.appGroupUnavailable" = "ไม่สามารถใช้ App Group ได้ กรุณาตรวจสอบ Signing & Capabilities";
+"error.readFailed" = "อ่านข้อมูลไม่สำเร็จ";
+"error.decodeFailed" = "ถอดรหัสข้อมูลไม่สำเร็จ";
+
+/* Reset Time */
+"time.minutesLater" = "อีก %d นาที";
+"time.hoursLater" = "อีก %@ ชั่วโมง";
+"time.daysLater" = "อีก %d วัน";
+
+/* Token Usage Widget (ccusage) */
+"widget.tokenUsage.today" = "วันนี้";
+"widget.tokenUsage.thisWeek" = "สัปดาห์นี้";
+"widget.tokenUsage.thisMonth" = "เดือนนี้";
+"widget.tokenUsageDescription" = "แสดงการใช้งานโทเค็นและค่าใช้จ่าย";
+"widget.pleaseOpenApp" = "กรุณาเปิดแอป";
+"widget.monthlyLimit" = "ขีดจำกัดรายเดือน";
+"widget.premiumRequests" = "คำขอแบบพรีเมียม";
+"widget.copilotBillingDescription" = "แสดงการใช้งานและค่าใช้จ่ายของ Copilot";

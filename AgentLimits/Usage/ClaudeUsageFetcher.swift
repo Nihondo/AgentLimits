@@ -1,69 +1,129 @@
 // MARK: - ClaudeUsageFetcher.swift
-// Fetches usage data from Claude.ai via JavaScript injection.
-// Extracts organization ID from cookies or page content to call usage API.
+// Native Claude (Anthropic) usage fetcher. Reuses the user's already-granted
+// Claude Code OAuth session via the keychain item written by `claude /login`.
+// No WKWebView, no JS injection, no API keys — only the rotated OAuth tokens.
+//
+// Status-code matrix (per codex-island):
+//   200 + body.error.type == "rate_limit_error" → rateLimited
+//   200                                          → parse
+//   401                                          → refresh once + retry
+//   403 (scope insufficient: missing user:profile) → claudeReLogin
+//   429                                          → rateLimited
+//
+// 5-minute minimum poll interval is enforced upstream (UsageViewModel).
 
 import Foundation
-import WebKit
 
 // MARK: - API Response Models
 
-/// Response structure from Claude.ai usage API
+/// Response from `GET https://api.anthropic.com/api/oauth/usage`.
 struct ClaudeUsageResponse: Codable {
     struct Window: Codable {
         let utilization: Double?
-        let resets_at: String?
+        /// ISO8601 string OR epoch-seconds Double depending on field/account.
+        let resets_at: ResetsAt?
+    }
+
+    /// Discriminated union for `resets_at` — string OR number.
+    enum ResetsAt: Codable {
+        case iso(String)
+        case epoch(Double)
+        case absent
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            if container.decodeNil() { self = .absent; return }
+            if let s = try? container.decode(String.self) { self = .iso(s); return }
+            if let d = try? container.decode(Double.self) { self = .epoch(d); return }
+            self = .absent
+        }
+
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.singleValueContainer()
+            switch self {
+            case .iso(let s): try container.encode(s)
+            case .epoch(let d): try container.encode(d)
+            case .absent: try container.encodeNil()
+            }
+        }
+    }
+
+    struct ExtraUsage: Codable {
+        let is_enabled: Bool?
+        let monthly_limit: Double?
+        let used_credits: Double?
+        let utilization: Double?
+        let currency: String?
+    }
+
+    /// Anthropic sometimes returns HTTP 200 with this error block instead of 429.
+    struct RateLimitErrorBody: Codable {
+        let type: String?
+        let message: String?
+    }
+
+    struct RateLimitErrorWrapper: Codable {
+        let error: RateLimitErrorBody?
     }
 
     let five_hour: Window?
     let seven_day: Window?
-    let seven_day_oauth_apps: Window?
-    let seven_day_opus: Window?
-    let seven_day_sonnet: Window?
-    let iguana_necktie: Window?
-    let extra_usage: Window?
+    let extra_usage: ExtraUsage?
 }
 
 extension ClaudeUsageResponse {
-    /// Converts API response to a UsageSnapshot for persistence and display.
-    /// - Parameters:
-    ///   - fetchedAt: The timestamp when this data was fetched
-    ///   - parseResetDate: Function to parse ISO8601 date strings from the API
-    /// - Returns: A UsageSnapshot containing primary (5h) and secondary (7d) windows
-    func toSnapshot(fetchedAt: Date, parseResetDate: (String) -> Date?) -> UsageSnapshot {
+    func toSnapshot(fetchedAt: Date, planType: String?) -> UsageSnapshot {
         let primary = makeWindow(
-            kind: .primary,
             source: five_hour,
-            limitSeconds: UsageLimitDuration.fiveHours,
-            parseResetDate: parseResetDate
+            kind: .primary,
+            limitSeconds: UsageLimitDuration.fiveHours
         )
         let secondary = makeWindow(
-            kind: .secondary,
             source: seven_day,
-            limitSeconds: UsageLimitDuration.sevenDays,
-            parseResetDate: parseResetDate
+            kind: .secondary,
+            limitSeconds: UsageLimitDuration.sevenDays
         )
+        let extra = extra_usage.map {
+            ExtraUsageInfo(
+                isEnabled: $0.is_enabled ?? false,
+                monthlyLimit: $0.monthly_limit,
+                usedCredits: $0.used_credits,
+                utilization: $0.utilization,
+                currency: $0.currency
+            )
+        }
         return UsageSnapshot(
             provider: .claudeCode,
             fetchedAt: fetchedAt,
             primaryWindow: primary,
-            secondaryWindow: secondary
+            secondaryWindow: secondary,
+            planType: planType,
+            limitReached: false,
+            extraUsage: extra
         )
     }
 
     private func makeWindow(
-        kind: UsageWindowKind,
         source: Window?,
-        limitSeconds: TimeInterval,
-        parseResetDate: (String) -> Date?
+        kind: UsageWindowKind,
+        limitSeconds: TimeInterval
     ) -> UsageWindow? {
-        guard let source, let usedPercent = source.utilization else {
+        guard let source, let rawUtilization = source.utilization else { return nil }
+        // Codex-island contract: utilization arrives in [0, 100]. Clamp without
+        // a "raw > 1 ? raw/100 : raw" heuristic — that heuristic breaks at
+        // window reset when utilization legitimately enters (0, 1].
+        let usedPercent = max(0, min(100, rawUtilization))
+        let resetAt: Date?
+        switch source.resets_at {
+        case .iso(let s):
+            resetAt = ClaudeResetDateParser.parse(s)
+        case .epoch(let d):
+            resetAt = Date(timeIntervalSince1970: d)
+        case .absent, .none:
+            // Treat absent reset as "not yet initialized" — drop the window.
             return nil
         }
-        // resets_at が null の場合は初期状態として扱い、UsageWindow を作らない
-        guard let resetAtString = source.resets_at,
-              let resetAt = parseResetDate(resetAtString) else {
-            return nil
-        }
+        guard let resetAt else { return nil }
         return UsageWindow(
             kind: kind,
             usedPercent: usedPercent,
@@ -73,192 +133,162 @@ extension ClaudeUsageResponse {
     }
 }
 
-// MARK: - Error Types
+// MARK: - ISO8601 Parsing
 
-/// Errors that can occur when fetching Claude usage data
-enum ClaudeUsageFetcherError: LocalizedError {
-    case scriptFailed(String)
-    case invalidResponse
-    case missingOrganization
+enum ClaudeResetDateParser {
+    private static let withFractional: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return f
+    }()
+    private static let withoutFractional: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime]
+        return f
+    }()
 
-    var errorDescription: String? {
-        switch self {
-        case .scriptFailed(let message):
-            return "error.fetchFailed".localized(message)
-        case .invalidResponse:
-            return "error.parseFailed".localized()
-        case .missingOrganization:
-            return "error.missingOrg".localized()
+    static func parse(_ value: String) -> Date? {
+        if let d = withFractional.date(from: value) { return d }
+        if let d = withoutFractional.date(from: value) { return d }
+        // Normalize >3-digit fractional seconds to milliseconds.
+        if let trimmed = trimFractionalSeconds(value),
+           let d = withFractional.date(from: trimmed) {
+            return d
         }
+        return nil
+    }
+
+    private static func trimFractionalSeconds(_ value: String) -> String? {
+        guard let dotIdx = value.firstIndex(of: ".") else { return nil }
+        let fractionStart = value.index(after: dotIdx)
+        guard let suffixStart = value[fractionStart...].firstIndex(where: { $0 == "Z" || $0 == "+" || $0 == "-" }) else {
+            return nil
+        }
+        let fraction = value[fractionStart..<suffixStart]
+        if fraction.count <= 3 { return value }
+        let trimmedFraction = fraction.prefix(3)
+        return String(value[..<fractionStart]) + trimmedFraction + value[suffixStart...]
     }
 }
 
 // MARK: - Claude Usage Fetcher
 
-/// Fetches usage data from Claude.ai by executing JavaScript in WebView.
-/// Obtains organization ID from cookies or page content to authenticate.
+/// Fetches Claude usage by reusing the user's claude /login OAuth session.
 final class ClaudeUsageFetcher {
-    private let scriptRunner: WebViewScriptRunner
+    private let http: NativeUsageHTTPClient
+    private let oauthClient: ClaudeOAuthClient
 
-    init(scriptRunner: WebViewScriptRunner = WebViewScriptRunner()) {
-        self.scriptRunner = scriptRunner
+    init(
+        http: NativeUsageHTTPClient = NativeUsageHTTPClient(),
+        oauthClient: ClaudeOAuthClient = ClaudeOAuthClient()
+    ) {
+        self.http = http
+        self.oauthClient = oauthClient
     }
 
-    /// Fetches current usage snapshot by executing JavaScript in the WebView
-    @MainActor
-    func fetchUsageSnapshot(using webView: WKWebView) async throws -> UsageSnapshot {
-        let response: ClaudeUsageResponse
-        do {
-            response = try await scriptRunner.decodeJSONScript(
-                ClaudeUsageResponse.self,
-                script: Self.usageScript,
-                webView: webView
-            )
-        } catch let error as WebViewScriptRunnerError {
-            throw mapScriptError(error)
-        } catch {
-            throw ClaudeUsageFetcherError.invalidResponse
+    /// True when we can locate an access token without hitting the network.
+    /// Used by the UI to choose between "logged in" and "needs claude /login".
+    func hasValidSession() -> Bool {
+        if ProcessInfo.processInfo.environment[ClaudeOAuthConfig.envTokenVariable]?.isEmpty == false {
+            return true
         }
-        return response.toSnapshot(fetchedAt: Date(), parseResetDate: parseResetDate)
+        return (try? ClaudeKeychainStore.loadCredentials()) != nil
     }
 
-    /// Checks if user is logged in by verifying the session cookie
-    @MainActor
-    func hasValidSession(using webView: WKWebView) async -> Bool {
-        await hasValidSessionCookie(using: webView)
-    }
-
-    private func hasValidSessionCookie(using webView: WKWebView) async -> Bool {
-        let cookieStore = webView.configuration.websiteDataStore.httpCookieStore
-        return await withCheckedContinuation { continuation in
-            cookieStore.getAllCookies { cookies in
-                let now = Date()
-                // Look for a valid Claude session cookie scoped to claude.ai.
-                let isValid = cookies.contains { cookie in
-                    guard cookie.name == "sessionKey" else { return false }
-                    guard cookie.domain.hasSuffix("claude.ai") else { return false }
-                    if let expiresDate = cookie.expiresDate {
-                        return expiresDate > now
-                    }
-                    return true
+    /// Fetches the current usage snapshot. Throws `UsageAuthError`.
+    /// On 401, refreshes the OAuth tokens via the keychain refresh_token,
+    /// writes the rotated pair back, and retries the GET once.
+    func fetchUsageSnapshot() async throws -> UsageSnapshot {
+        let initial = try resolveAccessTokenAndPlan()
+        let accessToken = initial.accessToken
+        var planType = initial.planType
+        let raw = try await performUsageGET(accessToken: accessToken)
+        switch raw.response.statusCode {
+        case 200...299:
+            if let wrapper = try? JSONDecoder().decode(ClaudeUsageResponse.RateLimitErrorWrapper.self, from: raw.data),
+               wrapper.error?.type == "rate_limit_error" {
+                throw UsageAuthError.rateLimited
+            }
+            do {
+                let decoded = try JSONDecoder().decode(ClaudeUsageResponse.self, from: raw.data)
+                return decoded.toSnapshot(fetchedAt: Date(), planType: planType)
+            } catch {
+                throw UsageAuthError.invalidResponse(reason: error.localizedDescription)
+            }
+        case 401:
+            // Refresh once + retry. Refresh re-issues with the SAME scope, so
+            // 403 (scope insufficient) cannot be helped by refresh and we
+            // surface .claudeReLogin instead (handled in the 403 branch below).
+            let newAccess: String
+            do {
+                newAccess = try await oauthClient.refreshAndPersist()
+            } catch let refreshError as UsageAuthError {
+                throw refreshError
+            }
+            planType = (try? ClaudeKeychainStore.loadCredentials().payload.claudeAiOauth.subscriptionType) ?? planType
+            let retry = try await performUsageGET(accessToken: newAccess)
+            switch retry.response.statusCode {
+            case 200...299:
+                if let wrapper = try? JSONDecoder().decode(ClaudeUsageResponse.RateLimitErrorWrapper.self, from: retry.data),
+                   wrapper.error?.type == "rate_limit_error" {
+                    throw UsageAuthError.rateLimited
                 }
-                continuation.resume(returning: isValid)
+                do {
+                    let decoded = try JSONDecoder().decode(ClaudeUsageResponse.self, from: retry.data)
+                    return decoded.toSnapshot(fetchedAt: Date(), planType: planType)
+                } catch {
+                    throw UsageAuthError.invalidResponse(reason: error.localizedDescription)
+                }
+            case 401:
+                throw UsageAuthError.claudeAuthExpired
+            case 403:
+                throw UsageAuthError.claudeReLogin
+            case 429:
+                throw UsageAuthError.rateLimited
+            default:
+                throw UsageAuthError.httpStatus(code: retry.response.statusCode, body: retry.bodyString)
             }
+        case 403:
+            throw UsageAuthError.claudeReLogin
+        case 429:
+            throw UsageAuthError.rateLimited
+        default:
+            throw UsageAuthError.httpStatus(code: raw.response.statusCode, body: raw.bodyString)
         }
     }
 
-    private func mapScriptError(_ error: WebViewScriptRunnerError) -> ClaudeUsageFetcherError {
-        // Map script errors to user-facing domain errors.
-        switch error {
-        case .invalidResponse:
-            return .invalidResponse
-        case .scriptFailed(let message):
-            if message.contains("Missing organization id") {
-                return .missingOrganization
-            }
-            return .scriptFailed(message)
-        }
+    // MARK: - Helpers
+
+    private struct InitialResolution {
+        let accessToken: String
+        let planType: String?
     }
 
-    // MARK: - Date Parsing
-
-    /// Parses ISO8601 date string with various fractional second formats
-    private func parseResetDate(_ value: String) -> Date? {
-        // Try full ISO8601 with fractional seconds first.
-        if let date = Self.formatterWithFractionalSeconds.date(from: value) {
-            return date
+    /// Token resolution order, per codex-island:
+    /// 1. CLAUDE_CODE_OAUTH_TOKEN env var (Claude Desktop child processes)
+    /// 2. Keychain payload's accessToken
+    /// 3. Refresh handled later in the 401 branch (not pre-emptively here)
+    private func resolveAccessTokenAndPlan() throws -> InitialResolution {
+        if let env = ProcessInfo.processInfo.environment[ClaudeOAuthConfig.envTokenVariable],
+           !env.isEmpty {
+            let plan = (try? ClaudeKeychainStore.loadCredentials().payload.claudeAiOauth.subscriptionType)
+            return InitialResolution(accessToken: env, planType: plan)
         }
-        // Fallback to ISO8601 without fractional seconds.
-        if let date = Self.formatterWithoutFractionalSeconds.date(from: value) {
-            return date
-        }
-        // Normalize long fractional precision to milliseconds if needed.
-        if let trimmed = trimFractionalSeconds(value),
-           let date = Self.formatterWithFractionalSeconds.date(from: trimmed) {
-            return date
-        }
-        return nil
+        let (payload, _) = try ClaudeKeychainStore.loadCredentials()
+        return InitialResolution(
+            accessToken: payload.claudeAiOauth.accessToken,
+            planType: payload.claudeAiOauth.subscriptionType
+        )
     }
 
-    private func trimFractionalSeconds(_ value: String) -> String? {
-        guard let dotIndex = value.firstIndex(of: ".") else { return nil }
-        let fractionStart = value.index(after: dotIndex)
-        guard let suffixStart = value[fractionStart...].firstIndex(where: { $0 == "Z" || $0 == "+" || $0 == "-" }) else {
-            return nil
-        }
-        let fraction = value[fractionStart..<suffixStart]
-        if fraction.count <= 3 {
-            return value
-        }
-        // Truncate to milliseconds precision.
-        let trimmedFraction = fraction.prefix(3)
-        return String(value[..<fractionStart]) + trimmedFraction + value[suffixStart...]
+    private func performUsageGET(accessToken: String) async throws -> NativeUsageHTTPClient.RawResponse {
+        var request = URLRequest(url: ClaudeOAuthConfig.usageEndpoint)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        request.setValue(ClaudeOAuthConfig.oauthBetaHeader, forHTTPHeaderField: "anthropic-beta")
+        request.setValue(ClaudeOAuthConfig.userAgent, forHTTPHeaderField: "User-Agent")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        return try await http.send(request)
     }
-
-    private static let formatterWithFractionalSeconds: ISO8601DateFormatter = {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return formatter
-    }()
-
-    private static let formatterWithoutFractionalSeconds: ISO8601DateFormatter = {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime]
-        return formatter
-    }()
-
-    // MARK: - JavaScript Scripts
-
-    /// Script to fetch usage: finds org ID from cookie/resources/HTML, then calls API
-    private static let usageScript = """
-    return (async () => {
-      try {
-        function readCookieValue(name) {
-          const pattern = new RegExp("(?:^|; )" + name + "=([^;]*)");
-          const match = document.cookie.match(pattern);
-          return match ? decodeURIComponent(match[1]) : null;
-        }
-
-        function findOrgIdFromResources() {
-          const entries = performance.getEntriesByType("resource");
-          for (const entry of entries) {
-            if (!entry || !entry.name) { continue; }
-            const match = entry.name.match(/\\/api\\/organizations\\/([a-f0-9-]{36})\\/usage/);
-            if (match) { return match[1]; }
-          }
-          return null;
-        }
-
-        function findOrgIdFromHtml() {
-          const html = document.documentElement ? document.documentElement.innerHTML : "";
-          const match = html.match(/\\/api\\/organizations\\/([a-f0-9-]{36})\\/usage/);
-          return match ? match[1] : null;
-        }
-
-        const orgId = readCookieValue("lastActiveOrg")
-          || findOrgIdFromResources()
-          || findOrgIdFromHtml();
-        if (!orgId) {
-          throw new Error("Missing organization id");
-        }
-
-        const response = await fetch("https://claude.ai/api/organizations/" + orgId + "/usage", {
-          method: "GET",
-          credentials: "include",
-          headers: {
-            "Accept": "application/json"
-          }
-        });
-        if (!response.ok) {
-          throw new Error("HTTP " + response.status);
-        }
-        const data = await response.json();
-        return JSON.stringify(data);
-      } catch (error) {
-        const message = error && error.message ? error.message : String(error);
-        return JSON.stringify({ "__error": message });
-      }
-    })();
-    """
-
 }

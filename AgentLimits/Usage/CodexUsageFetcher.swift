@@ -1,22 +1,29 @@
 // MARK: - CodexUsageFetcher.swift
-// Fetches usage data from ChatGPT Codex via JavaScript injection.
-// Uses access token from session API to authenticate usage endpoint.
+// Native Codex (ChatGPT) usage fetcher. Reads the access token written by the
+// Codex CLI at `~/.codex/auth.json` and calls the backend usage endpoint
+// directly via URLSession — no WKWebView, no JS injection.
+//
+// The Codex CLI rotates its own tokens; we never refresh on our side.
+// On HTTP 401 the user must run `codex login`, which we surface via
+// `UsageAuthError.codexAuthExpired`.
 
 import Foundation
-import WebKit
 
 // MARK: - API Response Models
 
-/// Response structure from ChatGPT Codex usage API
+/// Response structure from ChatGPT Codex usage API.
 struct CodexUsageResponse: Codable {
     struct RateLimit: Codable {
         struct Window: Codable {
             let used_percent: Double?
             let limit_window_seconds: Double?
             let reset_after_seconds: Double?
+            /// epoch-seconds.
             let reset_at: TimeInterval?
         }
 
+        let allowed: Bool?
+        let limit_reached: Bool?
         let primary_window: Window?
         let secondary_window: Window?
     }
@@ -30,31 +37,31 @@ extension CodexUsageResponse {
     private static let secondsEqualityTolerance: TimeInterval = 0.001
 
     func toSnapshot(fetchedAt: Date) -> UsageSnapshot {
-        let primary = makeWindow(
-            kind: .primary,
-            source: rate_limit?.primary_window
-        )
-        let secondary = makeWindow(
-            kind: .secondary,
-            source: rate_limit?.secondary_window
-        )
+        let limitReached = rate_limit?.limit_reached ?? false
+        let primary = makeWindow(source: rate_limit?.primary_window, kind: .primary)
+        let secondary = makeWindow(source: rate_limit?.secondary_window, kind: .secondary)
         return UsageSnapshot(
             provider: .chatgptCodex,
             fetchedAt: fetchedAt,
             primaryWindow: primary,
-            secondaryWindow: secondary
+            secondaryWindow: secondary,
+            planType: plan_type,
+            limitReached: limitReached,
+            extraUsage: nil
         )
     }
 
     private func makeWindow(
-        kind: UsageWindowKind,
-        source: RateLimit.Window?
+        source: RateLimit.Window?,
+        kind: UsageWindowKind
     ) -> UsageWindow? {
         guard let source,
               let usedPercent = source.used_percent,
               let limitSeconds = source.limit_window_seconds else {
             return nil
         }
+        // Skip "freshly reset" windows where 0% used and the entire window
+        // duration is still available (matches the prior WebView behavior).
         if usedPercent == 0,
            let resetAfterSeconds = source.reset_after_seconds,
            abs(limitSeconds - resetAfterSeconds) <= Self.secondsEqualityTolerance {
@@ -70,141 +77,48 @@ extension CodexUsageResponse {
     }
 }
 
-// MARK: - Error Types
-
-/// Errors that can occur when fetching Codex usage data
-enum CodexUsageFetcherError: LocalizedError {
-    case pageNotReady
-    case scriptFailed(String)
-    case invalidResponse
-
-    var errorDescription: String? {
-        switch self {
-        case .pageNotReady:
-            return "error.loginNotLoaded".localized()
-        case .scriptFailed(let message):
-            return "error.fetchFailed".localized(message)
-        case .invalidResponse:
-            return "error.parseFailed".localized()
-        }
-    }
-}
-
 // MARK: - Codex Usage Fetcher
 
-/// Fetches usage data from ChatGPT Codex by executing JavaScript in WebView.
-/// Authenticates via session API to get access token for usage endpoint.
+/// Fetches Codex usage via HTTPS using the CLI-rotated access token.
 final class CodexUsageFetcher {
-    private let scriptRunner: WebViewScriptRunner
+    private let http: NativeUsageHTTPClient
 
-    init(scriptRunner: WebViewScriptRunner = WebViewScriptRunner()) {
-        self.scriptRunner = scriptRunner
+    init(http: NativeUsageHTTPClient = NativeUsageHTTPClient()) {
+        self.http = http
     }
 
-    /// Fetches current usage snapshot by executing JavaScript in the WebView
-    @MainActor
-    func fetchUsageSnapshot(using webView: WKWebView) async throws -> UsageSnapshot {
-        let response: CodexUsageResponse
-        do {
-            // Execute usage API script and decode JSON response.
-            response = try await scriptRunner.decodeJSONScript(
-                CodexUsageResponse.self,
-                script: Self.usageScript,
-                webView: webView
-            )
-        } catch let error as WebViewScriptRunnerError {
-            // Map script runner errors to domain errors.
-            throw mapScriptError(error)
-        }
-        return response.toSnapshot(fetchedAt: Date())
+    /// Returns true when an access token can be read off disk. The actual
+    /// validity is only known by hitting the endpoint, but this is enough
+    /// for the UI to decide between "logged in" and "needs codex login".
+    func hasValidSession() -> Bool {
+        (try? CodexAuthStore.loadAccessToken()) != nil
     }
 
-    /// Checks if user is logged in by verifying access token exists
-    @MainActor
-    func hasValidSession(using webView: WKWebView) async -> Bool {
-        do {
-            // Check if session token is present in web context.
-            return try await scriptRunner.runBooleanScript(Self.loginCheckScript, webView: webView)
-        } catch {
-            return false
+    /// Fetches the current usage snapshot. Throws `UsageAuthError`.
+    func fetchUsageSnapshot() async throws -> UsageSnapshot {
+        let token = try CodexAuthStore.loadAccessToken()
+        guard let url = URL(string: "https://chatgpt.com/backend-api/wham/usage") else {
+            throw UsageAuthError.invalidResponse(reason: "invalid usage URL")
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        let raw = try await http.send(request)
+        switch raw.response.statusCode {
+        case 200...299:
+            do {
+                let decoded = try JSONDecoder().decode(CodexUsageResponse.self, from: raw.data)
+                return decoded.toSnapshot(fetchedAt: Date())
+            } catch {
+                throw UsageAuthError.invalidResponse(reason: error.localizedDescription)
+            }
+        case 401:
+            throw UsageAuthError.codexAuthExpired
+        case 429:
+            throw UsageAuthError.rateLimited
+        default:
+            throw UsageAuthError.httpStatus(code: raw.response.statusCode, body: raw.bodyString)
         }
     }
-
-    private func mapScriptError(_ error: WebViewScriptRunnerError) -> CodexUsageFetcherError {
-        // Translate script errors into user-facing fetcher errors.
-        switch error {
-        case .invalidResponse:
-            return .invalidResponse
-        case .scriptFailed(let message):
-            return .scriptFailed(message)
-        }
-    }
-
-    // MARK: - JavaScript Scripts
-
-    /// Shared JavaScript function to fetch session from ChatGPT API.
-    /// Tries both `/api/auth/session` and `/backend-api/auth/session` endpoints.
-    /// Returns the session object containing the access token, or null if not authenticated.
-    private static let fetchSessionScript = """
-        async function fetchSession() {
-          let response = await fetch("/api/auth/session", { credentials: "include" });
-          if (response.ok) {
-            return await response.json();
-          }
-          response = await fetch("/backend-api/auth/session", { credentials: "include" });
-          if (response.ok) {
-            return await response.json();
-          }
-          return null;
-        }
-    """
-
-    /// Script to fetch usage data: gets session token, then calls usage API.
-    /// Uses the shared fetchSession function to obtain authentication credentials.
-    private static let usageScript = """
-    return (async () => {
-      try {
-        \(fetchSessionScript)
-
-        const session = await fetchSession();
-        const accessToken = session && (session.accessToken || session.access_token);
-        if (!accessToken) {
-          throw new Error("Missing access token");
-        }
-
-        const response = await fetch("https://chatgpt.com/backend-api/wham/usage", {
-          method: "GET",
-          credentials: "include",
-          headers: {
-            "Accept": "application/json",
-            "Authorization": "Bearer " + accessToken
-          }
-        });
-        if (!response.ok) {
-          throw new Error("HTTP " + response.status);
-        }
-        const data = await response.json();
-        return JSON.stringify(data);
-      } catch (error) {
-        const message = error && error.message ? error.message : String(error);
-        return JSON.stringify({ "__error": message });
-      }
-    })();
-    """
-
-    /// Script to check login status by verifying access token exists.
-    /// Uses the shared fetchSession function to check authentication state.
-    private static let loginCheckScript = """
-    return (async () => {
-      try {
-        \(fetchSessionScript)
-
-        const session = await fetchSession();
-        const accessToken = session && (session.accessToken || session.access_token);
-        return !!accessToken;
-      } catch (error) {
-        return false;
-      }
-    })();
-    """
 }

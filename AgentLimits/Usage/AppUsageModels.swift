@@ -154,7 +154,10 @@ extension UsageSnapshot {
             fetchedAt: fetchedAt,
             primaryWindow: primaryWindow,
             secondaryWindow: secondaryWindow,
-            displayMode: displayMode.makeDisplayModeRaw()
+            displayMode: displayMode.makeDisplayModeRaw(),
+            planType: planType,
+            limitReached: limitReached,
+            extraUsage: extraUsage
         )
     }
 }

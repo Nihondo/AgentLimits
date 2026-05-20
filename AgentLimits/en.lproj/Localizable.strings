@@ -72,6 +72,19 @@
 "error.appGroupUnavailable" = "App Group unavailable. Check Signing & Capabilities.";
 "error.readFailed" = "Failed to read data";
 "error.decodeFailed" = "Failed to decode data";
+"error.codexAuthExpired" = "auth expired — codex login";
+"error.claudeReLogin" = "re-login: claude /login";
+"error.rateLimited" = "rate limited";
+
+/* Native auth panel (Codex/Claude — read credentials from disk/keychain) */
+"nativeAuth.loggedIn" = "%@ — signed in";
+"nativeAuth.notLoggedIn" = "%@ — not signed in";
+"nativeAuth.refresh" = "Refresh now";
+"nativeAuth.runCodexLogin" = "Run codex login";
+"nativeAuth.runClaudeLogin" = "Run claude /login";
+"nativeAuth.explanationCodex" = "Reads ~/.codex/auth.json. The Codex CLI rotates the token automatically; if it expires, run codex login.";
+"nativeAuth.explanationClaude" = "Reads the Claude Code-credentials keychain item written by claude /login. Tokens auto-refresh; if scope is insufficient, run claude /login.";
+"nativeAuth.waitingForLogin" = "Waiting for keychain update…";
 
 /* Relative Time */
 "time.minutesLater" = "In %d min";

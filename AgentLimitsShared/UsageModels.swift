@@ -792,6 +792,23 @@ extension UsageWindow {
     }
 }
 
+/// Paid-overage block returned by Claude's `/api/oauth/usage` endpoint.
+/// Populated only when the user has explicitly enabled paid overage —
+/// nil otherwise. This is the closest thing to a real numeric cap either
+/// provider exposes.
+struct ExtraUsageInfo: Codable, Equatable {
+    /// True when the account has paid overage turned on.
+    let isEnabled: Bool
+    /// Monthly cap in `currency`, if any.
+    let monthlyLimit: Double?
+    /// Credits used so far in this billing window, in `currency`.
+    let usedCredits: Double?
+    /// 0-100 percentage of monthly_limit consumed, when both numbers are present.
+    let utilization: Double?
+    /// ISO 4217 currency code (e.g. "USD") — nil when overage is disabled.
+    let currency: String?
+}
+
 /// A snapshot of usage data for a provider at a specific point in time
 struct UsageSnapshot: Codable, SnapshotData {
     let provider: UsageProvider
@@ -803,19 +820,34 @@ struct UsageSnapshot: Codable, SnapshotData {
     let secondaryWindow: UsageWindow?
     /// Display mode used by UI when rendering this snapshot
     let displayMode: UsageDisplayModeRaw
+    /// Subscription plan ("free", "plus", "max", …) when the provider exposes it.
+    /// Codex provides this via `rate_limit.plan_type`; Claude provides it only
+    /// in the keychain payload's `subscriptionType` (not in the usage response).
+    let planType: String?
+    /// True when the provider has signalled the cap is reached (Codex
+    /// `rate_limit.limit_reached`). Propagated onto both windows for badge UI.
+    let limitReached: Bool
+    /// Claude paid-overage cap, when present. nil for Codex/Copilot.
+    let extraUsage: ExtraUsageInfo?
 
     init(
         provider: UsageProvider,
         fetchedAt: Date,
         primaryWindow: UsageWindow?,
         secondaryWindow: UsageWindow?,
-        displayMode: UsageDisplayModeRaw = .used
+        displayMode: UsageDisplayModeRaw = .used,
+        planType: String? = nil,
+        limitReached: Bool = false,
+        extraUsage: ExtraUsageInfo? = nil
     ) {
         self.provider = provider
         self.fetchedAt = fetchedAt
         self.primaryWindow = primaryWindow
         self.secondaryWindow = secondaryWindow
         self.displayMode = displayMode
+        self.planType = planType
+        self.limitReached = limitReached
+        self.extraUsage = extraUsage
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -824,6 +856,9 @@ struct UsageSnapshot: Codable, SnapshotData {
         case primaryWindow
         case secondaryWindow
         case displayMode
+        case planType
+        case limitReached
+        case extraUsage
     }
 
     init(from decoder: Decoder) throws {
@@ -833,6 +868,10 @@ struct UsageSnapshot: Codable, SnapshotData {
         primaryWindow = try container.decodeIfPresent(UsageWindow.self, forKey: .primaryWindow)
         secondaryWindow = try container.decodeIfPresent(UsageWindow.self, forKey: .secondaryWindow)
         displayMode = try container.decodeIfPresent(UsageDisplayModeRaw.self, forKey: .displayMode) ?? .used
+        // Backward-compatible: old snapshots predate these fields.
+        planType = try container.decodeIfPresent(String.self, forKey: .planType)
+        limitReached = try container.decodeIfPresent(Bool.self, forKey: .limitReached) ?? false
+        extraUsage = try container.decodeIfPresent(ExtraUsageInfo.self, forKey: .extraUsage)
     }
 }
 

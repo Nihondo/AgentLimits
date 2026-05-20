@@ -334,36 +334,190 @@ struct ContentView: View {
     }
 
     private var loginWebViewSection: some View {
-        ZStack {
-            ForEach(UsageProvider.allCases) { provider in
-                let store = webViewPool.getWebViewStore(for: provider)
-                WebViewRepresentable(store: store)
-                    .onReceive(store.$popupWebView) { popup in
-                        if let popup {
-                            popupWebView = popup
-                            popupWebViewStore = store
-                            // Set up login check callback for auto-close.
-                            store.onPopupNavigationFinished = { [weak viewModel] _ in
-                                guard let viewModel else { return false }
-                                return await viewModel.checkLoginStatus(for: store.provider)
-                            }
-                        } else {
-                            // Close sheet when popup is dismissed programmatically.
-                            if popupWebViewStore === store {
+        Group {
+            switch viewModel.selectedProvider {
+            case .chatgptCodex, .claudeCode:
+                NativeAuthStatusView(
+                    provider: viewModel.selectedProvider,
+                    snapshot: viewModel.snapshot,
+                    fetchStatuses: viewModel.fetchStatuses,
+                    onRefresh: { viewModel.fetchNow() }
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(DesignTokens.Spacing.medium)
+            case .githubCopilot:
+                ZStack {
+                    let store = webViewPool.getWebViewStore(for: .githubCopilot)
+                    WebViewRepresentable(store: store)
+                        .onReceive(store.$popupWebView) { popup in
+                            if let popup {
+                                popupWebView = popup
+                                popupWebViewStore = store
+                                store.onPopupNavigationFinished = { [weak viewModel] _ in
+                                    guard let viewModel else { return false }
+                                    return await viewModel.checkLoginStatus(for: store.provider)
+                                }
+                            } else if popupWebViewStore === store {
                                 popupWebView = nil
                                 popupWebViewStore = nil
                             }
                         }
-                    }
-                .opacity(viewModel.selectedProvider == provider ? 1 : 0)
-                .allowsHitTesting(viewModel.selectedProvider == provider)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .layoutPriority(1)
+                .cornerRadius(DesignTokens.CornerRadius.medium)
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .layoutPriority(1)
-        .cornerRadius(DesignTokens.CornerRadius.medium)
     }
 
+}
+
+// MARK: - Native Auth Status
+
+/// Status panel shown in place of the WebView for native (CLI-credential)
+/// providers. Surfaces login state, subscription badge, and a re-auth button
+/// that detached-spawns the provider CLI to refresh the keychain item.
+private struct NativeAuthStatusView: View {
+    let provider: UsageProvider
+    let snapshot: UsageSnapshot?
+    let fetchStatuses: [UsageProvider: ProviderFetchStatus]
+    let onRefresh: () -> Void
+
+    @State private var isLoggedIn: Bool = false
+    @State private var didTriggerReauth: Bool = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.medium) {
+            HStack(spacing: DesignTokens.Spacing.small) {
+                Image(systemName: isLoggedIn ? "checkmark.shield.fill" : "exclamationmark.shield.fill")
+                    .foregroundStyle(isLoggedIn ? Color.green : Color.orange)
+                Text(headlineText)
+                    .font(.headline)
+                Spacer()
+                if let plan = snapshot?.planType, !plan.isEmpty {
+                    Text(plan.capitalized)
+                        .font(.caption)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color.secondary.opacity(0.15))
+                        .clipShape(Capsule())
+                }
+            }
+            if let statusText = lastFetchText {
+                Text(statusText)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+            Text(explanationText)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: DesignTokens.Spacing.small) {
+                Button(reauthButtonLabel) {
+                    triggerReauth()
+                }
+                .controlSize(.regular)
+                Button("nativeAuth.refresh".localized()) {
+                    onRefresh()
+                }
+                .controlSize(.regular)
+                Spacer()
+                if didTriggerReauth {
+                    Text("nativeAuth.waitingForLogin".localized())
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        .onAppear(perform: refreshLoginState)
+        .onChange(of: snapshot?.fetchedAt) { _, _ in
+            refreshLoginState()
+        }
+    }
+
+    private var headlineText: String {
+        isLoggedIn
+            ? "nativeAuth.loggedIn".localized(provider.displayName)
+            : "nativeAuth.notLoggedIn".localized(provider.displayName)
+    }
+
+    private var explanationText: String {
+        switch provider {
+        case .chatgptCodex:
+            return "nativeAuth.explanationCodex".localized()
+        case .claudeCode:
+            return "nativeAuth.explanationClaude".localized()
+        case .githubCopilot:
+            return ""
+        }
+    }
+
+    private var reauthButtonLabel: String {
+        switch provider {
+        case .chatgptCodex:
+            return "nativeAuth.runCodexLogin".localized()
+        case .claudeCode:
+            return "nativeAuth.runClaudeLogin".localized()
+        case .githubCopilot:
+            return ""
+        }
+    }
+
+    private var lastFetchText: String? {
+        guard let status = fetchStatuses[provider] else { return nil }
+        switch status {
+        case .success(let date):
+            let formatter = DateFormatter()
+            formatter.timeStyle = .short
+            formatter.dateStyle = .none
+            return "usage.updated".localized() + formatter.string(from: date)
+        case .failure(let message):
+            return message
+        case .notFetched:
+            return "status.notFetched".localized()
+        }
+    }
+
+    private func refreshLoginState() {
+        switch provider {
+        case .chatgptCodex:
+            isLoggedIn = CodexUsageFetcher().hasValidSession()
+        case .claudeCode:
+            isLoggedIn = ClaudeUsageFetcher().hasValidSession()
+        case .githubCopilot:
+            isLoggedIn = false
+        }
+    }
+
+    private func triggerReauth() {
+        let launched: Bool
+        switch provider {
+        case .chatgptCodex:
+            launched = ClaudeCLILocator.launchCodexLogin()
+        case .claudeCode:
+            launched = ClaudeCLILocator.launchClaudeLogin()
+        case .githubCopilot:
+            launched = false
+        }
+        didTriggerReauth = launched
+        // Poll the credential store every 5s for up to 2 minutes for the
+        // rotated token to appear, then auto-trigger a fetch.
+        guard launched else { return }
+        Task { @MainActor in
+            let deadline = Date().addingTimeInterval(120)
+            while Date() < deadline {
+                try? await Task.sleep(for: .seconds(5))
+                refreshLoginState()
+                if isLoggedIn {
+                    didTriggerReauth = false
+                    onRefresh()
+                    return
+                }
+            }
+            didTriggerReauth = false
+        }
+    }
 }
 
 // MARK: - Popup WebView Sheet

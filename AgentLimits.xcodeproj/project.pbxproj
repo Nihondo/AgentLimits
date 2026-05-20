@@ -234,6 +234,7 @@
 				nl,
 				tr,
 				uk,
+				th,
 			);
 			mainGroup = 42D45B812EF649FD00A51EA8;
 			minimizedProjectReferenceProxies = 1;
@@ -436,6 +437,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 11;
 				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = TW5U7LRTPP;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -445,7 +447,7 @@
 				INFOPLIST_KEY_CFBundleName = AgentLimits;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025-2026 Nihondo";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -478,6 +480,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 11;
 				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = TW5U7LRTPP;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -487,7 +490,7 @@
 				INFOPLIST_KEY_CFBundleName = AgentLimits;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025-2026 Nihondo";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -518,6 +521,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 11;
 				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = TW5U7LRTPP;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -555,6 +559,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 11;
 				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = TW5U7LRTPP;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;

@@ -1,0 +1,220 @@
+/* Window */
+"window.settings.title" = "การตั้งค่า AgentLimits";
+
+/* Tabs */
+"tab.usage" = "การใช้งาน";
+"tab.wakeUp" = "ปลุก";
+"tab.notification" = "การแจ้งเตือน";
+"tab.pacemaker" = "Pacemaker";
+"tab.advanced" = "ขั้นสูง";
+
+/* Pacemaker */
+"pacemaker.description" = "ปรับแต่งการแสดงผล Pacemaker, เกณฑ์ และสี";
+
+/* Menu */
+"menu.openSettings" = "การตั้งค่า AgentLimits...";
+"settings.showMenuDashboard" = "แสดงแดชบอร์ดในเมนู";
+"menu.dashboard.remaining5h" = "🕔%@";
+"menu.dashboard.remainingHours" = "อีก %.1f ชม.";
+"menu.dashboard.remainingMinutes" = "อีก %d นาที";
+"menu.dashboard.weeklyReset" = "📅%@";
+"menu.dashboard.resetDaysLater" = "อีก %.1f วัน";
+"menu.dashboard.resetHoursLater" = "อีก %.1f ชม.";
+"menu.dashboard.resetMinutesLater" = "อีก %d นาที";
+"menu.dashboard.soon" = "เร็วๆ นี้";
+"menu.displayMode" = "โหมดแสดงผล";
+"menu.displayMode.used" = "อัตราการใช้งาน";
+"menu.displayMode.remaining" = "อัตราคงเหลือ";
+"menu.showPacemakerValue" = "แสดงตัวบ่งชี้ Pacemaker";
+"pacemaker.showRingWarningSegment" = "แสดงโซนเตือนของวงแหวน";
+"menu.about" = "เกี่ยวกับ AgentLimits";
+"menu.quit" = "ออกจากโปรแกรม";
+"menu.language" = "ภาษา";
+"menu.language.system" = "ค่าระบบ";
+
+/* ContentView */
+"content.login" = "เข้าสู่ระบบเพื่อดูอัตราการใช้งานปัจจุบัน";
+"content.usageLimit" = "ขีดจำกัดการใช้งาน";
+"content.autoRefresh" = "บริการที่ล็อกอินแล้วจะอัปเดตอัตโนมัติทุก %d นาที";
+"refreshInterval.label" = "ช่วงเวลาอัปเดต";
+"refreshInterval.minutesFormat" = "%d นาที";
+"content.refreshNow" = "อัปเดตทันที";
+"content.clearData" = "ล้างข้อมูล";
+"content.clearDataConfirmTitle" = "ล้างข้อมูล";
+"content.clearDataConfirmMessage" = "การดำเนินการนี้จะลบข้อมูลล็อกอินและข้อมูลเว็บไซต์ของเบราว์เซอร์ที่ฝังไว้";
+"content.clearDataConfirmAction" = "ล้าง";
+"content.clearDataCancel" = "ยกเลิก";
+"content.provider" = "บริการ";
+"content.usageSummary" = "สถานะ";
+"content.5hours" = "5 ชั่วโมง";
+"content.week" = "สัปดาห์";
+"usage.updated" = "อัปเดตเมื่อ: ";
+"content.notFetched" = "ยังไม่ได้ดึงข้อมูล กรุณาเข้าสู่ระบบด้านล่าง";
+"content.reset" = "รีเซ็ต:";
+"content.popupClose" = "ปิด";
+"settings.showInMenuBar" = "แสดงในแถบเมนู";
+
+/* Display Mode */
+"displayMode.used" = "อัตราการใช้งาน";
+"displayMode.remaining" = "อัตราคงเหลือ";
+"displayMode.usedWithPacemaker" = "การใช้งาน + Pacemaker";
+
+/* Status */
+"status.notFetched" = "ยังไม่ได้ดึงข้อมูล";
+"status.loadingLogin" = "กำลังโหลดหน้าล็อกอิน...";
+"status.updated" = "อัปเดตแล้ว";
+
+/* Errors */
+"error.fetchFailed" = "ดึงข้อมูลไม่สำเร็จ: %@";
+"error.parseFailed" = "ไม่สามารถวิเคราะห์ผลลัพธ์ได้";
+"error.loginNotLoaded" = "ยังโหลดหน้าล็อกอินไม่เสร็จ";
+"error.missingOrg" = "ไม่สามารถดึง Organization ID ได้ กรุณาเปิดหน้าการใช้งานใหม่";
+"error.appGroupUnavailable" = "ไม่สามารถใช้ App Group ได้ กรุณาตรวจสอบ Signing & Capabilities";
+"error.readFailed" = "อ่านข้อมูลไม่สำเร็จ";
+"error.decodeFailed" = "ถอดรหัสข้อมูลไม่สำเร็จ";
+"error.codexAuthExpired" = "การพิสูจน์ตัวตนหมดอายุ — โปรดรัน codex login";
+"error.claudeReLogin" = "โปรดล็อกอินใหม่: claude /login";
+"error.rateLimited" = "ถูกจำกัดอัตราการใช้งาน";
+
+/* Native auth panel (Codex/Claude — read credentials from disk/keychain) */
+"nativeAuth.loggedIn" = "%@ — เข้าสู่ระบบแล้ว";
+"nativeAuth.notLoggedIn" = "%@ — ยังไม่ได้เข้าสู่ระบบ";
+"nativeAuth.refresh" = "อัปเดตทันที";
+"nativeAuth.runCodexLogin" = "รัน codex login";
+"nativeAuth.runClaudeLogin" = "รัน claude /login";
+"nativeAuth.explanationCodex" = "อ่านไฟล์ ~/.codex/auth.json โดย Codex CLI จะหมุนเวียนโทเค็นให้อัตโนมัติ หากหมดอายุให้รัน codex login";
+"nativeAuth.explanationClaude" = "อ่านรายการคีย์เชน Claude Code-credentials ที่ claude /login เขียนไว้ โทเค็นจะรีเฟรชอัตโนมัติ หาก scope ไม่เพียงพอให้รัน claude /login อีกครั้ง";
+"nativeAuth.waitingForLogin" = "กำลังรอการอัปเดตคีย์เชน…";
+
+/* Relative Time */
+"time.minutesLater" = "อีก %d นาที";
+"time.hoursLater" = "อีก %d ชั่วโมง";
+"time.daysLater" = "อีก %d วัน";
+
+/* Wake Up */
+"menu.wakeUp" = "ปลุก";
+"menu.wakeUpNow" = " - รันทันที";
+"wakeUp.title" = "ตารางเวลาปลุก";
+"wakeUp.description" = "เรียก CLI ตามเวลาที่กำหนดเพื่อเริ่มเซสชัน 5 ชั่วโมง";
+"wakeUp.provider" = "บริการ";
+"wakeUp.schedule" = "ตารางเวลา";
+"wakeUp.enabled" = "เปิดใช้งานตารางเวลา";
+"wakeUp.selectHours" = "เลือกชั่วโมงที่จะรัน (เลือกได้หลายค่า)";
+"wakeUp.selectedHours" = "ที่เลือก:";
+"wakeUp.noHoursSelected" = "ไม่มี";
+"wakeUp.hoursSelected" = "ชั่วโมงที่เลือก";
+"wakeUp.testNow" = "ทดสอบทันที";
+"wakeUp.command" = "คำสั่ง";
+"wakeUp.additionalArgs" = "พารามิเตอร์เพิ่มเติม";
+"wakeUp.additionalArgsPlaceholder" = "เช่น --model=\"<<model-name>>\"";
+"wakeUp.status" = "สถานะ";
+"wakeUp.notScheduled" = "ยังไม่ได้ตั้งเวลา";
+"wakeUp.lastResult" = "ผลลัพธ์ล่าสุด:";
+"wakeUp.success" = "สำเร็จ";
+"wakeUp.startAtLogin" = "เริ่มแอปเมื่อเข้าสู่ระบบ";
+
+/* Login Item */
+"loginItem.requiresApproval" = "ต้องอนุญาตใน System Settings";
+"loginItem.notFound" = "ไม่พบรายการเริ่มต้นอัตโนมัติ";
+
+/* Threshold Notification */
+"notification.title" = "การแจ้งเตือนเกณฑ์อัตราการใช้งาน";
+"notification.description" = "ตั้งค่าเกณฑ์การแจ้งเตือนและสีของอัตราการใช้งาน";
+"notification.provider" = "บริการ";
+"notification.colors" = "สี";
+"notification.authorization" = "ต้องการสิทธิ์การแจ้งเตือน";
+"notification.requestAuth" = "ขอสิทธิ์";
+"notification.primaryWindow" = "ขีดจำกัด 5 ชั่วโมง";
+"notification.secondaryWindow" = "ขีดจำกัดรายสัปดาห์";
+"notification.enabled" = "เปิดใช้งานการแจ้งเตือนเกณฑ์";
+"notification.warning" = "ระดับเตือน";
+"notification.danger" = "ระดับอันตราย";
+"notification.resetDefaults" = "รีเซ็ตเป็นค่าเริ่มต้น";
+"notification.alertTitleWarning" = "%@ เตือนอัตราการใช้งาน";
+"notification.alertTitleDanger" = "%@ อัตราการใช้งานอันตราย";
+"notification.alertBody5h" = "ใช้งานในรอบ 5 ชั่วโมงถึง %d%% แล้ว";
+"notification.alertBodyWeek" = "ใช้งานในรอบสัปดาห์ถึง %d%% แล้ว";
+"notification.alertBodyMonth" = "ใช้งานในรอบเดือนถึง %d%% แล้ว";
+"notification.monthlyWindow" = "ขีดจำกัดรายเดือน";
+
+/* ccusage */
+"tab.ccusage" = "ccusage";
+"ccusage.title" = "ติดตามการใช้งานโทเค็น (ccusage)";
+"ccusage.description" = "ดึงข้อมูลการใช้งานโทเค็นและค่าใช้จ่ายด้วย ccusage CLI";
+"ccusage.settings" = "การตั้งค่า";
+"ccusage.enabled" = "เปิดใช้งานการดึงข้อมูลตามรอบ";
+"ccusage.command" = "คำสั่ง";
+"ccusage.additionalArgs" = "พารามิเตอร์เพิ่มเติม";
+"ccusage.additionalArgsPlaceholder" = "เช่น --timezone <<timezone>>";
+"ccusage.testNow" = "ทดสอบทันที";
+"ccusage.status" = "สถานะ";
+"ccusage.lastResult" = "ผลลัพธ์ล่าสุด:";
+"tokenUsage.notFetched" = "ยังไม่ได้ดึงข้อมูล";
+"tokenUsage.updated" = "อัปเดตเมื่อ: ";
+"ccusage.provider" = "บริการ";
+"ccusage.disabled" = "ปิดใช้งาน";
+"ccusage.credits.title" = "เครดิต";
+"ccusage.credits.body" = "ขอบคุณเป็นพิเศษถึง ryoppippi ผู้สร้าง ccusage";
+"ccusage.credits.site" = "เว็บไซต์ ccusage";
+"ccusage.credits.repo" = "GitHub: ryoppippi/ccusage";
+"ccusage.copilot.autoFetchNote" = "ดึงข้อมูลอัตโนมัติพร้อมกับการใช้งาน Copilot";
+
+/* Advanced Settings */
+"advancedSettings.title" = "การตั้งค่าขั้นสูง";
+"advancedSettings.description" = "ปรับแต่งพาธของ CLI, สคริปต์ และการทำงานของวิดเจ็ต";
+"cliPaths.sectionTitle" = "พาธคำสั่ง CLI";
+"cliPaths.codex" = "พาธ codex";
+"cliPaths.claude" = "พาธ claude";
+"cliPaths.npx" = "พาธ npx";
+"cliPaths.codex.placeholder" = "เช่น /opt/homebrew/bin/codex";
+"cliPaths.claude.placeholder" = "เช่น /opt/homebrew/bin/claude";
+"cliPaths.npx.placeholder" = "เช่น /opt/homebrew/bin/npx";
+"cliPaths.note" = "การเปลี่ยนแปลงจะมีผลเมื่อรัน CLI ครั้งถัดไป";
+"cliPaths.resolvedLabel" = "ที่พบ:";
+"cliPaths.notFound" = "ไม่พบ";
+
+/* CLI Colors */
+"cliColors.donut" = "สีของกราฟโดนัท";
+"cliColors.donutUseStatus" = "ใช้สีตามอัตราการใช้งาน";
+"cliColors.green" = "อัตราการใช้งาน (ปกติ)";
+"cliColors.orange" = "อัตราการใช้งาน (เตือน)";
+"cliColors.red" = "อัตราการใช้งาน (อันตราย)";
+"cliColors.reset" = "รีเซ็ตเป็นค่าเริ่มต้น";
+
+/* Pacemaker Colors */
+"cliColors.pacemaker" = "การตั้งค่าสี";
+"cliColors.pacemakerRing" = "กราฟโดนัท";
+"cliColors.pacemakerOrange" = "เกินจังหวะ (เตือน)";
+"cliColors.pacemakerRed" = "เกินจังหวะ (อันตราย)";
+
+/* Scripts */
+"scripts.title" = "สคริปต์ที่มาพร้อมแอป";
+"scripts.claudeCode.title" = "สคริปต์แสดงสถานะของ Claude Code";
+"scripts.claudeCode.note" = "ใช้สคริปต์นี้กับฟีเจอร์ status line ของ Claude Code เพื่อแสดงอัตราการใช้งาน";
+"scripts.copy" = "คัดลอกพาธ";
+"scripts.copied" = "คัดลอกแล้ว!";
+"scripts.notFound" = "ไม่พบสคริปต์ในแอป";
+
+/* Widget Tap Action */
+"widgetTapAction.title" = "การแตะวิดเจ็ต";
+"widgetTapAction.openWebsite" = "เปิดเว็บไซต์";
+"widgetTapAction.refreshData" = "อัปเดตข้อมูล";
+"widgetTapAction.note" = "เลือกการทำงานเมื่อแตะวิดเจ็ต";
+
+/* Pacemaker Thresholds */
+"notification.pacemakerThresholds" = "เกณฑ์ Pacemaker";
+"notification.pacemakerThresholds.description" = "ตั้งเกณฑ์เตือนและอันตรายเมื่อใช้งานเกินจังหวะ (เทียบเป็น %)";
+"notification.pacemakerThresholds.warning" = "เตือน";
+"notification.pacemakerThresholds.danger" = "อันตราย";
+"content.month" = "รายเดือน";
+
+/* Update */
+"menu.checkForUpdates" = "ตรวจหาการอัปเดต...";
+"tab.update" = "อัปเดต";
+"update.currentVersion" = "เวอร์ชันปัจจุบัน";
+"update.lastChecked" = "ตรวจสอบล่าสุด";
+"update.checkNow" = "ตรวจหาการอัปเดตทันที";
+"update.automaticChecks" = "ตรวจหาการอัปเดตอัตโนมัติ";
+"update.releasesPage" = "ดูรุ่นทั้งหมด";
+"update.neverChecked" = "ยังไม่เคยตรวจ";
+"settings.providerOrder" = "ลำดับการแสดงผล";
