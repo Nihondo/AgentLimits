@@ -78,6 +78,7 @@ final class CCUsageFetcher {
         return formatter
     }()
 
+
     /// Output formatter for ISO date strings (YYYY-MM-DD), used for today's date comparison
     private let outputFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -297,7 +298,10 @@ final class CCUsageFetcher {
         todayString: String,
         startOfWeek: Date
     ) throws -> TokenUsageSnapshot {
+        // Decode ccusage response and normalize fields.
         let response = try decodeResponse(CCUsageCodexResponse.self, jsonData: jsonData)
+
+        // Normalize daily entries into a common structure.
         let dailyEntries = response.daily.map { entry in
             InternalDailyEntry(
                 date: entry.date,
@@ -309,6 +313,8 @@ final class CCUsageFetcher {
             totalTokens: response.totals.totalTokens,
             costUSD: response.totals.costUSD
         )
+        // Build standardized snapshot from normalized entries.
+        // Codex dates are now formatted as YYYY-MM-DD (ISO8601) in the integrated ccusage CLI.
         return buildSnapshot(
             provider: provider,
             dailyEntries: dailyEntries,

@@ -56,6 +56,7 @@ enum TokenUsageProvider: String, Codable, CaseIterable, Identifiable, SnapshotFi
         let npxExecutable = CLICommandPathResolver.resolveExecutable(for: .npx, defaultName: "npx")
         switch self {
         case .codex:
+            // Use the integrated ccusage CLI for Codex, as @ccusage/codex is deprecated.
             return "\(npxExecutable) -y ccusage@latest codex daily"
         case .claude:
             return "\(npxExecutable) -y ccusage@latest claude daily"
