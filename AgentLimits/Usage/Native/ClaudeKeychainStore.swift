@@ -13,7 +13,7 @@ import OSLog
 
 /// The decrypted payload stored inside the keychain item.
 /// Wire format is JSON; field names match what Claude Code itself writes.
-struct ClaudeCredentialsPayload: Codable, Equatable {
+nonisolated struct ClaudeCredentialsPayload: Codable, Equatable {
     /// expiresAt is ms-since-epoch (not seconds).
     struct ClaudeAiOAuth: Codable, Equatable {
         var accessToken: String
@@ -31,16 +31,16 @@ enum ClaudeKeychainStore {
     /// In-memory cache of the discovered account name so we don't re-shell on
     /// every refresh. The account name is whatever string the user's
     /// `claude /login` happened to write — it isn't fixed.
-    private static let cachedAccountLock = NSLock()
-    private static var storedCachedAccount: String?
-    private static var cachedAccount: String? {
+    nonisolated private static let cachedAccountLock = NSLock()
+    nonisolated(unsafe) private static var storedCachedAccount: String?
+    nonisolated private static var cachedAccount: String? {
         get { cachedAccountLock.withLock { storedCachedAccount } }
         set { cachedAccountLock.withLock { storedCachedAccount = newValue } }
     }
 
     /// Loads the current credentials payload, alongside the keychain account
     /// name (needed for write-back).
-    static func loadCredentials() throws -> (payload: ClaudeCredentialsPayload, account: String) {
+    nonisolated static func loadCredentials() throws -> (payload: ClaudeCredentialsPayload, account: String) {
         let account = try resolveAccount()
         let json = try readPasswordJSON(account: account)
         let decoded: ClaudeCredentialsPayload
@@ -57,7 +57,7 @@ enum ClaudeKeychainStore {
     /// Writes back a credentials payload, preserving the existing account name.
     /// Uses `add-generic-password -U` to update the existing item in place
     /// (preserves keychain ACLs unlike a delete-then-add).
-    static func writeCredentials(_ payload: ClaudeCredentialsPayload, account: String) throws {
+    nonisolated static func writeCredentials(_ payload: ClaudeCredentialsPayload, account: String) throws {
         let encoded: Data
         do {
             let encoder = JSONEncoder()
@@ -97,7 +97,7 @@ enum ClaudeKeychainStore {
     /// Resolves the keychain account name. Caches the result.
     /// `security find-generic-password -s "<service>"` prints a metadata block
     /// containing an `"acct"<blob>="<value>"` line. We parse `<value>` from there.
-    private static func resolveAccount() throws -> String {
+    nonisolated private static func resolveAccount() throws -> String {
         if let cached = cachedAccount {
             return cached
         }
@@ -122,7 +122,7 @@ enum ClaudeKeychainStore {
         return account
     }
 
-    private static func readPasswordJSON(account: String) throws -> String {
+    nonisolated private static func readPasswordJSON(account: String) throws -> String {
         let result = runSecurity(arguments: [
             "find-generic-password",
             "-s", ClaudeOAuthConfig.keychainService,
@@ -141,7 +141,7 @@ enum ClaudeKeychainStore {
         return trimmed
     }
 
-    private static func verifyWrittenCredentials(expectedAccessToken: String) {
+    nonisolated private static func verifyWrittenCredentials(expectedAccessToken: String) {
         do {
             let (latest, _) = try loadCredentials()
             if latest.claudeAiOauth.accessToken != expectedAccessToken {
@@ -155,7 +155,7 @@ enum ClaudeKeychainStore {
     /// Parses `"acct"<blob>="value"` from the metadata block.
     /// Both quoted and hex-blob forms exist; only the quoted variant is used
     /// by Claude Code, which is the only producer of this keychain item.
-    private static func parseAcctValue(from text: String) -> String? {
+    nonisolated private static func parseAcctValue(from text: String) -> String? {
         // Find a line containing `"acct"<...>="..."` and extract the quoted value.
         for line in text.split(whereSeparator: \.isNewline) {
             let lineStr = String(line)
@@ -178,7 +178,7 @@ enum ClaudeKeychainStore {
     }
 
     /// Runs /usr/bin/security with argv — no shell, no quoting hazards.
-    private static func runSecurity(arguments: [String]) -> SecurityResult {
+    nonisolated private static func runSecurity(arguments: [String]) -> SecurityResult {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/security")
         process.arguments = arguments

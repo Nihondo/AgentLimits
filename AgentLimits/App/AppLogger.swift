@@ -15,20 +15,20 @@ import OSLog
 /// log collect --device --last 1h --output ~/Desktop/agentlimits.logarchive
 /// ```
 extension Logger {
-    private static let subsystem = Bundle.main.bundleIdentifier ?? "com.dmng.agentlimit"
+    nonisolated private static let subsystem = Bundle.main.bundleIdentifier ?? "com.dmng.agentlimit"
 
     /// Wake Up feature: LaunchAgent management and CLI execution
-    static let wakeup = Logger(subsystem: subsystem, category: "wakeup")
+    nonisolated static let wakeup = Logger(subsystem: subsystem, category: "wakeup")
 
     /// Threshold notification: usage alerts and notification delivery
-    static let notification = Logger(subsystem: subsystem, category: "notification")
+    nonisolated static let notification = Logger(subsystem: subsystem, category: "notification")
 
     /// Usage display: snapshot storage and display mode
-    static let usage = Logger(subsystem: subsystem, category: "usage")
+    nonisolated static let usage = Logger(subsystem: subsystem, category: "usage")
 
     /// App settings: login items, preferences
-    static let app = Logger(subsystem: subsystem, category: "app")
+    nonisolated static let app = Logger(subsystem: subsystem, category: "app")
 
     /// ccusage: token usage fetching and processing
-    static let ccusage = Logger(subsystem: subsystem, category: "ccusage")
+    nonisolated static let ccusage = Logger(subsystem: subsystem, category: "ccusage")
 }

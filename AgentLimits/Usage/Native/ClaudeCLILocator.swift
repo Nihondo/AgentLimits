@@ -10,7 +10,7 @@ import OSLog
 /// Probes well-known CLI install paths for the Claude Code / Codex CLIs.
 enum ClaudeCLILocator {
     /// Returns the first matching `claude` binary, or nil.
-    static func locateClaudeBinary() -> String? {
+    nonisolated static func locateClaudeBinary() -> String? {
         // Honor user override first.
         let override = CLICommandPathResolver.resolveExecutable(for: .claude, defaultName: "claude")
         if override != "claude", CLICommandPathValidator.isExecutablePathValid(override) {
@@ -20,7 +20,7 @@ enum ClaudeCLILocator {
     }
 
     /// Returns the first matching `codex` binary, or nil.
-    static func locateCodexBinary() -> String? {
+    nonisolated static func locateCodexBinary() -> String? {
         let override = CLICommandPathResolver.resolveExecutable(for: .codex, defaultName: "codex")
         if override != "codex", CLICommandPathValidator.isExecutablePathValid(override) {
             return (override as NSString).expandingTildeInPath
@@ -29,7 +29,7 @@ enum ClaudeCLILocator {
     }
 
     /// Probes the codex-island canonical install paths in priority order.
-    private static func locate(binaryName: String) -> String? {
+    nonisolated private static func locate(binaryName: String) -> String? {
         let home = NSHomeDirectory()
         var candidates = [
             "/opt/homebrew/bin/\(binaryName)",
@@ -50,7 +50,7 @@ enum ClaudeCLILocator {
     }
 
     /// Finds the highest `~/.nvm/versions/node/<version>/bin/<binary>` if any.
-    private static func highestNvmVersionPath(binaryName: String, home: String) -> String? {
+    nonisolated private static func highestNvmVersionPath(binaryName: String, home: String) -> String? {
         let nvmDir = "\(home)/.nvm/versions/node"
         guard let entries = try? FileManager.default.contentsOfDirectory(atPath: nvmDir) else {
             return nil
@@ -72,7 +72,7 @@ enum ClaudeCLILocator {
     /// write; we recover automatically on the next poll once the rotated
     /// token appears in the keychain.
     @discardableResult
-    static func launchClaudeLogin() -> Bool {
+    nonisolated static func launchClaudeLogin() -> Bool {
         guard let claudePath = locateClaudeBinary() else {
             Logger.usage.error("ClaudeCLILocator: claude binary not found in known locations")
             return false
@@ -82,7 +82,7 @@ enum ClaudeCLILocator {
 
     /// Detached-spawns the Codex re-auth flow. Returns true on launch.
     @discardableResult
-    static func launchCodexLogin() -> Bool {
+    nonisolated static func launchCodexLogin() -> Bool {
         guard let codexPath = locateCodexBinary() else {
             Logger.usage.error("ClaudeCLILocator: codex binary not found in known locations")
             return false
@@ -90,7 +90,7 @@ enum ClaudeCLILocator {
         return spawnDetached(executablePath: codexPath, arguments: ["login"])
     }
 
-    private static func spawnDetached(executablePath: String, arguments: [String]) -> Bool {
+    nonisolated private static func spawnDetached(executablePath: String, arguments: [String]) -> Bool {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: executablePath)
         process.arguments = arguments
@@ -106,7 +106,7 @@ enum ClaudeCLILocator {
         }
     }
 
-    private static func compareNodeVersion(_ lhs: String, _ rhs: String) -> ComparisonResult {
+    nonisolated private static func compareNodeVersion(_ lhs: String, _ rhs: String) -> ComparisonResult {
         let lhsParts = parseNodeVersion(lhs)
         let rhsParts = parseNodeVersion(rhs)
         for index in 0..<max(lhsParts.count, rhsParts.count) {
@@ -118,7 +118,7 @@ enum ClaudeCLILocator {
         return lhs.localizedStandardCompare(rhs)
     }
 
-    private static func parseNodeVersion(_ version: String) -> [Int] {
+    nonisolated private static func parseNodeVersion(_ version: String) -> [Int] {
         let normalized = version.drop(while: { $0 == "v" })
         return normalized.split(separator: ".").compactMap { Int($0) }
     }

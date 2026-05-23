@@ -92,7 +92,7 @@ extension ClaudeUsageResponse {
                 currency: $0.currency
             )
         }
-        let isLimitReached = (extra_usage?.utilization ?? 0) >= 1.0
+        let isLimitReached = (extra_usage?.utilization ?? 0) >= 100.0
         return UsageSnapshot(
             provider: .claudeCode,
             fetchedAt: fetchedAt,

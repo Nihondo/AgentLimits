@@ -10,16 +10,16 @@ import SwiftUI
 
 /// App Group configuration for shared data access between App and Widget
 enum AppGroupConfig {
-    static let groupId = "group.com.dmng.agentlimit"
-    static let appLanguageKey = "app_language"
-    static let snapshotDirectory = "Library/Application Support/AgentLimit"
-    static let usageRefreshIntervalMinutesKey = "usage_refresh_interval_minutes"
-    static let tokenUsageRefreshIntervalMinutesKey = "token_usage_refresh_interval_minutes"
+    nonisolated static let groupId = "group.com.dmng.agentlimit"
+    nonisolated static let appLanguageKey = "app_language"
+    nonisolated static let snapshotDirectory = "Library/Application Support/AgentLimit"
+    nonisolated static let usageRefreshIntervalMinutesKey = "usage_refresh_interval_minutes"
+    nonisolated static let tokenUsageRefreshIntervalMinutesKey = "token_usage_refresh_interval_minutes"
 }
 
 /// Shared UserDefaults accessor for the App Group container.
 enum AppGroupDefaults {
-    static var shared: UserDefaults? {
+    nonisolated static var shared: UserDefaults? {
         UserDefaults(suiteName: AppGroupConfig.groupId)
     }
 }
@@ -36,26 +36,26 @@ enum SharedUserDefaultsKeys {
 
 /// UserDefaults keys for CLI command path overrides.
 enum CLICommandPathKeys {
-    static let codex = "cli_path_codex"
-    static let claude = "cli_path_claude"
-    static let npx = "cli_path_npx"
+    nonisolated static let codex = "cli_path_codex"
+    nonisolated static let claude = "cli_path_claude"
+    nonisolated static let npx = "cli_path_npx"
 }
 
 /// UserDefaults keys for Claude OAuth compatibility overrides.
 enum ClaudeOAuthOverrideKeys {
-    static let clientID = "claude_oauth_client_id"
+    nonisolated static let clientID = "claude_oauth_client_id"
 }
 
 /// Normalizes and validates CLI command path overrides.
 enum CLICommandPathValidator {
     /// Returns a trimmed override path, or nil when empty.
-    static func normalizeOverridePath(_ rawValue: String) -> String? {
+    nonisolated static func normalizeOverridePath(_ rawValue: String) -> String? {
         let trimmedValue = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmedValue.isEmpty ? nil : trimmedValue
     }
 
     /// Returns true when the path exists and is executable.
-    static func isExecutablePathValid(_ path: String) -> Bool {
+    nonisolated static func isExecutablePathValid(_ path: String) -> Bool {
         let expandedPath = (path as NSString).expandingTildeInPath
         var isDirectory: ObjCBool = false
         let fileExists = FileManager.default.fileExists(atPath: expandedPath, isDirectory: &isDirectory)
@@ -81,21 +81,21 @@ enum CLICommandPathResolver {
     /// - Parameters:
     ///   - kind: Command kind that may have a path override.
     ///   - defaultName: Default executable name to use when no override is set.
-    static func resolveExecutable(for kind: CLICommandKind, defaultName: String) -> String {
+    nonisolated static func resolveExecutable(for kind: CLICommandKind, defaultName: String) -> String {
         guard let overridePath = loadCommandPath(for: kind) else {
             return defaultName
         }
         return overridePath
     }
 
-    private static func loadCommandPath(for kind: CLICommandKind) -> String? {
+    nonisolated private static func loadCommandPath(for kind: CLICommandKind) -> String? {
         let defaults = AppGroupDefaults.shared ?? .standard
         let key = commandPathKey(for: kind)
         let rawValue = defaults.string(forKey: key) ?? ""
         return CLICommandPathValidator.normalizeOverridePath(rawValue)
     }
 
-    private static func commandPathKey(for kind: CLICommandKind) -> String {
+    nonisolated private static func commandPathKey(for kind: CLICommandKind) -> String {
         switch kind {
         case .codex:
             return CLICommandPathKeys.codex

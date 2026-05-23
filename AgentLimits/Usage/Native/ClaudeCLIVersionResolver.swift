@@ -7,19 +7,19 @@ import OSLog
 
 /// Claude Code CLI のバージョンを検出し、User-Agent 用にキャッシュする。
 enum ClaudeCLIVersionResolver {
-    private static let cachedVersionKey = "claude_cli_version_cached"
-    private static let fetchedAtKey = "claude_cli_version_fetched_at"
-    private static let cacheTTL: TimeInterval = 24 * 60 * 60
+    nonisolated private static let cachedVersionKey = "claude_cli_version_cached"
+    nonisolated private static let fetchedAtKey = "claude_cli_version_fetched_at"
+    nonisolated private static let cacheTTL: TimeInterval = 24 * 60 * 60
 
     /// キャッシュ済みバージョンを返す。未検出時は同梱 fallback を返す。
-    static func cachedVersion() -> String {
+    nonisolated static func cachedVersion() -> String {
         let rawValue = AppGroupDefaults.shared?.string(forKey: cachedVersionKey) ?? ""
         let trimmedValue = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmedValue.isEmpty ? ClaudeOAuthConfig.claudeCodeCLIVersionFallback : trimmedValue
     }
 
     /// TTL が切れている場合のみ Claude CLI のバージョンを再検出する。
-    static func refreshIfNeeded() async {
+    nonisolated static func refreshIfNeeded() async {
         let defaults = AppGroupDefaults.shared
         let fetchedAt = defaults?.object(forKey: fetchedAtKey) as? Date
         if let fetchedAt, Date().timeIntervalSince(fetchedAt) < cacheTTL {
@@ -29,7 +29,7 @@ enum ClaudeCLIVersionResolver {
     }
 
     /// Claude CLI のバージョンを即時再検出する。
-    static func forceRefresh() async {
+    nonisolated static func forceRefresh() async {
         guard let claudePath = ClaudeCLILocator.locateClaudeBinary() else {
             Logger.usage.error("ClaudeCLIVersionResolver: claude binary not found")
             return
@@ -48,7 +48,7 @@ enum ClaudeCLIVersionResolver {
         }
     }
 
-    private static func runVersionCommand(executablePath: String) async throws -> String {
+    nonisolated private static func runVersionCommand(executablePath: String) async throws -> String {
         try await withCheckedThrowingContinuation { continuation in
             let process = Process()
             process.executableURL = URL(fileURLWithPath: executablePath)
@@ -85,7 +85,7 @@ enum ClaudeCLIVersionResolver {
         }
     }
 
-    private static func extractVersion(from text: String) -> String? {
+    nonisolated private static func extractVersion(from text: String) -> String? {
         let pattern = #"\d+\.\d+\.\d+"#
         guard let regex = try? NSRegularExpression(pattern: pattern),
               let match = regex.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)),

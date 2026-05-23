@@ -17,21 +17,21 @@ struct NativeUsageHTTPClient {
         let response: HTTPURLResponse
 
         /// UTF-8 body string (best effort, for error reporting).
-        var bodyString: String {
+        nonisolated var bodyString: String {
             String(data: data, encoding: .utf8) ?? ""
         }
     }
 
     private let session: URLSession
 
-    init(session: URLSession = .shared) {
+    nonisolated init(session: URLSession = .shared) {
         self.session = session
     }
 
     /// Executes an HTTP request and returns the raw response pair.
     /// Throws `UsageAuthError.transport` for transport-layer failures
     /// (DNS, TLS, timeout). Status codes are propagated to the caller.
-    func send(_ request: URLRequest) async throws -> RawResponse {
+    nonisolated func send(_ request: URLRequest) async throws -> RawResponse {
         let result: (Data, URLResponse)
         do {
             result = try await session.data(for: request)
