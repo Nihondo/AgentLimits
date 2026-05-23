@@ -4,11 +4,20 @@
 import Foundation
 
 extension CLICommandPathResolver {
-    /// Resolves an executable path for the given CLI command kind using the login shell.
+    /// Resolves an executable path for the given CLI command kind.
+    /// Full-path overrides take precedence. Without an override, the user's
+    /// login shell resolves the command with the same PATH handling used by
+    /// CLI execution features.
     /// - Parameter kind: CLI command kind to resolve.
     /// - Returns: Resolved path or nil when not found.
     static func resolveExecutablePath(for kind: CLICommandKind) async -> String? {
-        await resolveExecutablePath(commandName: kind.rawValue)
+        if let overridePath = resolveOverridePath(for: kind) {
+            guard CLICommandPathValidator.isExecutablePathValid(overridePath) else {
+                return nil
+            }
+            return (overridePath as NSString).expandingTildeInPath
+        }
+        return await resolveExecutablePath(commandName: kind.rawValue)
     }
 
     /// Resolves an executable path for the given command name using the login shell.

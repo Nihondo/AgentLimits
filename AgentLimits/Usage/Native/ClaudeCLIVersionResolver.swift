@@ -30,7 +30,7 @@ enum ClaudeCLIVersionResolver {
 
     /// Claude CLI のバージョンを即時再検出する。
     nonisolated static func forceRefresh() async {
-        guard let claudePath = ClaudeCLILocator.locateClaudeBinary() else {
+        guard let claudePath = await ClaudeCLILocator.locateClaudeBinary() else {
             Logger.usage.error("ClaudeCLIVersionResolver: claude binary not found")
             return
         }

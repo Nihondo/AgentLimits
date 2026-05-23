@@ -82,13 +82,14 @@ enum CLICommandPathResolver {
     ///   - kind: Command kind that may have a path override.
     ///   - defaultName: Default executable name to use when no override is set.
     nonisolated static func resolveExecutable(for kind: CLICommandKind, defaultName: String) -> String {
-        guard let overridePath = loadCommandPath(for: kind) else {
+        guard let overridePath = resolveOverridePath(for: kind) else {
             return defaultName
         }
         return overridePath
     }
 
-    nonisolated private static func loadCommandPath(for kind: CLICommandKind) -> String? {
+    /// Returns the normalized override path for a CLI command, or nil when unset.
+    nonisolated static func resolveOverridePath(for kind: CLICommandKind) -> String? {
         let defaults = AppGroupDefaults.shared ?? .standard
         let key = commandPathKey(for: kind)
         let rawValue = defaults.string(forKey: key) ?? ""

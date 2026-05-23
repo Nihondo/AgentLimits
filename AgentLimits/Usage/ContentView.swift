@@ -496,21 +496,21 @@ private struct NativeAuthStatusView: View {
     }
 
     private func triggerReauth() {
-        let loginSnapshot = captureLoginSnapshot()
-        let launched: Bool
-        switch provider {
-        case .chatgptCodex:
-            launched = ClaudeCLILocator.launchCodexLogin()
-        case .claudeCode:
-            launched = ClaudeCLILocator.launchClaudeLogin()
-        case .githubCopilot:
-            launched = false
-        }
-        didTriggerReauth = launched
-        // Poll the credential store every 5s for up to 2 minutes for the
-        // rotated token to appear, then auto-trigger a fetch.
-        guard launched else { return }
         Task { @MainActor in
+            let loginSnapshot = captureLoginSnapshot()
+            let launched: Bool
+            switch provider {
+            case .chatgptCodex:
+                launched = await ClaudeCLILocator.launchCodexLogin()
+            case .claudeCode:
+                launched = await ClaudeCLILocator.launchClaudeLogin()
+            case .githubCopilot:
+                launched = false
+            }
+            didTriggerReauth = launched
+            // Poll the credential store every 5s for up to 2 minutes for the
+            // rotated token to appear, then auto-trigger a fetch.
+            guard launched else { return }
             let deadline = Date().addingTimeInterval(120)
             while Date() < deadline {
                 try? await Task.sleep(for: .seconds(5))
