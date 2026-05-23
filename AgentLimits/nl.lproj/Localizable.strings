@@ -72,19 +72,19 @@
 "error.readFailed" = "Lezen van gegevens mislukt";
 "error.decodeFailed" = "Decoderen van gegevens mislukt";
 
-"error.codexAuthExpired" = "auth expired — codex login";
-"error.claudeReLogin" = "re-login: claude /login";
-"error.rateLimited" = "rate limited";
+"error.codexAuthExpired" = "authenticatie verlopen — voer codex login uit";
+"error.claudeReLogin" = "opnieuw aanmelden: claude /login";
+"error.rateLimited" = "rate limit bereikt";
 
 /* Native auth panel (Codex/Claude — read credentials from disk/keychain) */
-"nativeAuth.loggedIn" = "%@ — signed in";
-"nativeAuth.notLoggedIn" = "%@ — not signed in";
-"nativeAuth.refresh" = "Refresh now";
-"nativeAuth.runCodexLogin" = "Run codex login";
-"nativeAuth.runClaudeLogin" = "Run claude /login";
-"nativeAuth.explanationCodex" = "Reads ~/.codex/auth.json. The Codex CLI rotates the token automatically; if it expires, run codex login.";
-"nativeAuth.explanationClaude" = "Reads the Claude Code-credentials keychain item written by claude /login. Tokens auto-refresh; if scope is insufficient, run claude /login.";
-"nativeAuth.waitingForLogin" = "Waiting for keychain update…";
+"nativeAuth.loggedIn" = "%@ — aangemeld";
+"nativeAuth.notLoggedIn" = "%@ — niet aangemeld";
+"nativeAuth.refresh" = "Nu verversen";
+"nativeAuth.runCodexLogin" = "codex login uitvoeren";
+"nativeAuth.runClaudeLogin" = "claude /login uitvoeren";
+"nativeAuth.explanationCodex" = "Leest ~/.codex/auth.json. De Codex-CLI rouleert het token automatisch; voer codex login uit als het verloopt.";
+"nativeAuth.explanationClaude" = "Leest het sleutelhangeritem Claude Code-credentials dat door claude /login is geschreven. Tokens worden automatisch vernieuwd; voer claude /login uit als de scope onvoldoende is.";
+"nativeAuth.waitingForLogin" = "Wachten op sleutelhangerupdate…";
 
 /* Relative Time */
 "time.minutesLater" = "Over %d min";
@@ -173,10 +173,10 @@
 "cliPaths.resolvedLabel" = "Opgelost:";
 "cliPaths.notFound" = "Niet gevonden";
 "claudeOAuth.title" = "Claude OAuth";
-"claudeOAuth.clientID" = "Client ID";
-"claudeOAuth.detectedVersion" = "Claude Code CLI Version";
-"claudeOAuth.refreshVersion" = "Refresh";
-"claudeOAuth.note" = "Usually leave the Client ID blank. Override it only if Anthropic changes the public Claude Code OAuth client.";
+"claudeOAuth.clientID" = "Client-ID";
+"claudeOAuth.detectedVersion" = "Claude Code CLI-versie";
+"claudeOAuth.refreshVersion" = "Verversen";
+"claudeOAuth.note" = "Laat de Client-ID normaal leeg. Overschrijf deze alleen als Anthropic de openbare OAuth-client van Claude Code wijzigt.";
 
 /* CLI Colors */
 "cliColors.donut" = "Kleur donutgrafiek";

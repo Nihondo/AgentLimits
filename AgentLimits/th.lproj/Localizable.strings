@@ -173,10 +173,10 @@
 "cliPaths.resolvedLabel" = "ที่พบ:";
 "cliPaths.notFound" = "ไม่พบ";
 "claudeOAuth.title" = "Claude OAuth";
-"claudeOAuth.clientID" = "Client ID";
-"claudeOAuth.detectedVersion" = "Claude Code CLI Version";
-"claudeOAuth.refreshVersion" = "Refresh";
-"claudeOAuth.note" = "Usually leave the Client ID blank. Override it only if Anthropic changes the public Claude Code OAuth client.";
+"claudeOAuth.clientID" = "รหัสไคลเอ็นต์";
+"claudeOAuth.detectedVersion" = "เวอร์ชัน CLI ของ Claude Code";
+"claudeOAuth.refreshVersion" = "รีเฟรช";
+"claudeOAuth.note" = "โดยปกติให้เว้นรหัสไคลเอ็นต์ว่างไว้ เปลี่ยนค่านี้เฉพาะเมื่อ Anthropic เปลี่ยนไคลเอ็นต์ OAuth สาธารณะของ Claude Code";
 
 /* CLI Colors */
 "cliColors.donut" = "สีของกราฟโดนัท";

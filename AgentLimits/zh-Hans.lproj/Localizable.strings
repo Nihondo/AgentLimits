@@ -72,19 +72,19 @@
 "error.readFailed" = "读取数据失败";
 "error.decodeFailed" = "解析数据失败";
 
-"error.codexAuthExpired" = "auth expired — codex login";
-"error.claudeReLogin" = "re-login: claude /login";
-"error.rateLimited" = "rate limited";
+"error.codexAuthExpired" = "认证已过期 — 请运行 codex login";
+"error.claudeReLogin" = "重新登录：claude /login";
+"error.rateLimited" = "已达到速率限制";
 
 /* Native auth panel (Codex/Claude — read credentials from disk/keychain) */
-"nativeAuth.loggedIn" = "%@ — signed in";
-"nativeAuth.notLoggedIn" = "%@ — not signed in";
-"nativeAuth.refresh" = "Refresh now";
-"nativeAuth.runCodexLogin" = "Run codex login";
-"nativeAuth.runClaudeLogin" = "Run claude /login";
-"nativeAuth.explanationCodex" = "Reads ~/.codex/auth.json. The Codex CLI rotates the token automatically; if it expires, run codex login.";
-"nativeAuth.explanationClaude" = "Reads the Claude Code-credentials keychain item written by claude /login. Tokens auto-refresh; if scope is insufficient, run claude /login.";
-"nativeAuth.waitingForLogin" = "Waiting for keychain update…";
+"nativeAuth.loggedIn" = "%@ — 已登录";
+"nativeAuth.notLoggedIn" = "%@ — 未登录";
+"nativeAuth.refresh" = "立即刷新";
+"nativeAuth.runCodexLogin" = "运行 codex login";
+"nativeAuth.runClaudeLogin" = "运行 claude /login";
+"nativeAuth.explanationCodex" = "读取 ~/.codex/auth.json。Codex CLI 会自动轮换令牌；如果令牌过期，请运行 codex login。";
+"nativeAuth.explanationClaude" = "读取由 claude /login 写入的 Claude Code-credentials 钥匙串项目。令牌会自动刷新；如果 scope 不足，请运行 claude /login。";
+"nativeAuth.waitingForLogin" = "正在等待钥匙串更新…";
 
 /* Relative Time */
 "time.minutesLater" = "%d 分钟后";
@@ -173,10 +173,10 @@
 "cliPaths.resolvedLabel" = "已解析：";
 "cliPaths.notFound" = "未找到";
 "claudeOAuth.title" = "Claude OAuth";
-"claudeOAuth.clientID" = "Client ID";
-"claudeOAuth.detectedVersion" = "Claude Code CLI Version";
-"claudeOAuth.refreshVersion" = "Refresh";
-"claudeOAuth.note" = "Usually leave the Client ID blank. Override it only if Anthropic changes the public Claude Code OAuth client.";
+"claudeOAuth.clientID" = "客户端 ID";
+"claudeOAuth.detectedVersion" = "Claude Code CLI 版本";
+"claudeOAuth.refreshVersion" = "刷新";
+"claudeOAuth.note" = "通常请将客户端 ID 留空。仅当 Anthropic 更改 Claude Code 的公共 OAuth 客户端时才覆盖它。";
 
 /* CLI Colors */
 "cliColors.donut" = "甜甜圈图颜色";

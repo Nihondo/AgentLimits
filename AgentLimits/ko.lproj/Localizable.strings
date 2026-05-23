@@ -72,19 +72,19 @@
 "error.readFailed" = "데이터 읽기 실패";
 "error.decodeFailed" = "데이터 디코딩 실패";
 
-"error.codexAuthExpired" = "auth expired — codex login";
-"error.claudeReLogin" = "re-login: claude /login";
-"error.rateLimited" = "rate limited";
+"error.codexAuthExpired" = "인증 만료 — codex login 실행";
+"error.claudeReLogin" = "다시 로그인: claude /login";
+"error.rateLimited" = "요청 제한됨";
 
 /* Native auth panel (Codex/Claude — read credentials from disk/keychain) */
-"nativeAuth.loggedIn" = "%@ — signed in";
-"nativeAuth.notLoggedIn" = "%@ — not signed in";
-"nativeAuth.refresh" = "Refresh now";
-"nativeAuth.runCodexLogin" = "Run codex login";
-"nativeAuth.runClaudeLogin" = "Run claude /login";
-"nativeAuth.explanationCodex" = "Reads ~/.codex/auth.json. The Codex CLI rotates the token automatically; if it expires, run codex login.";
-"nativeAuth.explanationClaude" = "Reads the Claude Code-credentials keychain item written by claude /login. Tokens auto-refresh; if scope is insufficient, run claude /login.";
-"nativeAuth.waitingForLogin" = "Waiting for keychain update…";
+"nativeAuth.loggedIn" = "%@ — 로그인됨";
+"nativeAuth.notLoggedIn" = "%@ — 로그인되지 않음";
+"nativeAuth.refresh" = "지금 새로 고침";
+"nativeAuth.runCodexLogin" = "codex login 실행";
+"nativeAuth.runClaudeLogin" = "claude /login 실행";
+"nativeAuth.explanationCodex" = "~/.codex/auth.json을 읽습니다. Codex CLI가 토큰을 자동으로 교체합니다. 만료되면 codex login을 실행하세요.";
+"nativeAuth.explanationClaude" = "claude /login이 작성한 Claude Code-credentials 키체인 항목을 읽습니다. 토큰은 자동으로 갱신됩니다. scope가 충분하지 않으면 claude /login을 실행하세요.";
+"nativeAuth.waitingForLogin" = "키체인 업데이트 대기 중…";
 
 /* Relative Time */
 "time.minutesLater" = "%d분 후";
@@ -173,10 +173,10 @@
 "cliPaths.resolvedLabel" = "해결됨:";
 "cliPaths.notFound" = "찾을 수 없음";
 "claudeOAuth.title" = "Claude OAuth";
-"claudeOAuth.clientID" = "Client ID";
-"claudeOAuth.detectedVersion" = "Claude Code CLI Version";
-"claudeOAuth.refreshVersion" = "Refresh";
-"claudeOAuth.note" = "Usually leave the Client ID blank. Override it only if Anthropic changes the public Claude Code OAuth client.";
+"claudeOAuth.clientID" = "클라이언트 ID";
+"claudeOAuth.detectedVersion" = "Claude Code CLI 버전";
+"claudeOAuth.refreshVersion" = "새로 고침";
+"claudeOAuth.note" = "일반적으로 클라이언트 ID는 비워 두세요. Anthropic이 공개 Claude Code OAuth 클라이언트를 변경한 경우에만 재정의하세요.";
 
 /* CLI Colors */
 "cliColors.donut" = "도넛 차트 색상";

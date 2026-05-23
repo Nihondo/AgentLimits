@@ -173,10 +173,10 @@
 "cliPaths.resolvedLabel" = "解決結果:";
 "cliPaths.notFound" = "見つかりません";
 "claudeOAuth.title" = "Claude OAuth";
-"claudeOAuth.clientID" = "Client ID";
+"claudeOAuth.clientID" = "クライアント ID";
 "claudeOAuth.detectedVersion" = "Claude Code CLI バージョン";
 "claudeOAuth.refreshVersion" = "再検出";
-"claudeOAuth.note" = "通常は Client ID を空のままにしてください。Anthropic が Claude Code の公開 OAuth クライアントを変更した場合のみ上書きします。";
+"claudeOAuth.note" = "通常はクライアント ID を空のままにしてください。Anthropic が Claude Code の公開 OAuth クライアントを変更した場合のみ上書きします。";
 
 /* CLI Colors */
 "cliColors.donut" = "ドーナツグラフ";

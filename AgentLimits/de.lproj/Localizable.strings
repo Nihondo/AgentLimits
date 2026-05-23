@@ -73,19 +73,19 @@
 "error.readFailed" = "Daten konnten nicht gelesen werden";
 "error.decodeFailed" = "Daten konnten nicht dekodiert werden";
 
-"error.codexAuthExpired" = "auth expired — codex login";
-"error.claudeReLogin" = "re-login: claude /login";
-"error.rateLimited" = "rate limited";
+"error.codexAuthExpired" = "Authentifizierung abgelaufen — codex login ausführen";
+"error.claudeReLogin" = "Erneut anmelden: claude /login";
+"error.rateLimited" = "Rate-Limit erreicht";
 
 /* Native auth panel (Codex/Claude — read credentials from disk/keychain) */
-"nativeAuth.loggedIn" = "%@ — signed in";
-"nativeAuth.notLoggedIn" = "%@ — not signed in";
-"nativeAuth.refresh" = "Refresh now";
-"nativeAuth.runCodexLogin" = "Run codex login";
-"nativeAuth.runClaudeLogin" = "Run claude /login";
-"nativeAuth.explanationCodex" = "Reads ~/.codex/auth.json. The Codex CLI rotates the token automatically; if it expires, run codex login.";
-"nativeAuth.explanationClaude" = "Reads the Claude Code-credentials keychain item written by claude /login. Tokens auto-refresh; if scope is insufficient, run claude /login.";
-"nativeAuth.waitingForLogin" = "Waiting for keychain update…";
+"nativeAuth.loggedIn" = "%@ — angemeldet";
+"nativeAuth.notLoggedIn" = "%@ — nicht angemeldet";
+"nativeAuth.refresh" = "Jetzt aktualisieren";
+"nativeAuth.runCodexLogin" = "codex login ausführen";
+"nativeAuth.runClaudeLogin" = "claude /login ausführen";
+"nativeAuth.explanationCodex" = "Liest ~/.codex/auth.json. Die Codex-CLI rotiert das Token automatisch; wenn es abläuft, führen Sie codex login aus.";
+"nativeAuth.explanationClaude" = "Liest den Schlüsselbund-Eintrag Claude Code-credentials, der von claude /login geschrieben wurde. Tokens werden automatisch aktualisiert; wenn der Scope nicht ausreicht, führen Sie claude /login aus.";
+"nativeAuth.waitingForLogin" = "Warte auf Schlüsselbund-Aktualisierung…";
 
 /* Relative Time */
 "time.minutesLater" = "In %d Min.";
@@ -174,10 +174,10 @@
 "cliPaths.resolvedLabel" = "Aufgelöst:";
 "cliPaths.notFound" = "Nicht gefunden";
 "claudeOAuth.title" = "Claude OAuth";
-"claudeOAuth.clientID" = "Client ID";
-"claudeOAuth.detectedVersion" = "Claude Code CLI Version";
-"claudeOAuth.refreshVersion" = "Refresh";
-"claudeOAuth.note" = "Usually leave the Client ID blank. Override it only if Anthropic changes the public Claude Code OAuth client.";
+"claudeOAuth.clientID" = "Client-ID";
+"claudeOAuth.detectedVersion" = "Claude Code CLI-Version";
+"claudeOAuth.refreshVersion" = "Aktualisieren";
+"claudeOAuth.note" = "Lassen Sie die Client-ID normalerweise leer. Überschreiben Sie sie nur, wenn Anthropic den öffentlichen OAuth-Client von Claude Code ändert.";
 
 /* CLI Colors */
 "cliColors.donut" = "Donut-Diagrammfarbe";

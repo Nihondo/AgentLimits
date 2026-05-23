@@ -72,19 +72,19 @@
 "error.readFailed" = "Veri okunamadı";
 "error.decodeFailed" = "Veri çözümlenemedi";
 
-"error.codexAuthExpired" = "auth expired — codex login";
-"error.claudeReLogin" = "re-login: claude /login";
-"error.rateLimited" = "rate limited";
+"error.codexAuthExpired" = "kimlik doğrulama süresi doldu — codex login çalıştırın";
+"error.claudeReLogin" = "yeniden giriş yapın: claude /login";
+"error.rateLimited" = "hız sınırına ulaşıldı";
 
 /* Native auth panel (Codex/Claude — read credentials from disk/keychain) */
-"nativeAuth.loggedIn" = "%@ — signed in";
-"nativeAuth.notLoggedIn" = "%@ — not signed in";
-"nativeAuth.refresh" = "Refresh now";
-"nativeAuth.runCodexLogin" = "Run codex login";
-"nativeAuth.runClaudeLogin" = "Run claude /login";
-"nativeAuth.explanationCodex" = "Reads ~/.codex/auth.json. The Codex CLI rotates the token automatically; if it expires, run codex login.";
-"nativeAuth.explanationClaude" = "Reads the Claude Code-credentials keychain item written by claude /login. Tokens auto-refresh; if scope is insufficient, run claude /login.";
-"nativeAuth.waitingForLogin" = "Waiting for keychain update…";
+"nativeAuth.loggedIn" = "%@ — oturum açık";
+"nativeAuth.notLoggedIn" = "%@ — oturum açık değil";
+"nativeAuth.refresh" = "Şimdi yenile";
+"nativeAuth.runCodexLogin" = "codex login çalıştır";
+"nativeAuth.runClaudeLogin" = "claude /login çalıştır";
+"nativeAuth.explanationCodex" = "~/.codex/auth.json dosyasını okur. Codex CLI token’ı otomatik olarak döndürür; süresi dolarsa codex login çalıştırın.";
+"nativeAuth.explanationClaude" = "claude /login tarafından yazılan Claude Code-credentials anahtar zinciri öğesini okur. Token’lar otomatik yenilenir; scope yetersizse claude /login çalıştırın.";
+"nativeAuth.waitingForLogin" = "Anahtar zinciri güncellemesi bekleniyor…";
 
 /* Relative Time */
 "time.minutesLater" = "%d dk içinde";
@@ -173,10 +173,10 @@
 "cliPaths.resolvedLabel" = "Çözümlendi:";
 "cliPaths.notFound" = "Bulunamadı";
 "claudeOAuth.title" = "Claude OAuth";
-"claudeOAuth.clientID" = "Client ID";
-"claudeOAuth.detectedVersion" = "Claude Code CLI Version";
-"claudeOAuth.refreshVersion" = "Refresh";
-"claudeOAuth.note" = "Usually leave the Client ID blank. Override it only if Anthropic changes the public Claude Code OAuth client.";
+"claudeOAuth.clientID" = "İstemci ID";
+"claudeOAuth.detectedVersion" = "Claude Code CLI sürümü";
+"claudeOAuth.refreshVersion" = "Yenile";
+"claudeOAuth.note" = "Normalde İstemci ID alanını boş bırakın. Yalnızca Anthropic, Claude Code’un herkese açık OAuth istemcisini değiştirirse geçersiz kılın.";
 
 /* CLI Colors */
 "cliColors.donut" = "Halka grafik rengi";
