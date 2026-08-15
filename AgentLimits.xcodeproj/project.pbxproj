@@ -14,19 +14,19 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		8A10F0013B00000100000001 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 42D45B822EF649FD00A51EA8 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 42D45B892EF649FE00A51EA8;
-			remoteInfo = AgentLimits;
-		};
 		42D45BCA2EF64A5100A51EA8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 42D45B822EF649FD00A51EA8 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 42D45BB72EF64A5000A51EA8;
 			remoteInfo = AgentLimitsWidgetExtension;
+		};
+		8A10F0013B00000100000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 42D45B822EF649FD00A51EA8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 42D45B892EF649FE00A51EA8;
+			remoteInfo = AgentLimits;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -45,12 +45,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		8A10F0023B00000100000001 /* AgentLimitsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AgentLimitsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		42D45B8A2EF649FE00A51EA8 /* AgentLimits.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AgentLimits.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		42D45BB82EF64A5000A51EA8 /* AgentLimitsWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AgentLimitsWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		42D45BBA2EF64A5000A51EA8 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		42D45BBC2EF64A5000A51EA8 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		7A1B2C3D4E5F678901234567 /* Configurations/DevelopmentTeam.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Configurations/DevelopmentTeam.xcconfig; sourceTree = "<group>"; };
+		8A10F0023B00000100000001 /* AgentLimitsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AgentLimitsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -71,11 +71,6 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		8A10F0033B00000100000001 /* AgentLimitsTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = AgentLimitsTests;
-			sourceTree = "<group>";
-		};
 		01349414347243A598E67AD9 /* AgentLimitsShared */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = AgentLimitsShared;
@@ -97,16 +92,14 @@
 			path = AgentLimitsWidget;
 			sourceTree = "<group>";
 		};
+		8A10F0033B00000100000001 /* AgentLimitsTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = AgentLimitsTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		8A10F0043B00000100000001 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		42D45B872EF649FE00A51EA8 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -121,6 +114,13 @@
 			files = (
 				42D45BBD2EF64A5000A51EA8 /* SwiftUI.framework in Frameworks */,
 				42D45BBB2EF64A5000A51EA8 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8A10F0043B00000100000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -170,29 +170,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		8A10F0053B00000100000001 /* AgentLimitsTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 8A10F00A3B00000100000001 /* Build configuration list for PBXNativeTarget "AgentLimitsTests" */;
-			buildPhases = (
-				8A10F0063B00000100000001 /* Sources */,
-				8A10F0043B00000100000001 /* Frameworks */,
-				8A10F0073B00000100000001 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				8A10F0083B00000100000001 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				8A10F0033B00000100000001 /* AgentLimitsTests */,
-			);
-			name = AgentLimitsTests;
-			packageProductDependencies = (
-			);
-			productName = AgentLimitsTests;
-			productReference = 8A10F0023B00000100000001 /* AgentLimitsTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 		42D45B892EF649FE00A51EA8 /* AgentLimits */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 42D45BAB2EF649FF00A51EA8 /* Build configuration list for PBXNativeTarget "AgentLimits" */;
@@ -242,6 +219,29 @@
 			productReference = 42D45BB82EF64A5000A51EA8 /* AgentLimitsWidgetExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		8A10F0053B00000100000001 /* AgentLimitsTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8A10F00A3B00000100000001 /* Build configuration list for PBXNativeTarget "AgentLimitsTests" */;
+			buildPhases = (
+				8A10F0063B00000100000001 /* Sources */,
+				8A10F0043B00000100000001 /* Frameworks */,
+				8A10F0073B00000100000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8A10F0083B00000100000001 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				8A10F0033B00000100000001 /* AgentLimitsTests */,
+			);
+			name = AgentLimitsTests;
+			packageProductDependencies = (
+			);
+			productName = AgentLimitsTests;
+			productReference = 8A10F0023B00000100000001 /* AgentLimitsTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -252,15 +252,15 @@
 				LastSwiftUpdateCheck = 2620;
 				LastUpgradeCheck = 2640;
 				TargetAttributes = {
-					8A10F0053B00000100000001 = {
-						CreatedOnToolsVersion = 26.2;
-						TestTargetID = 42D45B892EF649FE00A51EA8;
-					};
 					42D45B892EF649FE00A51EA8 = {
 						CreatedOnToolsVersion = 26.2;
 					};
 					42D45BB72EF64A5000A51EA8 = {
 						CreatedOnToolsVersion = 26.2;
+					};
+					8A10F0053B00000100000001 = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = 42D45B892EF649FE00A51EA8;
 					};
 				};
 			};
@@ -302,13 +302,6 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		8A10F0073B00000100000001 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		42D45B882EF649FE00A51EA8 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -323,16 +316,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-/* End PBXResourcesBuildPhase section */
-
-/* Begin PBXSourcesBuildPhase section */
-		8A10F0063B00000100000001 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
+		8A10F0073B00000100000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
 		42D45B862EF649FE00A51EA8 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -347,56 +340,29 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		8A10F0063B00000100000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		8A10F0083B00000100000001 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 42D45B892EF649FE00A51EA8 /* AgentLimits */;
-			targetProxy = 8A10F0013B00000100000001 /* PBXContainerItemProxy */;
-		};
 		42D45BCB2EF64A5100A51EA8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 42D45BB72EF64A5000A51EA8 /* AgentLimitsWidgetExtension */;
 			targetProxy = 42D45BCA2EF64A5100A51EA8 /* PBXContainerItemProxy */;
 		};
+		8A10F0083B00000100000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 42D45B892EF649FE00A51EA8 /* AgentLimits */;
+			targetProxy = 8A10F0013B00000100000001 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		8A10F00B3B00000100000001 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.dmng.agentlimit.AgentLimitsTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AgentLimits.app/Contents/MacOS/AgentLimits";
-			};
-			name = Debug;
-		};
-		8A10F00C3B00000100000001 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.dmng.agentlimit.AgentLimitsTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AgentLimits.app/Contents/MacOS/AgentLimits";
-			};
-			name = Release;
-		};
 		42D45BA92EF649FF00A51EA8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7A1B2C3D4E5F678901234567 /* Configurations/DevelopmentTeam.xcconfig */;
@@ -537,7 +503,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 18;
 				DEAD_CODE_STRIPPING = YES;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -554,7 +520,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.1.6;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dmng.agentlimit.AgentLimit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -579,7 +545,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 18;
 				DEAD_CODE_STRIPPING = YES;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -596,7 +562,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.1.6;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dmng.agentlimit.AgentLimit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -619,7 +585,7 @@
 				CODE_SIGN_ENTITLEMENTS = AgentLimitsWidget/AgentLimitsWidget.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 18;
 				DEAD_CODE_STRIPPING = YES;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -633,7 +599,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.1.6;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dmng.agentlimit.AgentLimit.AgentLimitWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -656,7 +622,7 @@
 				CODE_SIGN_ENTITLEMENTS = AgentLimitsWidget/AgentLimitsWidget.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 18;
 				DEAD_CODE_STRIPPING = YES;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -670,7 +636,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.1.6;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dmng.agentlimit.AgentLimit.AgentLimitWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -684,18 +650,43 @@
 			};
 			name = Release;
 		};
+		8A10F00B3B00000100000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dmng.agentlimit.AgentLimitsTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AgentLimits.app/Contents/MacOS/AgentLimits";
+			};
+			name = Debug;
+		};
+		8A10F00C3B00000100000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dmng.agentlimit.AgentLimitsTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AgentLimits.app/Contents/MacOS/AgentLimits";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		8A10F00A3B00000100000001 /* Build configuration list for PBXNativeTarget "AgentLimitsTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				8A10F00B3B00000100000001 /* Debug */,
-				8A10F00C3B00000100000001 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		42D45B852EF649FD00A51EA8 /* Build configuration list for PBXProject "AgentLimits" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -719,6 +710,15 @@
 			buildConfigurations = (
 				42D45BCF2EF64A5100A51EA8 /* Debug */,
 				42D45BD02EF64A5100A51EA8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8A10F00A3B00000100000001 /* Build configuration list for PBXNativeTarget "AgentLimitsTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8A10F00B3B00000100000001 /* Debug */,
+				8A10F00C3B00000100000001 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
