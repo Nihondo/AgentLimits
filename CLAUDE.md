@@ -59,7 +59,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 | `AgentLimits/App/SettingsTabView.swift` | Tab-based settings UI (Usage, ccusage, Wake Up, Notification, Advanced) |
 | `AgentLimits/App/DesignTokens.swift` | Shared design tokens (spacing/corners/window min size) |
 | `AgentLimits/App/CLICommandSettingsView.swift` | Advanced Settings UI (CLI paths + scripts + widget tap action + menu bar icon hide toggle) |
-| `AgentLimits/App/LanguageManager.swift` | Language settings management (Japanese/English/System) |
+| `AgentLimits/App/LanguageManager.swift` | Language settings management (System or any bundled localization) |
 | `AgentLimits/App/LoginItemManager.swift` | Login item (start at login) management |
 | `AgentLimits/App/AppLogger.swift` | Application-wide logging utility |
 | `AgentLimits/App/AutoRefreshCoordinator.swift` | Auto-refresh cycle coordination |
@@ -84,6 +84,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 | `AgentLimitsShared/TokenUsageModels.swift` | Shared token usage models/store and helpers |
 | `AgentLimitsShared/TokenUsageFormatting.swift` | Shared cost/token formatting for ccusage |
 | `AgentLimitsShared/WidgetTapActionSettings.swift` | Widget tap action settings (open website / refresh data) |
+| `AgentLimitsTests/LanguageCodeResolverTests.swift` | Language resolution and English fallback regression tests |
 | `AgentLimitsWidget/AgentLimitsWidget.swift` | Usage limits widget TimelineProvider and donut gauge UI |
 | `AgentLimitsWidget/TokenUsageWidget.swift` | ccusage token usage widget TimelineProvider and rows UI (small + medium with heatmap) |
 | `AgentLimitsWidget/HeatmapView.swift` | Heatmap grid view for medium widget (7 rows × 4-6 columns) |
@@ -291,6 +292,7 @@ Monthly-only usage windows:
 - Widget refresh frequency may be throttled by the OS
 - CLI execution uses the user login shell and prefixes PATH with `/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH`
 - Full-path overrides from Advanced Settings take precedence
+- System language resolution uses a bundled localization when available and explicitly falls back to English when none of the preferred OS languages are supported; never depend on bundle localization ordering for the fallback.
 - Menu bar is managed by `MenuBarController` (AppKit `NSStatusItem`), not SwiftUI `MenuBarExtra`; `AgentLimitsApp` only declares a `Window` scene for the settings window
 - `MenuBarController` uses KVO (`addObserver(_:forKeyPath:options:context:)`) for specific UserDefaults keys rather than `UserDefaults.didChangeNotification` (which fires on every write); `observedAppGroupDefaults` is stored as a property so `addObserver` and `removeObserver` always use the same instance; KVO callbacks run `nonisolated` and dispatch to `@MainActor` via `Task`
 - `AppSharedState.onSettingsWindowClosed` bridges `SettingsWindowController` window-close → `MenuBarController.endTemporaryRevealIfNeeded()` and reapplies the login-history-based WebView background policy; set in `AppDelegate.applicationDidFinishLaunching`

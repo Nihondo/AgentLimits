@@ -49,7 +49,8 @@ When you open the menu bar menu, a dashboard appears at the top showing per-prov
 - **Pacemaker bar**: divided into time segments (5h: 5 segments, weekly: 7 segments, monthly: single continuous bar) with gaps, matching the widget inner ring
 - Clicking a dashboard row opens the provider's usage page in the browser
 - Dashboard visibility is configurable per provider in **Usage** settings (**Show dashboard in menu**)
-- Menu also includes: **Display Mode**, **Language** (System/Japanese/English), **Wake Up → Run Now**, **Start app at login**, and **Check for Updates...**
+- Menu also includes: **Display Mode**, **Language** (System or any bundled translation), **Wake Up → Run Now**, **Start app at login**, and **Check for Updates...**
+- With **System** selected, AgentLimits uses a supported OS language and falls back to English when the OS language is not available.
 
 ![](./images/agentlimits_menu.png)
 

@@ -453,7 +453,10 @@ enum LanguageCodeResolver {
                 return match
             }
         }
-        return supported.first ?? LocalizationConfig.fallbackLanguageCode
+        return matchLanguageCode(
+            for: LocalizationConfig.fallbackLanguageCode,
+            supportedLanguageCodes: supported
+        ) ?? LocalizationConfig.fallbackLanguageCode
     }
 
     /// Returns the effective language code for a given raw value.
