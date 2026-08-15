@@ -18,6 +18,7 @@ Download the latest build: [Download](https://github.com/Nihondo/AgentLimits/rel
 
 ## What It Tracks
 - **Usage limits (Codex / Claude Code):** 5-hour + weekly usage, or monthly usage when the provider returns a monthly window, via internal APIs.
+  - If Codex temporarily returns only a weekly window, AgentLimits keeps the 5-hour slot unavailable and displays the returned value in the weekly slot.
   - Codex: `https://chatgpt.com/backend-api/wham/usage`
   - Claude Code: `https://claude.ai/api/organizations/{orgId}/usage`
 - **Usage limits (GitHub Copilot):** Monthly premium interaction quota via entitlement API.
@@ -67,6 +68,7 @@ Pacemaker shows a time-based usage benchmark to help you stay on track.
 ## Widgets
 ### Usage Widgets (Codex / Claude Code)
 - Dual donut gauge: 5-hour and weekly windows side by side
+- If Codex provides only the weekly window, the 5-hour donut remains unavailable while the weekly donut continues to show usage.
 - Some Codex plans may show a single centered monthly donut when the Codex API returns only a monthly window
 - Color-coded percentage based on usage level and display mode
 - Update time shown as `HH:mm` (or `--:--` if older than 24h)

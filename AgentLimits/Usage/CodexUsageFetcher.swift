@@ -28,24 +28,52 @@ struct CodexUsageResponse: Codable {
 extension CodexUsageResponse {
     /// Small tolerance for comparing API double values.
     private static let secondsEqualityTolerance: TimeInterval = 0.001
+    /// APIの週次ウィンドウ期間を判定するときに許容する秒数差。
+    private static let windowDurationTolerance: TimeInterval = 1
 
     func toSnapshot(fetchedAt: Date) -> UsageSnapshot {
-        let primary = makeWindow(
+        let sourcePrimary = makeWindow(
             kind: .primary,
             source: rate_limit?.primary_window
         )
-        let secondary = primary?.isLongerThanWeeklyWindow == true
+        let sourceSecondary = sourcePrimary?.isLongerThanWeeklyWindow == true
             ? nil
             : makeWindow(
                 kind: .secondary,
                 source: rate_limit?.secondary_window
             )
+        let windows = normalizeWindows(
+            primary: sourcePrimary,
+            secondary: sourceSecondary
+        )
 
         return UsageSnapshot(
             provider: .chatgptCodex,
             fetchedAt: fetchedAt,
-            primaryWindow: primary,
-            secondaryWindow: secondary
+            primaryWindow: windows.primary,
+            secondaryWindow: windows.secondary
+        )
+    }
+
+    /// APIが週次枠をprimaryとして返した場合に、保存先を週次スロットへ正規化します。
+    private func normalizeWindows(
+        primary: UsageWindow?,
+        secondary: UsageWindow?
+    ) -> (primary: UsageWindow?, secondary: UsageWindow?) {
+        guard secondary == nil,
+              let primary,
+              abs(primary.limitWindowSeconds - UsageLimitDuration.sevenDays)
+                <= Self.windowDurationTolerance else {
+            return (primary, secondary)
+        }
+        return (
+            nil,
+            UsageWindow(
+                kind: .secondary,
+                usedPercent: primary.usedPercent,
+                resetAt: primary.resetAt,
+                limitWindowSeconds: primary.limitWindowSeconds
+            )
         )
     }
 

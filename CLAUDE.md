@@ -27,6 +27,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
    - Codex: `https://chatgpt.com/backend-api/wham/usage`
    - Claude Code: `https://claude.ai/api/organizations/{orgId}/usage`
    - GitHub Copilot: `https://github.com/github-copilot/chat/entitlement`
+   - Codex weekly-only responses may arrive in API `primary_window`; when its `limit_window_seconds` is within one second of 604,800 and no usable secondary window exists, snapshot creation moves it to `secondaryWindow` with `.secondary` kind and leaves `primaryWindow` nil.
    - Codex monthly-only responses are detected from `limit_window_seconds > UsageLimitDuration.sevenDays + 1`, not from `plan_type`; monthly Codex snapshots keep `primaryWindow` and drop `secondaryWindow`.
 3. `UsageViewModel` manages auto-refresh (configurable 1-10 minutes) and per-provider state
 4. `UsageSnapshotStore` persists usage snapshots as JSON under App Group container

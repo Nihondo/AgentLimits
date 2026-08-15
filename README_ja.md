@@ -18,6 +18,7 @@ macOS Sonoma以降向けのメニューバーアプリと通知センターウ�
 
 ## 取得する情報
 - **使用量（Codex / Claude Code）**: 5時間+週、またはプロバイダが月間ウィンドウを返す場合は月間の使用量を内部APIから取得
+  - Codexが一時的に週次ウィンドウだけを返す場合、5時間枠は未取得のまま、返された値を週次枠に表示します
   - Codex: `https://chatgpt.com/backend-api/wham/usage`
   - Claude Code: `https://claude.ai/api/organizations/{orgId}/usage`
 - **使用量（GitHub Copilot）**: 月間プレミアムリクエスト枠をentitlement APIから取得
@@ -66,6 +67,7 @@ macOS Sonoma以降向けのメニューバーアプリと通知センターウ�
 ## ウィジェット
 ### 使用量ウィジェット（Codex / Claude Code）
 - ダブルドーナツ: 5時間・週の2つのウィンドウを横並び表示
+- Codexが週次ウィンドウだけを返す場合、5時間ドーナツは未取得のまま、週次ドーナツには使用量を表示します
 - 一部のCodexプランでは、Codex APIが月間ウィンドウのみを返す場合に月間のシングルドーナツを中央表示
 - 使用率と表示モードに応じて色分け表示
 - 更新時刻は `HH:mm` 形式（24時間以上前なら `--:--`）
