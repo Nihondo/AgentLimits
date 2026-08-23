@@ -24,3 +24,12 @@
 "widget.monthlyLimit" = "Monthly Limit";
 "widget.premiumRequests" = "프리미엄 요청";
 "widget.copilotBillingDescription" = "Copilot 청구 사용량과 비용을 표시합니다.";
+
+"widget.custom.service" = "Service";
+"widget.custom.configuration" = "사용자 지정 사용량";
+"widget.custom.configurationDescription" = "Choose the custom usage service shown by this widget.";
+"widget.custom.title" = "사용자 지정 사용량";
+"widget.custom.description" = "Shows usage from a custom AgentLimits service.";
+"widget.custom.unavailable" = "Service unavailable";
+"widget.custom.configure" = "Add a custom service in AgentLimits.";
+"widget.custom.openSettings" = "Open Settings";

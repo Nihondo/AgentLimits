@@ -17,6 +17,7 @@ final class AppSharedState: ObservableObject {
     let webViewPool: UsageWebViewPool
     let viewModel: UsageViewModel
     let tokenUsageViewModel: TokenUsageViewModel
+    let customUsageViewModel: CustomUsageViewModel
 
     /// 設定ウィンドウクローズ時のコールバック（AppDelegate が設定する）
     var onSettingsWindowClosed: (() -> Void)?
@@ -29,19 +30,22 @@ final class AppSharedState: ObservableObject {
         self.webViewPool = pool
         self.viewModel = UsageViewModel(webViewPool: pool)
         self.tokenUsageViewModel = TokenUsageViewModel()
+        self.customUsageViewModel = CustomUsageViewModel()
         observePageReadyChanges()
         observeCookieChanges()
         let storedMode = UsageDisplayMode.makeSelectableMode(
             from: UserDefaults.standard.string(forKey: UserDefaultsKeys.displayMode)
         )
         viewModel.updateDisplayMode(storedMode)
-        startBackgroundRefresh()
+        if !Self.isRunningUnitTests {
+            startBackgroundRefresh()
 
-        // Initialize WakeUpScheduler to sync LaunchAgents on startup
-        _ = WakeUpScheduler.shared
+            // Initialize WakeUpScheduler to sync LaunchAgents on startup
+            _ = WakeUpScheduler.shared
 
-        // Refresh widgets once on app launch.
-        WidgetCenter.shared.reloadAllTimelines()
+            // Refresh widgets once on app launch.
+            WidgetCenter.shared.reloadAllTimelines()
+        }
     }
 
     /// Starts background refresh and loads WebViews (called once)
@@ -51,6 +55,7 @@ final class AppSharedState: ObservableObject {
         loadWebViews()
         viewModel.startAutoRefresh()
         tokenUsageViewModel.startAutoRefresh()
+        customUsageViewModel.startAutoRefresh()
     }
 
     /// Applies the background WebView policy for providers with fetch history.
@@ -95,5 +100,11 @@ final class AppSharedState: ObservableObject {
                 }
                 .store(in: &cancellables)
         }
+    }
+
+    private static var isRunningUnitTests: Bool {
+        let environment = ProcessInfo.processInfo.environment
+        return environment["XCTestConfigurationFilePath"] != nil
+            || environment["XCTestBundlePath"] != nil
     }
 }

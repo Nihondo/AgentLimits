@@ -18,6 +18,7 @@ enum UserDefaultsKeys {
     static let menuBarShowPacemakerValue = SharedUserDefaultsKeys.menuBarShowPacemakerValue
     static let pacemakerRingWarningEnabled = SharedUserDefaultsKeys.pacemakerRingWarningEnabled
     static let providerDisplayOrder = "provider_display_order"
+    static let serviceDisplayOrder = "usage_service_display_order_v2"
     static let menuBarIconHidden = "menu_bar_icon_hidden"
 }
 
@@ -42,6 +43,43 @@ enum ProviderOrderStore {
             providers.map(\.rawValue),
             forKey: UserDefaultsKeys.providerDisplayOrder
         )
+    }
+
+    /// 組み込みとカスタムを含む共通表示順を返します。
+    static func loadServiceOrder() -> [UsageServiceKey] {
+        let customKeys = CustomUsageServiceDescriptorStore.loadDescriptors().map {
+            UsageServiceKey.custom($0.providerID)
+        }
+        let builtInKeys = loadProviderOrder().map { UsageServiceKey.builtIn($0) }
+        guard let stored = UserDefaults.standard.stringArray(forKey: UserDefaultsKeys.serviceDisplayOrder) else {
+            return builtInKeys + customKeys
+        }
+        let available = Set(builtInKeys + customKeys)
+        let storedKeys = stored.map(UsageServiceKey.init(rawValue:)).filter { available.contains($0) }
+        let missing = (builtInKeys + customKeys).filter { !storedKeys.contains($0) }
+        return storedKeys + missing
+    }
+
+    /// 共通表示順を保存し、組み込み順の旧キーも同期します。
+    static func saveServiceOrder(_ serviceKeys: [UsageServiceKey]) {
+        UserDefaults.standard.set(
+            serviceKeys.map(\.rawValue),
+            forKey: UserDefaultsKeys.serviceDisplayOrder
+        )
+        saveProviderOrder(serviceKeys.compactMap(\.builtInProvider))
+        CustomUsageServiceStore.shared.syncWidgetDescriptors()
+    }
+
+    /// 新しいサービスを保存済み表示順の末尾へ追加します。
+    static func addService(_ serviceKey: UsageServiceKey) {
+        let order = loadServiceOrder()
+        guard order.contains(serviceKey) else { return }
+        saveServiceOrder(order)
+    }
+
+    /// 削除されたサービスを表示順から取り除きます。
+    static func removeService(_ serviceKey: UsageServiceKey) {
+        saveServiceOrder(loadServiceOrder().filter { $0 != serviceKey })
     }
 }
 

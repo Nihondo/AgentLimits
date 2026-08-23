@@ -38,12 +38,13 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 6. `CopilotBillingFetcher` fetches billing usage via WebView JS (triggered after Copilot entitlement fetch):
    - API: `https://github.com/settings/billing/usage_table?group=0&period=3&product=&query=`
 7. `TokenUsageViewModel` manages auto-refresh (configurable 1-10 minutes) and snapshot persistence
-7. Widgets read their respective snapshot files (no network access)
-8. `ThresholdNotificationManager` checks usage against thresholds and sends notifications
-9. `MenuBarController` (AppKit `NSStatusItem`) manages the menu bar icon and dropdown menu
+8. `CustomUsageViewModel` runs enabled custom service executables concurrently on the Usage refresh interval, validates stdout, and atomically persists the exact bytes to `usage_snapshot_custom_<provider>.json`. Each provider has an in-flight guard; failures preserve the previous successful snapshot.
+9. Widgets read their respective snapshot files (no network access). `CustomUsageWidget` resolves a configured `AppEntity` through the App Group service index and reads the selected custom snapshot.
+10. `ThresholdNotificationManager` converts built-in and custom data to `UsagePresentationSnapshot`, then checks service-key + semantic-window thresholds.
+11. `MenuBarController` (AppKit `NSStatusItem`) manages the menu bar icon and dropdown menu
    - Icon label: `MenuBarLabelContentView` rendered via `ImageRenderer` → `NSStatusItem.button.image`
    - Menu dropdown: dashboard rows use `NSHostingView<DashboardMenuItemView>` as `NSMenuItem.view`
-10. Bundled Claude Code status line script reads snapshots + App Group settings for CLI display
+12. Bundled Claude Code status line script reads snapshots + App Group settings for CLI display
 
 ### Key Components
 
@@ -64,6 +65,10 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 | `AgentLimits/App/AppLogger.swift` | Application-wide logging utility |
 | `AgentLimits/App/AutoRefreshCoordinator.swift` | Auto-refresh cycle coordination |
 | `AgentLimits/App/ShellExecutor.swift` | Shell command execution utility |
+| `AgentLimits/CustomUsage/CustomUsageServiceStore.swift` | Dynamic custom service registry and App Group widget-safe descriptor synchronization |
+| `AgentLimits/CustomUsage/CustomUsageScriptRunner.swift` | Direct executable runner with timeout and stdout/stderr limits |
+| `AgentLimits/CustomUsage/CustomUsageViewModel.swift` | Custom refresh scheduling, in-flight deduplication, exact-byte snapshot persistence, notifications, and widget reloads |
+| `AgentLimits/CustomUsage/CustomUsageSettingsView.swift` | List/detail custom service management UI |
 | `AgentLimits/Usage/CodexUsageFetcher.swift` | Codex API + JS token extraction |
 | `AgentLimits/Usage/ClaudeUsageFetcher.swift` | Claude API + JS org ID extraction |
 | `AgentLimits/Usage/CopilotUsageFetcher.swift` | GitHub Copilot entitlement API + JS cookie-based auth |
@@ -80,12 +85,14 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 | `AgentLimits/CCUsage/CCUsageFetcher.swift` | CLI execution + parsing for ccusage |
 | `AgentLimits/CCUsage/CCUsageSettingsView.swift` | ccusage settings UI |
 | `AgentLimitsShared/UsageModels.swift` | Shared usage models/store and helpers |
+| `AgentLimitsShared/CustomUsageModels.swift` | Common service identity, semantic windows, custom JSON contract/validator, exact-byte store, and widget service index |
 | `AgentLimitsShared/UsageColorSettings.swift` | Usage color persistence (menu bar + widgets) |
 | `AgentLimitsShared/TokenUsageModels.swift` | Shared token usage models/store and helpers |
 | `AgentLimitsShared/TokenUsageFormatting.swift` | Shared cost/token formatting for ccusage |
 | `AgentLimitsShared/WidgetTapActionSettings.swift` | Widget tap action settings (open website / refresh data) |
 | `AgentLimitsTests/LanguageCodeResolverTests.swift` | Language resolution and English fallback regression tests |
 | `AgentLimitsWidget/AgentLimitsWidget.swift` | Usage limits widget TimelineProvider and donut gauge UI |
+| `AgentLimitsWidget/CustomUsageWidget.swift` | AppIntent-configurable custom usage widget and service entity query |
 | `AgentLimitsWidget/TokenUsageWidget.swift` | ccusage token usage widget TimelineProvider and rows UI (small + medium with heatmap) |
 | `AgentLimitsWidget/HeatmapView.swift` | Heatmap grid view for medium widget (7 rows × 4-6 columns) |
 | `AgentLimitsWidget/HeatmapColors.swift` | 5-level color scheme (GitHub-style) + accented mode support |
@@ -152,6 +159,17 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 - Widget tap action configurable: open website or refresh data (Advanced Settings)
 - Usage screen includes **Clear Data** to remove embedded browser login data, website storage, and cached usage snapshots, which resets login-history-based background WebView eligibility
 
+#### Custom Usage Services
+- Dynamic services are identified by immutable provider slugs matching `^[a-z0-9][a-z0-9_-]{0,62}$`; there is no `isCustom` field.
+- Common identity uses `builtIn:<rawValue>` or `custom:<slug>`. Semantic window kinds are `5h`, `1w`, and `1month`.
+- A custom executable runs directly with no arguments, from its parent directory, with the standard AgentLimits PATH prefix. Limits are 60 seconds, 256 KiB stdout, and 64 KiB stderr.
+- stdout must be schema version 1 JSON with a matching provider, timezone-aware `fetchedAt`/`resetAt`, and one or two unique windows. Unknown fields are accepted.
+- Successful output is validated before the original bytes (including the trailing newline) are atomically saved. Validation and execution failures never overwrite the last success.
+- Service settings include display name, script path, optional HTTP/HTTPS URL, auto refresh, menu bar visibility, and dashboard visibility. Run status stores last attempt, last success, and the latest error.
+- Custom services share the Usage 1–10 minute interval. Startup/periodic refresh respects auto refresh; manual tests and widget refresh deep links do not.
+- Wake Up and ccusage remain built-in-provider-only.
+- `CustomUsageWidget` is one `AppIntentConfiguration` kind. Each widget instance selects a `CustomUsageServiceEntity`; the App Group index contains only provider ID and display name, never executable paths.
+
 #### Token Usage (ccusage)
 - CLI-based fetch and parsing for Codex/Claude Code
 - Separate widgets for ccusage token usage (small and medium sizes)
@@ -198,6 +216,12 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 
 `AgentLimitsShared/UsageModels.swift` defines the shared usage model and snapshot store. App/widget add target-specific extensions in `AgentLimits/Usage/AppUsageModels.swift` and `AgentLimitsWidget/WidgetUsageModels.swift`.
 
+`AgentLimitsShared/CustomUsageModels.swift` keeps the legacy built-in model unchanged and adds the common presentation layer:
+- `UsageServiceKey`: `builtIn:<rawValue>` or `custom:<slug>`
+- `SemanticUsageWindowKind`: `.fiveHours`, `.oneWeek`, `.oneMonth`
+- `UsagePresentationSnapshot`: normalizes legacy primary/secondary windows and custom snapshots for menu, dashboard, colors, pacemaker, and notifications
+- `CustomUsageSnapshotStore`: validates then atomically writes the unmodified stdout bytes
+
 `UsageWindow` stores per-window usage data:
 - `kind`: `.primary` or `.secondary`
 - `usedPercent`: 0-100
@@ -224,6 +248,7 @@ Monthly-only usage windows:
 ├── usage_snapshot.json           # Codex usage limits
 ├── usage_snapshot_claude.json    # Claude Code usage limits
 ├── usage_snapshot_copilot.json   # GitHub Copilot usage limits
+├── usage_snapshot_custom_<provider>.json # Custom usage service (one per provider slug)
 ├── token_usage_codex.json        # ccusage Codex
 ├── token_usage_claude.json       # ccusage Claude
 └── token_usage_copilot.json      # Copilot billing
@@ -242,9 +267,14 @@ Monthly-only usage windows:
 | `menu_bar_dashboard_claude_enabled` | Dashboard row visibility for Claude Code (default: true) |
 | `menu_bar_dashboard_copilot_enabled` | Dashboard row visibility for Copilot (default: true) |
 | `provider_display_order` | Provider display order in menu bar icon and dashboard (`[String]` rawValue array; default: allCases order) |
+| `usage_service_display_order_v2` | Common built-in/custom service order (`UsageServiceKey.rawValue` array); legacy provider order is preserved during migration |
+| `custom_usage_services` | App-only custom service execution configuration |
+| `custom_usage_run_statuses` | Last attempt, last success, and last execution/validation error per custom provider |
+| `custom_usage_widget_services` | App Group widget index containing provider ID + display name only |
 | `menu_bar_icon_hidden` | Hide entire menu bar icon (default: false); relaunch app to temporarily reveal |
 | `wake_up_schedules` | Wake Up schedules (JSON array) |
 | `threshold_notification_settings` | Threshold settings (JSON array) |
+| `threshold_notification_settings_v2` | Version 2 notification settings keyed by common service ID and semantic window kind |
 | `app_language` | Language preference (App Group shared) |
 | `usage_refresh_interval_minutes` | Usage limits auto-refresh interval (minutes) |
 | `token_usage_refresh_interval_minutes` | ccusage auto-refresh interval (minutes) |
@@ -274,6 +304,7 @@ Monthly-only usage windows:
 - `AgentLimitWidget` - Codex usage limits widget
 - `AgentLimitWidgetClaude` - Claude Code usage limits widget
 - `AgentLimitWidgetCopilot` - GitHub Copilot usage limits widget
+- `CustomUsageWidget` - AppIntent-configurable custom service usage widget
 - `TokenUsageWidgetCodex` - ccusage Codex widget
 - `TokenUsageWidgetClaude` - ccusage Claude widget
 - `TokenUsageWidgetCopilot` - Copilot billing widget

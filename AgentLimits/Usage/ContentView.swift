@@ -23,7 +23,7 @@ struct ContentView: View {
     @AppStorage(UserDefaultsKeys.menuBarDashboardCodexEnabled) private var menuBarDashboardCodexEnabled = true
     @AppStorage(UserDefaultsKeys.menuBarDashboardClaudeEnabled) private var menuBarDashboardClaudeEnabled = true
     @AppStorage(UserDefaultsKeys.menuBarDashboardCopilotEnabled) private var menuBarDashboardCopilotEnabled = true
-    @State private var orderedProviders: [UsageProvider] = ProviderOrderStore.loadProviderOrder()
+    @State private var orderedServices: [UsageServiceKey] = ProviderOrderStore.loadServiceOrder()
     @State private var isShowingClearDataConfirm = false
     @State private var isClearingData = false
     @State private var isWebViewExpanded = false
@@ -55,22 +55,22 @@ struct ContentView: View {
 
                         SettingsFormSection(title: "settings.providerOrder".localized()) {
                             List {
-                                ForEach(orderedProviders, id: \.self) { provider in
+                                ForEach(orderedServices, id: \.self) { serviceKey in
                                     HStack(spacing: 8) {
                                         Image(systemName: "line.3.horizontal")
                                             .foregroundStyle(.secondary)
-                                        Text(provider.displayName)
+                                        Text(displayName(for: serviceKey))
                                         Spacer()
                                     }
                                     .padding(.vertical, 2)
                                 }
                                 .onMove { source, destination in
-                                    orderedProviders.move(fromOffsets: source, toOffset: destination)
-                                    ProviderOrderStore.saveProviderOrder(orderedProviders)
+                                    orderedServices.move(fromOffsets: source, toOffset: destination)
+                                    ProviderOrderStore.saveServiceOrder(orderedServices)
                                 }
                             }
                             .listStyle(.bordered(alternatesRowBackgrounds: true))
-                            .frame(height: CGFloat(orderedProviders.count) * 34)
+                            .frame(height: CGFloat(orderedServices.count) * 34)
                         }
 
                         SettingsFormSection(title: "content.usageSummary".localized()) {
@@ -107,6 +107,7 @@ struct ContentView: View {
         .onChange(of: refreshIntervalMinutes) { _, _ in
             // Restart auto-refresh and notify widgets when interval changes.
             viewModel.restartAutoRefresh()
+            AppSharedState.shared.customUsageViewModel.restartAutoRefresh()
             WidgetCenter.shared.reloadAllTimelines()
         }
         .onChange(of: viewModel.selectedProvider) { _, newProvider in
@@ -118,7 +119,7 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            orderedProviders = ProviderOrderStore.loadProviderOrder()
+            orderedServices = ProviderOrderStore.loadServiceOrder()
         }
         .confirmationDialog(
             "content.clearDataConfirmTitle".localized(),
@@ -165,6 +166,15 @@ struct ContentView: View {
                 )
             }
         }
+    }
+
+    private func displayName(for serviceKey: UsageServiceKey) -> String {
+        if let provider = serviceKey.builtInProvider {
+            return provider.displayName
+        }
+        guard let providerID = serviceKey.customProviderID else { return serviceKey.rawValue }
+        return AppSharedState.shared.customUsageViewModel.serviceStore
+            .service(providerID: providerID)?.displayName ?? providerID
     }
 
     // MARK: - Provider Picker

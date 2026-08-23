@@ -123,3 +123,26 @@ struct ProviderThresholdSettings: Codable, Equatable {
         )
     }
 }
+
+// MARK: - Dynamic Service Threshold Settings
+
+/// 組み込み・カスタム共通のサービス単位通知設定です。
+struct ServiceThresholdSettings: Codable, Equatable {
+    let serviceKey: UsageServiceKey
+    var windows: [SemanticUsageWindowKind: WindowThresholdSettings]
+
+    /// 指定利用枠の設定を返し、未設定時は既定値を使用します。
+    func settings(for kind: SemanticUsageWindowKind) -> WindowThresholdSettings {
+        windows[kind] ?? .defaultSettings()
+    }
+
+    static func defaultSettings(
+        for serviceKey: UsageServiceKey,
+        windowKinds: [SemanticUsageWindowKind]
+    ) -> ServiceThresholdSettings {
+        ServiceThresholdSettings(
+            serviceKey: serviceKey,
+            windows: Dictionary(uniqueKeysWithValues: windowKinds.map { ($0, .defaultSettings()) })
+        )
+    }
+}

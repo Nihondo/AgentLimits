@@ -24,3 +24,12 @@
 "widget.monthlyLimit" = "Monthly Limit";
 "widget.premiumRequests" = "Richieste Premium";
 "widget.copilotBillingDescription" = "Mostra l'utilizzo della fatturazione e i costi di Copilot.";
+
+"widget.custom.service" = "Service";
+"widget.custom.configuration" = "Utilizzo personalizzato";
+"widget.custom.configurationDescription" = "Choose the custom usage service shown by this widget.";
+"widget.custom.title" = "Utilizzo personalizzato";
+"widget.custom.description" = "Shows usage from a custom AgentLimits service.";
+"widget.custom.unavailable" = "Service unavailable";
+"widget.custom.configure" = "Add a custom service in AgentLimits.";
+"widget.custom.openSettings" = "Open Settings";

@@ -7,6 +7,7 @@ import SwiftUI
 
 enum SettingsTab: String, Hashable, CaseIterable, Identifiable {
     case usage
+    case customUsage
     case wakeUp
     case threshold
     case pacemaker
@@ -19,6 +20,7 @@ enum SettingsTab: String, Hashable, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .usage: return "tab.usage".localized()
+        case .customUsage: return "tab.customUsage".localized()
         case .wakeUp: return "tab.wakeUp".localized()
         case .threshold: return "tab.notification".localized()
         case .pacemaker: return "tab.pacemaker".localized()
@@ -31,6 +33,7 @@ enum SettingsTab: String, Hashable, CaseIterable, Identifiable {
     var iconName: String {
         switch self {
         case .usage: return "chart.pie"
+        case .customUsage: return "terminal"
         case .wakeUp: return "alarm"
         case .threshold: return "bell"
         case .pacemaker: return "gauge"
@@ -48,6 +51,7 @@ struct SettingsTabView: View {
     let viewModel: UsageViewModel
     let webViewPool: UsageWebViewPool
     let tokenUsageViewModel: TokenUsageViewModel
+    let customUsageViewModel: CustomUsageViewModel
 
     private var selectedTabBinding: Binding<SettingsTab?> {
         Binding(
@@ -87,6 +91,8 @@ struct SettingsTabView: View {
         switch SettingsTab(rawValue: selectedTabRaw) ?? .usage {
         case .usage:
             ContentView(viewModel: viewModel, webViewPool: webViewPool)
+        case .customUsage:
+            CustomUsageSettingsView(viewModel: customUsageViewModel)
         case .wakeUp:
             WakeUpSettingsView(scheduler: .shared)
         case .threshold:

@@ -11,6 +11,7 @@ import OSLog
 final class ThresholdNotificationStore: @unchecked Sendable {
     private let userDefaults: UserDefaults
     private let key = "threshold_notification_settings"
+    private let version2Key = "threshold_notification_settings_v2"
     private let encoder: JSONEncoder
     private let decoder: JSONDecoder
 
@@ -56,6 +57,53 @@ final class ThresholdNotificationStore: @unchecked Sendable {
         }
     }
 
+    /// 動的サービス対応のversion 2設定を読み込み、初回は旧設定から移行します。
+    func loadServiceSettings() -> [UsageServiceKey: ServiceThresholdSettings] {
+        if let data = userDefaults.data(forKey: version2Key),
+           let values = try? decoder.decode([ServiceThresholdSettings].self, from: data) {
+            return Dictionary(uniqueKeysWithValues: values.map { ($0.serviceKey, $0) })
+        }
+        let migrated = migrateLegacySettings(loadSettings())
+        saveServiceSettings(migrated)
+        return migrated
+    }
+
+    /// version 2通知設定を保存します。
+    func saveServiceSettings(_ settings: [UsageServiceKey: ServiceThresholdSettings]) {
+        if let data = try? encoder.encode(Array(settings.values)) {
+            userDefaults.set(data, forKey: version2Key)
+        }
+    }
+
+    /// 動的サービスの通知済みリセット時刻を更新します。
+    func updateLastNotifiedResetAt(
+        for serviceKey: UsageServiceKey,
+        windowKind: SemanticUsageWindowKind,
+        level: UsageThresholdLevel,
+        resetAt: Date
+    ) {
+        var allSettings = loadServiceSettings()
+        var serviceSettings = allSettings[serviceKey] ?? .defaultSettings(
+            for: serviceKey,
+            windowKinds: [windowKind]
+        )
+        var windowSettings = serviceSettings.settings(for: windowKind)
+        switch level {
+        case .warning: windowSettings.warning.lastNotifiedResetAt = resetAt
+        case .danger: windowSettings.danger.lastNotifiedResetAt = resetAt
+        }
+        serviceSettings.windows[windowKind] = windowSettings
+        allSettings[serviceKey] = serviceSettings
+        saveServiceSettings(allSettings)
+    }
+
+    /// 削除されたサービスのversion 2通知設定を削除します。
+    func deleteServiceSettings(for serviceKey: UsageServiceKey) {
+        var allSettings = loadServiceSettings()
+        allSettings.removeValue(forKey: serviceKey)
+        saveServiceSettings(allSettings)
+    }
+
     /// Updates lastNotifiedResetAt for a specific window
     func updateLastNotifiedResetAt(
         for provider: UsageProvider,
@@ -89,6 +137,24 @@ final class ThresholdNotificationStore: @unchecked Sendable {
     private func makeDefaultSettings() -> [UsageProvider: ProviderThresholdSettings] {
         Dictionary(uniqueKeysWithValues: UsageProvider.allCases.map {
             ($0, ProviderThresholdSettings.defaultSettings(for: $0))
+        })
+    }
+
+    private func migrateLegacySettings(
+        _ legacy: [UsageProvider: ProviderThresholdSettings]
+    ) -> [UsageServiceKey: ServiceThresholdSettings] {
+        Dictionary(uniqueKeysWithValues: legacy.map { provider, settings in
+            let windows: [SemanticUsageWindowKind: WindowThresholdSettings]
+            if provider == .githubCopilot {
+                windows = [.oneMonth: settings.primaryWindow]
+            } else {
+                windows = [
+                    .fiveHours: settings.primaryWindow,
+                    .oneWeek: settings.secondaryWindow,
+                ]
+            }
+            let serviceKey = UsageServiceKey.builtIn(provider)
+            return (serviceKey, ServiceThresholdSettings(serviceKey: serviceKey, windows: windows))
         })
     }
 }

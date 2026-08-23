@@ -23,6 +23,7 @@ Download the latest build: [Download](https://github.com/Nihondo/AgentLimits/rel
   - Claude Code: `https://claude.ai/api/organizations/{orgId}/usage`
 - **Usage limits (GitHub Copilot):** Monthly premium interaction quota via entitlement API.
   - Copilot: `https://github.com/github-copilot/chat/entitlement`
+- **Custom usage services:** Run a user-selected executable that prints an AgentLimits JSON snapshot to stdout. Each service may provide one or two unique `5h`, `1w`, or `1month` windows.
 - **Token usage (ccusage):** daily/weekly/monthly tokens and cost via CLI.
   - Codex: `npx -y ccusage@latest codex daily`
   - Claude Code: `npx -y ccusage@latest claude daily`
@@ -40,14 +41,14 @@ Download the latest build: [Download](https://github.com/Nihondo/AgentLimits/rel
 - Pacemaker indicator: optionally shows `<used>%↑` when over pace
 - Toggle icon visibility per provider in **Usage** settings
 - **Hide menu bar icon**: completely hides the menu bar icon. While hidden, double-click the app icon in Finder (or open via Spotlight / `open -a AgentLimits`) while it is still running to temporarily show the icon and open Settings. Closing the Settings window hides the icon again.
-- Provider display order (Codex / Claude Code / Copilot) is configurable in **Usage** settings (**Display Order**)
+- Service display order (built-in and custom) is configurable in **Usage** settings (**Display Order**)
 
 ### Menu Dashboard
 When you open the menu bar menu, a dashboard appears at the top showing per-provider usage at a glance:
 - Header: provider name · remaining time (5h window) · days until weekly reset, or monthly reset for monthly-only providers
 - **Usage bar**: linear progress bar color-coded by usage level; when pacemaker is exceeded, the bar is segmented (green → orange → red) matching the widget donut ring behavior
 - **Pacemaker bar**: divided into time segments (5h: 5 segments, weekly: 7 segments, monthly: single continuous bar) with gaps, matching the widget inner ring
-- Clicking a dashboard row opens the provider's usage page in the browser
+- Clicking a dashboard row opens the provider's usage page in the browser. A custom service opens its configured HTTP/HTTPS URL, or its settings when no URL is configured.
 - Dashboard visibility is configurable per provider in **Usage** settings (**Show dashboard in menu**)
 - Menu also includes: **Display Mode**, **Language** (System or any bundled translation), **Wake Up → Run Now**, **Start app at login**, and **Check for Updates...**
 - With **System** selected, AgentLimits uses a supported OS language and falls back to English when the OS language is not available.
@@ -81,6 +82,12 @@ Pacemaker shows a time-based usage benchmark to help you stay on track.
 - Color-coded percentage based on usage level and display mode
 - Update time shown as `HH:mm` (or `--:--` if older than 24h)
 
+### Custom Usage Widget
+- Add the single **Custom Usage** widget kind, then right-click it and choose **Edit Widget** to select a service.
+- Each widget instance can select a different custom service.
+- Small and medium widgets show one or two windows in `5h` → `1w` → `1month` order and reuse the usage colors, Used/Remaining mode, pacemaker, and update time.
+- If the selected service is deleted, the widget shows that the service is unavailable.
+
 ### Token Usage Widgets (Codex / Claude Code)
 - **Small:** today / this week / this month summary (cost + tokens)
 - **Medium:** summary + GitHub-style heatmap
@@ -108,6 +115,42 @@ Pacemaker shows a time-based usage benchmark to help you stay on track.
 8. Sign in via the embedded WebView (chatgpt.com / claude.ai / github.com).
 9. Use **Clear Data** to remove login data, website storage, and cached usage snapshots if sign-in gets stuck or you want to reset login history.
 
+### Custom Usage
+1. Open **Custom Usage** and add a service.
+2. Enter a display name and a permanent lowercase Provider ID matching `^[a-z0-9][a-z0-9_-]{0,62}$`.
+3. Select an executable regular file. AgentLimits runs the file directly from its parent folder; arguments and free-form shell commands are not accepted.
+4. Optionally add an HTTP/HTTPS website, then choose automatic refresh, menu bar, and dashboard visibility.
+5. Use **Run Test**. The executable must exit with code 0 within 60 seconds and print exactly one JSON object to stdout; write logs to stderr.
+6. Custom services use the Usage refresh interval. Manual tests and widget refresh taps still run when automatic refresh is disabled.
+
+Example stdout:
+
+```json
+{
+  "schemaVersion": 1,
+  "provider": "cursor",
+  "fetchedAt": "2026-08-23T12:34:56Z",
+  "windows": [
+    {
+      "kind": "5h",
+      "usedPercent": 42.5,
+      "resetAt": "2026-08-23T15:00:00Z",
+      "durationSeconds": 18000,
+      "usedCount": 425,
+      "limitCount": 1000
+    },
+    {
+      "kind": "1w",
+      "usedPercent": 68,
+      "resetAt": "2026-08-30T00:00:00Z",
+      "durationSeconds": 604800
+    }
+  ]
+}
+```
+
+`fetchedAt` and `resetAt` require timezone-aware ISO 8601 values. `usedPercent` must be 0–100 and `durationSeconds` must be positive. `usedCount` and `limitCount` are optional, but must be supplied together as nonnegative integers with `limitCount > 0`. Unknown fields are allowed. stdout is limited to 256 KiB and stderr to 64 KiB. Invalid output never overwrites the last successful snapshot.
+
 ### ccusage
 1. Open **ccusage**.
 2. Select provider (Codex / Claude Code).
@@ -126,8 +169,8 @@ Pacemaker shows a time-based usage benchmark to help you stay on track.
 ### Notification
 1. Open **Notification**.
 2. Request notification permission (first time only).
-3. Select provider (Codex / Claude Code / Copilot).
-4. Configure thresholds for each window (5-hour/weekly for Codex/Claude Code when available; monthly-only Codex and Copilot use the primary/monthly threshold).
+3. Select a built-in or custom service from the service menu.
+4. Configure thresholds for each available semantic window (5-hour, weekly, or monthly).
 5. Adjust usage colors (donut + status colors) if needed.
 
 ### Pacemaker
@@ -168,6 +211,7 @@ Snapshots are stored in the App Group container:
 ├── usage_snapshot.json
 ├── usage_snapshot_claude.json
 ├── usage_snapshot_copilot.json
+├── usage_snapshot_custom_<provider>.json
 ├── token_usage_codex.json
 ├── token_usage_claude.json
 └── token_usage_copilot.json
@@ -178,7 +222,8 @@ Snapshots are stored in the App Group container:
 - ccusage output changes may break parsing.
 - Widget refresh can be throttled by macOS.
 - Threshold notifications require permission.
-- CLI execution uses the **user login shell** and prefixes PATH with `/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH`.
+- Built-in CLI execution uses the **user login shell**. Custom usage executables run directly. Both prefix PATH with `/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH`.
+- Custom service stdout must contain only the snapshot JSON. Send diagnostic logs to stderr. On failure, AgentLimits keeps the last successful value and shows the latest attempt, success time, and error in settings and the menu dashboard.
 - Full-path overrides in **Advanced** take precedence.
 - Claude Code logins may require multiple attempts.
 - The Claude Code status line script requires `jq`.
