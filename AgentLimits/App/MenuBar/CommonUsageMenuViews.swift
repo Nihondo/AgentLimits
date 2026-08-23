@@ -123,34 +123,24 @@ struct CustomUsageDashboardMenuItemView: View {
     let snapshot: UsagePresentationSnapshot
     let displayMode: UsageDisplayMode
     let websiteURL: URL?
-    let lastAttemptAt: Date?
-    let lastSuccessAt: Date?
     let lastError: String?
     @State private var isHovered = false
 
     var body: some View {
         Button(action: openDestination) {
             VStack(alignment: .leading, spacing: 5) {
-                HStack {
+                HStack(spacing: 6) {
                     Text(snapshot.displayName).fontWeight(.semibold)
                     Spacer()
                     if lastError != nil {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .foregroundStyle(.orange)
                     }
-                    Text(snapshot.fetchedAt, style: .relative)
-                        .foregroundStyle(.secondary)
+                    DashboardResetLabels(resetDates: snapshot.windows.map { Optional($0.resetAt) })
                 }
                 .font(.system(size: 11))
                 ForEach(snapshot.windows, id: \.kind) { window in
                     windowRow(window)
-                }
-                HStack(spacing: 8) {
-                    statusDate("customUsage.lastAttempt".localized(), date: lastAttemptAt)
-                    statusDate(
-                        "customUsage.lastSuccess".localized(),
-                        date: lastSuccessAt ?? snapshot.fetchedAt
-                    )
                 }
                 if let lastError {
                     Text(lastError)
@@ -165,70 +155,54 @@ struct CustomUsageDashboardMenuItemView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .background(
-            RoundedRectangle(cornerRadius: 7)
-                .fill(isHovered ? Color.accentColor.opacity(0.8) : .clear)
-                .padding(.horizontal, 5)
-        )
+        .dashboardRowStyle(isHovered: isHovered)
         .onHover { isHovered = $0 }
-    }
-
-    private func statusDate(_ label: String, date: Date?) -> some View {
-        Group {
-            if let date {
-                Text("\(label): ") + Text(date, style: .relative)
-            } else {
-                Text("\(label): -")
-            }
-        }
-        .font(.system(size: 8.5))
-        .foregroundStyle(.secondary)
-        .lineLimit(1)
     }
 
     private func windowRow(_ window: SemanticUsageWindow) -> some View {
         let usageWindow = window.usageWindow
+        let displayModeRaw = displayMode.makeDisplayModeRaw()
         let percent = displayMode.displayPercent(from: window.usedPercent, window: usageWindow)
+        let pacemakerPercent = usageWindow.displayPacemakerPercent(for: displayModeRaw)
+        let thresholds = UsageStatusThresholdStore.loadThresholds(for: snapshot.serviceKey, windowKind: window.kind)
+        let isEligible = PacemakerRingWarningSettings.isWarningEnabled()
+            && displayModeRaw != .remaining
+            && !LinearWarningGate.isBlockedByStatusColor(usedPercent: window.usedPercent, thresholds: thresholds)
+        let segments = PacemakerLinearSegments.compute(
+            usedPercent: window.usedPercent,
+            pacemakerPercent: usageWindow.calculatePacemakerPercent(),
+            progress: max(0, min(1, percent / 100)),
+            isEligible: isEligible
+        )
+
         return HStack(spacing: 6) {
             Text(window.kind.compactLabel)
                 .font(.system(size: 10))
                 .foregroundStyle(.secondary)
-                .frame(width: 42, alignment: .trailing)
-            VStack(spacing: 2) {
-                GeometryReader { proxy in
-                    Capsule()
-                        .fill(Color.secondary.opacity(0.2))
-                        .overlay(alignment: .leading) {
-                            Capsule()
-                                .fill(statusColor(for: window))
-                                .frame(width: proxy.size.width * max(0, min(1, percent / 100)))
-                        }
-                }
-                .frame(height: 7)
-                if let pacemaker = usageWindow.displayPacemakerPercent(for: displayMode.makeDisplayModeRaw()) {
-                    GeometryReader { proxy in
-                        Capsule()
-                            .fill(Color.secondary.opacity(0.15))
-                            .overlay(alignment: .leading) {
-                                Capsule()
-                                    .fill(UsageColorSettings.loadPacemakerRingColor())
-                                    .frame(width: proxy.size.width * max(0, min(1, pacemaker / 100)))
-                            }
-                    }
-                    .frame(height: 3)
-                }
-            }
+                .frame(minWidth: 18, alignment: .trailing)
+
+            UsageLinearGaugeView(
+                usageProgress: max(0, min(1, percent / 100)),
+                barColor: statusColor(for: window, thresholds: thresholds),
+                pacemakerSegments: segments,
+                pacemakerProgress: pacemakerPercent.map { max(0, min(1, $0 / 100)) },
+                pacemakerRingColor: UsageColorSettings.loadPacemakerRingColor(),
+                pacemakerWarningColor: UsageColorSettings.loadPacemakerStatusOrangeColor(),
+                pacemakerDangerColor: UsageColorSettings.loadPacemakerStatusRedColor(),
+                divisionCount: usageWindow.pacemakerDivisionCount
+            )
+
             Text(UsagePercentFormatter.formatPercentText(percent))
                 .font(.system(size: 11))
                 .frame(width: 38, alignment: .trailing)
         }
     }
 
-    private func statusColor(for window: SemanticUsageWindow) -> Color {
-        let thresholds = UsageStatusThresholdStore.loadThresholds(
-            for: snapshot.serviceKey,
-            windowKind: window.kind
-        )
+    private func statusColor(for window: SemanticUsageWindow, thresholds: UsageStatusThresholds) -> Color {
+        let defaults = AppGroupDefaults.shared
+        guard defaults?.bool(forKey: UsageColorKeys.donutUseStatus) == true else {
+            return UsageColorSettings.loadDonutColor()
+        }
         switch UsageStatusLevelResolver.level(
             for: window.usedPercent,
             isRemainingMode: false,

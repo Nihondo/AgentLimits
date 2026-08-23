@@ -458,8 +458,6 @@ extension MenuBarController: NSMenuDelegate {
             snapshot: snapshot,
             displayMode: displayMode,
             websiteURL: service.websiteURL,
-            lastAttemptAt: status?.lastAttemptAt,
-            lastSuccessAt: status?.lastSuccessAt,
             lastError: status?.lastError
         )
         let hosting = NSHostingView(rootView: view)

@@ -12,19 +12,6 @@ struct DashboardMenuItemView: View {
     let displayMode: UsageDisplayMode
 
     @State private var isHovered = false
-    @Environment(\.colorScheme) private var colorScheme
-
-    // NSVisualEffectView のmaterial selectionはアクセントカラーより暗く合成されるため、
-    // ダークモード時のみHSB空間で明度を下げてネイティブに近づける
-    private var menuHighlightColor: Color {
-        guard colorScheme == .dark,
-              let rgb = NSColor.controlAccentColor.usingColorSpace(.deviceRGB) else {
-            return Color.accentColor
-        }
-        var h: CGFloat = 0, s: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
-        rgb.getHue(&h, saturation: &s, brightness: &b, alpha: &a)
-        return Color(NSColor(hue: h, saturation: s, brightness: b * 0.78, alpha: a))
-    }
 
     var body: some View {
         Button {
@@ -40,12 +27,7 @@ struct DashboardMenuItemView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .foregroundStyle(isHovered ? Color.white : Color.primary)
-        .background(
-            RoundedRectangle(cornerRadius: 7, style: .continuous)
-                .fill(isHovered ? menuHighlightColor : .clear)
-                .padding(.horizontal, 5)
-        )
+        .dashboardRowStyle(isHovered: isHovered)
         .onHover { isHovered = $0 }
     }
 
@@ -56,14 +38,15 @@ struct DashboardMenuItemView: View {
             Text(provider.displayName)
                 .fontWeight(.semibold)
             Spacer()
-            if snapshot.isSingleMonthlyWindow {
-                Label(primaryResetText, systemImage: "calendar")
-            } else {
-                Label(primaryRemainingText, systemImage: "clock")
-                Label(secondaryResetText, systemImage: "calendar")
-            }
+            DashboardResetLabels(resetDates: headerResetDates)
         }
         .font(.system(size: 11))
+    }
+
+    private var headerResetDates: [Date?] {
+        snapshot.isSingleMonthlyWindow
+            ? [snapshot.primaryWindow?.resetAt]
+            : [snapshot.primaryWindow?.resetAt, snapshot.secondaryWindow?.resetAt]
     }
 
     // MARK: - ウィンドウ行
@@ -103,40 +86,6 @@ struct DashboardMenuItemView: View {
             ))
             .font(.system(size: 11))
             .frame(width: 38, alignment: .trailing)
-        }
-    }
-
-    // MARK: - 時間テキスト
-
-    private var primaryRemainingText: String {
-        guard let window = snapshot.primaryWindow, let resetAt = window.resetAt else { return "--" }
-        let remaining = max(0, resetAt.timeIntervalSinceNow)
-        if remaining >= 3600 {
-            return String(format: "menu.dashboard.remainingHours".localized(), remaining / 3600.0)
-        }
-        return String(format: "menu.dashboard.remainingMinutes".localized(), max(1, Int(remaining) / 60))
-    }
-
-    private var secondaryResetText: String {
-        guard let window = snapshot.secondaryWindow, let resetAt = window.resetAt else { return "--" }
-        return formatResetRelative(resetAt)
-    }
-
-    private var primaryResetText: String {
-        guard let window = snapshot.primaryWindow, let resetAt = window.resetAt else { return "--" }
-        return formatResetRelative(resetAt)
-    }
-
-    private func formatResetRelative(_ resetAt: Date) -> String {
-        let remaining = resetAt.timeIntervalSinceNow
-        if remaining <= 60 {
-            return "menu.dashboard.soon".localized()
-        } else if remaining >= 86400 {
-            return String(format: "menu.dashboard.resetDaysLater".localized(), remaining / 86400.0)
-        } else if remaining >= 3600 {
-            return String(format: "menu.dashboard.resetHoursLater".localized(), remaining / 3600.0)
-        } else {
-            return String(format: "menu.dashboard.resetMinutesLater".localized(), max(1, Int(remaining) / 60))
         }
     }
 }

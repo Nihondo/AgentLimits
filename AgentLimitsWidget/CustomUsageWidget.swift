@@ -209,16 +209,30 @@ private struct CustomUsageWidgetEntryView: View {
         } else if let snapshot = entry.snapshot, let descriptor = entry.descriptor {
             let windows = snapshot.windows.sorted { $0.kind.displayOrder < $1.kind.displayOrder }
             if family == .systemMedium {
-                HStack(spacing: 14) {
-                    donutRow(windows: windows, providerID: descriptor.providerID)
-                    Spacer(minLength: 4)
-                    detailColumn(windows: windows)
-                        .frame(width: 145)
+                GeometryReader { proxy in
+                    let detailWidth = WidgetDonutLayout.detailColumnWidth
+                    let spacing = WidgetDonutLayout.columnSpacing
+                    let leftWidth = max(0, proxy.size.width - detailWidth - spacing)
+                    let donutSize = WidgetDonutLayout.donutSize(availableWidth: leftWidth, columnCount: windows.count)
+                    HStack(alignment: .center, spacing: 0) {
+                        donutRow(windows: windows, providerID: descriptor.providerID, donutSize: donutSize)
+                            .frame(width: leftWidth, alignment: .leading)
+                        Spacer(minLength: 0)
+                        detailColumn(windows: windows)
+                            .frame(width: detailWidth, alignment: .trailing)
+                            .padding(.trailing, 12)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(height: max(donutSize + 30, 96), alignment: .center)
                 }
                 .frame(height: 100)
             } else {
-                donutRow(windows: windows, providerID: descriptor.providerID)
-                    .frame(height: 100)
+                GeometryReader { proxy in
+                    let donutSize = WidgetDonutLayout.donutSize(availableWidth: proxy.size.width, columnCount: windows.count)
+                    donutRow(windows: windows, providerID: descriptor.providerID, donutSize: donutSize)
+                        .frame(height: donutSize + 30, alignment: .center)
+                }
+                .frame(height: 100)
             }
             Text("\("widget.updatedAt".widgetLocalized()) \(WidgetUpdateTimeFormatter.formatUpdateTime(since: snapshot.fetchedAt))")
                 .font(.caption2)
@@ -229,13 +243,14 @@ private struct CustomUsageWidgetEntryView: View {
         }
     }
 
-    private func donutRow(windows: [CustomUsageWindow], providerID: String) -> some View {
-        HStack(spacing: windows.count == 1 ? 0 : 12) {
+    private func donutRow(windows: [CustomUsageWindow], providerID: String, donutSize: CGFloat) -> some View {
+        HStack(spacing: windows.count == 1 ? 0 : WidgetDonutLayout.columnSpacing) {
             ForEach(windows, id: \.kind) { window in
                 CustomUsageDonutColumn(
                     serviceKey: .custom(providerID),
                     window: window.semanticWindow,
-                    displayMode: displayMode
+                    displayMode: displayMode,
+                    size: donutSize
                 )
                 .frame(maxWidth: .infinity)
             }
@@ -244,16 +259,18 @@ private struct CustomUsageWidgetEntryView: View {
 
     private func detailColumn(windows: [CustomUsageWindow]) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            ForEach(windows, id: \.kind) { window in
+            ForEach(Array(windows.enumerated()), id: \.element.kind) { index, window in
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(window.kind.compactLabel)
-                        .font(.caption.bold())
-                    Text(window.resetAt, style: .relative)
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
+                    UsageDetailSectionView(
+                        title: window.kind.detailTitle,
+                        window: window.semanticWindow.usageWindow,
+                        showRelative: windows.count > 1 && index == 0,
+                        showDateTime: !(windows.count > 1 && index == 0)
+                    )
                     if let used = window.usedCount, let limit = window.limitCount {
-                        Text("\(used) / \(limit)")
-                            .font(.caption2.monospacedDigit())
+                        Text("  \(used) / \(limit)")
+                            .font(.headline)
+                            .monospacedDigit()
                     }
                 }
             }
@@ -286,33 +303,43 @@ private struct CustomUsageDonutColumn: View {
     let serviceKey: UsageServiceKey
     let window: SemanticUsageWindow
     let displayMode: UsageDisplayModeRaw
+    let size: CGFloat
 
     var body: some View {
         VStack(spacing: 4) {
-            ZStack {
-                Circle().stroke(Color.secondary.opacity(0.18), lineWidth: 8)
-                Circle()
-                    .trim(from: 0, to: displayProgress)
-                    .stroke(ringColor, style: StrokeStyle(lineWidth: 8, lineCap: .round))
-                    .rotationEffect(.degrees(-90))
-                if let pacemakerProgress {
-                    Circle().stroke(Color.secondary.opacity(0.12), lineWidth: 4).padding(7)
-                    Circle()
-                        .trim(from: 0, to: pacemakerProgress)
-                        .stroke(
-                            UsageColorSettings.loadPacemakerRingColor(),
-                            style: StrokeStyle(lineWidth: 4, lineCap: .round)
-                        )
-                        .rotationEffect(.degrees(-90))
-                        .padding(7)
-                }
-                Text(window.kind.compactLabel)
-                    .font(.caption.bold())
-            }
-            .frame(width: 62, height: 62)
+            UsageRingGaugeView(
+                centerLabel: window.kind.compactLabel,
+                progress: displayProgress,
+                ringColor: ringColor,
+                pacemakerSegments: pacemakerSegments,
+                pacemakerProgress: pacemakerProgress,
+                pacemakerRingColor: UsageColorSettings.loadPacemakerRingColor(),
+                pacemakerWarningColor: UsageColorSettings.loadPacemakerStatusOrangeColor(),
+                pacemakerDangerColor: UsageColorSettings.loadPacemakerStatusRedColor(),
+                divisionCount: window.usageWindow.pacemakerDivisionCount,
+                size: size,
+                accessibilityPercentText: UsagePercentFormatter.formatPercentText(displayPercent, placeholder: "0%")
+            )
             percentText
                 .font(.title3.bold().monospacedDigit())
         }
+    }
+
+    private var isPacemakerRingWarningEnabled: Bool {
+        PacemakerRingWarningSettings.isWarningEnabled()
+    }
+
+    private var pacemakerSegments: PacemakerRingSegments? {
+        let thresholds = UsageStatusThresholdStore.loadThresholds(for: serviceKey, windowKind: window.kind)
+        let isEligible = isPacemakerRingWarningEnabled
+            && displayMode != .remaining
+            && !WidgetRingWarningGate.isBlockedByStatusColor(usedPercent: window.usedPercent, thresholds: thresholds)
+        return PacemakerRingSegments.compute(
+            usedPercent: window.usedPercent,
+            pacemakerPercent: window.usageWindow.calculatePacemakerPercent(),
+            progress: displayProgress,
+            isEligible: isEligible
+        )
     }
 
     @ViewBuilder
@@ -372,5 +399,16 @@ private struct CustomUsageDonutColumn: View {
 private extension UsageDisplayModeRaw {
     var normalizedForWidget: UsageDisplayModeRaw {
         self == .usedWithPacemaker ? .used : self
+    }
+}
+
+private extension SemanticUsageWindowKind {
+    /// 組み込みWidgetの詳細列と同じ見出し文言を、意味ベースの利用枠種別から解決する。
+    var detailTitle: String {
+        switch self {
+        case .fiveHours: return "widget.5hourLimit".widgetLocalized()
+        case .oneWeek: return "widget.weeklyLimit".widgetLocalized()
+        case .oneMonth: return "widget.monthlyLimit".widgetLocalized()
+        }
     }
 }
