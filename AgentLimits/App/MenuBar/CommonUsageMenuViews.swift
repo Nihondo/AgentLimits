@@ -38,19 +38,44 @@ private struct CommonUsageMenuBarServiceView: View {
             Text(snapshot.displayName)
                 .font(.system(size: 9.5, weight: .semibold))
             HStack(spacing: 2) {
-                ForEach(Array(snapshot.windows.enumerated()), id: \.element.kind) { index, window in
+                ForEach(Array(displayWindowSlots.enumerated()), id: \.offset) { index, window in
                     if index > 0 { Text("/").foregroundStyle(.secondary) }
-                    CommonUsagePercentText(
-                        serviceKey: snapshot.serviceKey,
-                        window: window,
-                        displayMode: displayMode,
-                        colorScheme: colorScheme
-                    )
+                    if let window {
+                        CommonUsagePercentText(
+                            serviceKey: snapshot.serviceKey,
+                            window: window,
+                            displayMode: displayMode,
+                            colorScheme: colorScheme
+                        )
+                    } else {
+                        Text(UsagePercentFormatter.formatPercentText(nil)).foregroundStyle(.secondary)
+                    }
                 }
             }
             .font(.system(size: 13.5, weight: .semibold, design: .monospaced))
             .monospacedDigit()
         }
+    }
+
+    // 一部のウィンドウだけ未取得の場合（例: Codexが週次のみ先に取得できた等）も、
+    // 想定される枠に対して「--」プレースホルダーを補って枠の存在がわかるようにする。
+    // 実データの種別が想定外（例: 月次のみ判定に切り替わった等）の場合はそのまま実データを使う。
+    private var displayWindowSlots: [SemanticUsageWindow?] {
+        let expectedKinds = snapshot.serviceKey.expectedWindowKinds
+        guard !expectedKinds.isEmpty,
+              snapshot.windows.allSatisfy({ expectedKinds.contains($0.kind) }) else {
+            return snapshot.windows
+        }
+        let byKind = Dictionary(uniqueKeysWithValues: snapshot.windows.map { ($0.kind, $0) })
+        return expectedKinds.map { byKind[$0] }
+    }
+}
+
+private extension UsageServiceKey {
+    /// このサービスで通常期待されるウィンドウ種別（組み込みサービスのみ既知の構成を返す）。
+    var expectedWindowKinds: [SemanticUsageWindowKind] {
+        guard let provider = builtInProvider else { return [] }
+        return provider == .githubCopilot ? [.oneMonth] : [.fiveHours, .oneWeek]
     }
 }
 

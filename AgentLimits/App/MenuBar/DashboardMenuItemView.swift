@@ -51,23 +51,19 @@ struct DashboardMenuItemView: View {
 
     // MARK: - ウィンドウ行
 
+    // ウィンドウ未取得時（ログイン直後など）も「これから開始する枠」がわかるよう、
+    // データが無くてもラベル/プレースホルダー行は表示する。
     @ViewBuilder
     private var windowRows: some View {
         if snapshot.isSingleMonthlyWindow {
-            if let primary = snapshot.primaryWindow {
-                windowRow(label: "mo", window: primary, windowKind: .primary)
-            }
+            windowRow(label: "mo", window: snapshot.primaryWindow, windowKind: .primary)
         } else {
-            if let primary = snapshot.primaryWindow {
-                windowRow(label: "5h", window: primary, windowKind: .primary)
-            }
-            if let secondary = snapshot.secondaryWindow {
-                windowRow(label: "1w", window: secondary, windowKind: .secondary)
-            }
+            windowRow(label: "5h", window: snapshot.primaryWindow, windowKind: .primary)
+            windowRow(label: "1w", window: snapshot.secondaryWindow, windowKind: .secondary)
         }
     }
 
-    private func windowRow(label: String, window: UsageWindow, windowKind: UsageWindowKind) -> some View {
+    private func windowRow(label: String, window: UsageWindow?, windowKind: UsageWindowKind) -> some View {
         HStack(spacing: 6) {
             Text(label)
                 .font(.system(size: 10))
@@ -82,7 +78,7 @@ struct DashboardMenuItemView: View {
             )
 
             Text(UsagePercentFormatter.formatPercentText(
-                displayMode.displayPercent(from: window.usedPercent, window: window)
+                window.map { displayMode.displayPercent(from: $0.usedPercent, window: $0) }
             ))
             .font(.system(size: 11))
             .frame(width: 38, alignment: .trailing)
