@@ -135,6 +135,7 @@ stdoutの例：
     {
       "kind": "5h",
       "label": "Fast Requests",
+      "title": "高速リクエスト枠",
       "usedPercent": 42.5,
       "resetAt": "2026-08-23T15:00:00Z",
       "durationSeconds": 18000,
@@ -151,7 +152,7 @@ stdoutの例：
 }
 ```
 
-`fetchedAt` はタイムゾーン付きISO 8601で指定します。`label`、`resetAt`、`durationSeconds`、`isPacemakerEnabled` は任意です。labelを省略または空文字にすると `kind` のラベルを使い、ペースメーカーは既定で有効です。指定する場合、`resetAt` はタイムゾーン付きISO 8601、`durationSeconds` は正数にします。`usedCount` と `limitCount` は任意ですが、使用する場合は両方を非負整数で指定し、`limitCount > 0` とします。未知フィールドは許容されます。期限なしの枠は、使用量が閾値未満に戻ってから再び超過した場合だけ、有効な閾値通知を再送します。stdout上限は256 KiB、stderr上限は64 KiBです。無効な出力で最終成功スナップショットが上書きされることはありません。
+`fetchedAt` はタイムゾーン付きISO 8601で指定します。`kind` は `5h` / `1w` / `1month` のどれにも対応しない任意区間・区間なしの枠には `custom` を指定できます（表示順は常に最後、`label`未指定時の既定ラベルは `•`）。`label`、`title`、`resetAt`、`durationSeconds`、`isPacemakerEnabled` は任意です。`label`はドーナツ中央やダッシュボードの短いラベル、`title`はWidget詳細列・通知設定の見出し・通知本文で使う長めの見出しで、互いに独立して指定できます。`title`を省略すると`label`、`label`も省略すると`kind`の既定文言にフォールバックします。`resetAt`はタイムゾーン付きISO 8601、`durationSeconds`は正数にします。`usedCount` と `limitCount` は任意ですが、使用する場合は両方を非負整数で指定し、`limitCount > 0` とします。未知フィールドは許容されます。期限なしの枠は、使用量が閾値未満に戻ってから再び超過した場合だけ、有効な閾値通知を再送します。stdout上限は256 KiB、stderr上限は64 KiBです。無効な出力で最終成功スナップショットが上書きされることはありません。
 
 ### ccusage
 1. **ccusage**タブを開く

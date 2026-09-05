@@ -19,6 +19,14 @@ xcodebuild -scheme AgentLimits -destination 'platform=macOS'
 xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 ```
 
+### Development Signing Troubleshooting
+
+- Set the local team in `Configurations/DevelopmentTeam.local.xcconfig`. Check the effective `DEVELOPMENT_TEAM` with `xcodebuild -scheme AgentLimits -showBuildSettings` before changing project settings.
+- The app and widget must use the same team. The widget identifier `com.dmng.agentlimit.AgentLimit.AgentLimitWidget` must be a regular App ID, not an App Clip, with the existing `group.com.dmng.agentlimit` App Group assigned.
+- After renewing an Apple Development certificate, refresh development provisioning profiles for **both** the app and widget. A profile can remain within its own validity period while containing an expired certificate. Compare certificate fingerprints, not just display names.
+- Try a signed build with `xcodebuild -scheme AgentLimits -destination 'platform=macOS' -allowProvisioningUpdates`. A build with `CODE_SIGNING_ALLOWED=NO` does not validate signing or provisioning.
+- If automatic signing reports that the existing widget Bundle ID is unavailable, inspect its registration in Apple Developer. `On Demand Install Capable` identifies an App Clip; such a registration is unsuitable for this macOS widget and may be absent from the macOS development profile App ID list. Do not rename the production Bundle ID just to suppress the error. Correcting a mistaken registration may require Apple Developer support or deletion and re-registration; obtain explicit approval before deleting an identifier.
+
 ## Architecture
 
 ### Data Flow
@@ -161,9 +169,9 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 
 #### Custom Usage Services
 - Dynamic services are identified by immutable provider slugs matching `^[a-z0-9][a-z0-9_-]{0,62}$`; there is no `isCustom` field.
-- Common identity uses `builtIn:<rawValue>` or `custom:<slug>`. Semantic window kinds are `5h`, `1w`, and `1month`.
+- Common identity uses `builtIn:<rawValue>` or `custom:<slug>`. Semantic window kinds are `5h`, `1w`, `1month`, and `custom` (for a window that doesn't semantically fit the first three — e.g. an arbitrary or expiry-less interval; it always sorts last and its default label is `•`). `durationSeconds`, not the `kind` value, drives pacemaker division count, so `custom` can still get 5- or 7-way divisions.
 - A custom executable runs directly with no arguments, from its parent directory, with the standard AgentLimits PATH prefix. Limits are 60 seconds, 256 KiB stdout, and 64 KiB stderr.
-- stdout must be schema version 1 JSON with a matching provider, timezone-aware `fetchedAt`, and one or two unique windows. `label`, `resetAt`, `durationSeconds`, and `isPacemakerEnabled` are optional; supplied reset dates are timezone-aware and supplied durations are finite positive values. A custom label disables pacemaker ring divisions, and pacemaker rendering requires the enabled flag, reset date, and duration. Unknown fields are accepted.
+- stdout must be schema version 1 JSON with a matching provider, timezone-aware `fetchedAt`, and one or two unique windows. `label`, `title`, `resetAt`, `durationSeconds`, and `isPacemakerEnabled` are optional; supplied reset dates are timezone-aware and supplied durations are finite positive values. `label` is the short compact-display name (donut center, dashboard row) and also disables pacemaker ring divisions when set; `title` is an independent longer heading used for the widget's medium-size detail column, the notification settings section title, and notification bodies — it resolves as `title ?? label ?? kind's default text` (`SemanticUsageWindow.heading(fallback:)`) and never affects pacemaker ring divisions. Pacemaker rendering requires the enabled flag, reset date, and duration. Unknown fields are accepted.
 - Expiry-backed threshold notifications deduplicate by reset date. No-expiry windows persist an active-threshold flag, notify once while usage remains above a level, and become eligible again only after usage falls below that level.
 - Successful output is validated before the original bytes (including the trailing newline) are atomically saved. Validation and execution failures never overwrite the last success.
 - Service settings include display name, script path, optional HTTP/HTTPS URL, auto refresh, menu bar visibility, and dashboard visibility. Run status stores last attempt, last success, and the latest error.

@@ -136,6 +136,7 @@ Example stdout:
     {
       "kind": "5h",
       "label": "Fast Requests",
+      "title": "Fast Request Window",
       "usedPercent": 42.5,
       "resetAt": "2026-08-23T15:00:00Z",
       "durationSeconds": 18000,
@@ -152,7 +153,7 @@ Example stdout:
 }
 ```
 
-`fetchedAt` requires a timezone-aware ISO 8601 value. `label`, `resetAt`, `durationSeconds`, and `isPacemakerEnabled` are optional; an omitted or blank label uses the `kind` label, and pacemaker is enabled by default. When supplied, `resetAt` must be timezone-aware ISO 8601 and `durationSeconds` must be positive. `usedCount` and `limitCount` are optional, but must be supplied together as nonnegative integers with `limitCount > 0`. Unknown fields are allowed. A no-expiry window re-sends an enabled threshold notification only after usage falls below the threshold and exceeds it again. stdout is limited to 256 KiB and stderr to 64 KiB. Invalid output never overwrites the last successful snapshot.
+`fetchedAt` requires a timezone-aware ISO 8601 value. `kind` also accepts `custom` for a window that doesn't fit `5h` / `1w` / `1month` — an arbitrary or expiry-less window (it always sorts last, and its default label without `label` is `•`). `label`, `title`, `resetAt`, `durationSeconds`, and `isPacemakerEnabled` are optional. `label` is the short label shown in the donut center and dashboard row; `title` is a longer heading shown in the widget's detail column, the notification settings section, and notification bodies — the two are independent. An omitted or blank `title` falls back to `label`, and an omitted or blank `label` falls back to the `kind` label; pacemaker is enabled by default. When supplied, `resetAt` must be timezone-aware ISO 8601 and `durationSeconds` must be positive. `usedCount` and `limitCount` are optional, but must be supplied together as nonnegative integers with `limitCount > 0`. Unknown fields are allowed. A no-expiry window re-sends an enabled threshold notification only after usage falls below the threshold and exceeds it again. stdout is limited to 256 KiB and stderr to 64 KiB. Invalid output never overwrites the last successful snapshot.
 
 ### ccusage
 1. Open **ccusage**.

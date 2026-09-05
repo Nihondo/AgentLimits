@@ -124,8 +124,10 @@
 "notification.alertBody5h" = "5 小时使用限制已达到 %d%%";
 "notification.alertBodyWeek" = "每周使用限制已达到 %d%%";
 "notification.alertBodyMonth" = "每月使用限制已达到 %d%%";
+"notification.alertBodyCustomWindow" = "自定义使用限制已达到 %d%%";
 "notification.alertBodyCustom" = "%@ 使用量已达到 %d%%";
 "notification.monthlyWindow" = "每月限制";
+"notification.customWindow" = "自定义限制";
 
 /* ccusage */
 "tab.ccusage" = "ccusage";

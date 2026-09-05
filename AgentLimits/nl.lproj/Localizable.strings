@@ -124,8 +124,10 @@
 "notification.alertBody5h" = "De 5-uur gebruikslimiet heeft %d%% bereikt";
 "notification.alertBodyWeek" = "De wekelijkse gebruikslimiet heeft %d%% bereikt";
 "notification.alertBodyMonth" = "De maandelijkse gebruikslimiet heeft %d%% bereikt";
+"notification.alertBodyCustomWindow" = "De aangepaste gebruikslimiet heeft %d%% bereikt";
 "notification.alertBodyCustom" = "%@-gebruik heeft %d%% bereikt";
 "notification.monthlyWindow" = "Maandelijkse limiet";
+"notification.customWindow" = "Aangepaste limiet";
 
 /* ccusage */
 "tab.ccusage" = "ccusage";

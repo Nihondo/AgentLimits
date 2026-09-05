@@ -266,8 +266,8 @@ final class ThresholdNotificationManager: ObservableObject {
             serviceKey: snapshot.serviceKey,
             displayName: snapshot.displayName,
             windowKind: window.kind,
-            windowLabel: window.displayLabel,
-            hasCustomLabel: window.hasCustomLabel,
+            windowHeading: window.heading(fallback: window.displayLabel),
+            hasCustomHeading: window.title != nil || window.hasCustomLabel,
             level: level,
             usedPercent: Int(window.usedPercent)
         )
@@ -286,8 +286,8 @@ final class ThresholdNotificationManager: ObservableObject {
         serviceKey: UsageServiceKey,
         displayName: String,
         windowKind: SemanticUsageWindowKind,
-        windowLabel: String,
-        hasCustomLabel: Bool,
+        windowHeading: String,
+        hasCustomHeading: Bool,
         level: UsageThresholdLevel,
         usedPercent: Int
     ) async -> Bool {
@@ -296,10 +296,10 @@ final class ThresholdNotificationManager: ObservableObject {
             ? "notification.alertTitleWarning"
             : "notification.alertTitleDanger"
         content.title = String(format: titleKey.localized(), displayName)
-        if hasCustomLabel {
+        if hasCustomHeading {
             content.body = String(
                 format: "notification.alertBodyCustom".localized(),
-                windowLabel,
+                windowHeading,
                 usedPercent
             )
         } else {
@@ -308,6 +308,7 @@ final class ThresholdNotificationManager: ObservableObject {
             case .fiveHours: bodyKey = "notification.alertBody5h"
             case .oneWeek: bodyKey = "notification.alertBodyWeek"
             case .oneMonth: bodyKey = "notification.alertBodyMonth"
+            case .custom: bodyKey = "notification.alertBodyCustomWindow"
             }
             content.body = String(format: bodyKey.localized(), usedPercent)
         }

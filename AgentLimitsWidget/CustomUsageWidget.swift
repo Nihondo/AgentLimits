@@ -274,7 +274,7 @@ private struct CustomUsageWidgetEntryView: View {
             ForEach(Array(windows.enumerated()), id: \.element.kind) { index, window in
                 VStack(alignment: .leading, spacing: 2) {
                     UsageDetailSectionView(
-                        title: window.hasCustomLabel ? window.displayLabel : window.kind.detailTitle,
+                        title: window.heading(fallback: window.kind.detailTitle),
                         window: window.usageWindow,
                         showRelative: windows.count > 1 && index == 0,
                         showDateTime: !(windows.count > 1 && index == 0),
@@ -429,6 +429,7 @@ private extension SemanticUsageWindowKind {
         case .fiveHours: return "widget.5hourLimit".widgetLocalized()
         case .oneWeek: return "widget.weeklyLimit".widgetLocalized()
         case .oneMonth: return "widget.monthlyLimit".widgetLocalized()
+        case .custom: return "widget.customLimit".widgetLocalized()
         }
     }
 }

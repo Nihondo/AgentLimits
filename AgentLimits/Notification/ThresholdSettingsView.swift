@@ -131,17 +131,22 @@ struct ThresholdSettingsView: View {
     }
 
     private func title(for kind: SemanticUsageWindowKind) -> String {
-        if let providerID = selectedServiceKey.customProviderID,
-           let window = CustomUsageSnapshotStore.shared.loadSnapshot(providerID: providerID)?
-            .windows
-            .first(where: { $0.kind == kind }),
-           window.semanticWindow.hasCustomLabel {
-            return window.semanticWindow.displayLabel
+        let fallback = fallbackTitle(for: kind)
+        guard let providerID = selectedServiceKey.customProviderID,
+              let window = CustomUsageSnapshotStore.shared.loadSnapshot(providerID: providerID)?
+                .windows
+                .first(where: { $0.kind == kind }) else {
+            return fallback
         }
+        return window.semanticWindow.heading(fallback: fallback)
+    }
+
+    private func fallbackTitle(for kind: SemanticUsageWindowKind) -> String {
         switch kind {
         case .fiveHours: return "notification.primaryWindow".localized()
         case .oneWeek: return "notification.secondaryWindow".localized()
         case .oneMonth: return "notification.monthlyWindow".localized()
+        case .custom: return "notification.customWindow".localized()
         }
     }
 

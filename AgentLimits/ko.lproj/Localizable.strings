@@ -124,8 +124,10 @@
 "notification.alertBody5h" = "5시간 사용 제한이 %d%%에 도달했습니다";
 "notification.alertBodyWeek" = "주간 사용 제한이 %d%%에 도달했습니다";
 "notification.alertBodyMonth" = "월간 사용 제한이 %d%%에 도달했습니다";
+"notification.alertBodyCustomWindow" = "사용자 지정 사용 제한이 %d%%에 도달했습니다";
 "notification.alertBodyCustom" = "%@ 사용량이 %d%%에 도달했습니다";
 "notification.monthlyWindow" = "월간 제한";
+"notification.customWindow" = "사용자 지정 제한";
 
 /* ccusage */
 "tab.ccusage" = "ccusage";

@@ -39,12 +39,14 @@ enum SemanticUsageWindowKind: String, Codable, CaseIterable, Hashable, Sendable 
     case fiveHours = "5h"
     case oneWeek = "1w"
     case oneMonth = "1month"
+    case custom = "custom"
 
     var displayOrder: Int {
         switch self {
         case .fiveHours: return 0
         case .oneWeek: return 1
         case .oneMonth: return 2
+        case .custom: return 3
         }
     }
 
@@ -54,6 +56,7 @@ enum SemanticUsageWindowKind: String, Codable, CaseIterable, Hashable, Sendable 
         case .fiveHours: return "5h"
         case .oneWeek: return "1w"
         case .oneMonth: return "1mo"
+        case .custom: return "•"
         }
     }
 }
@@ -62,6 +65,7 @@ enum SemanticUsageWindowKind: String, Codable, CaseIterable, Hashable, Sendable 
 struct SemanticUsageWindow: Hashable, Sendable {
     let kind: SemanticUsageWindowKind
     let label: String?
+    let title: String?
     let usedPercent: Double
     let resetAt: Date?
     let durationSeconds: TimeInterval?
@@ -77,6 +81,12 @@ struct SemanticUsageWindow: Hashable, Sendable {
     /// 任意ラベルが有効に指定されているかを返します。
     var hasCustomLabel: Bool {
         label != nil
+    }
+
+    /// 詳細見出し（Widget詳細列・通知セクション見出し・通知本文）で使う文言です。
+    /// `title`を優先し、未指定なら`label`、どちらもなければ呼び出し側の既定文言を使います。
+    func heading(fallback: String) -> String {
+        title ?? label ?? fallback
     }
 
     /// ペースメーカーを表示・計算できる利用枠かを返します。
@@ -115,6 +125,7 @@ extension UsagePresentationSnapshot {
             resolvedWindows.append(SemanticUsageWindow(
                 kind: kind,
                 label: nil,
+                title: nil,
                 usedPercent: primary.usedPercent,
                 resetAt: resetAt,
                 durationSeconds: primary.limitWindowSeconds,
@@ -127,6 +138,7 @@ extension UsagePresentationSnapshot {
             resolvedWindows.append(SemanticUsageWindow(
                 kind: .oneWeek,
                 label: nil,
+                title: nil,
                 usedPercent: secondary.usedPercent,
                 resetAt: resetAt,
                 durationSeconds: secondary.limitWindowSeconds,
@@ -170,6 +182,7 @@ struct CustomUsageSnapshot: Codable, Equatable, Sendable {
 struct CustomUsageWindow: Codable, Equatable, Sendable {
     let kind: SemanticUsageWindowKind
     let label: String?
+    let title: String?
     let usedPercent: Double
     let resetAt: Date?
     let durationSeconds: TimeInterval?
@@ -180,6 +193,7 @@ struct CustomUsageWindow: Codable, Equatable, Sendable {
     private enum CodingKeys: String, CodingKey {
         case kind
         case label
+        case title
         case usedPercent
         case resetAt
         case durationSeconds
@@ -191,6 +205,7 @@ struct CustomUsageWindow: Codable, Equatable, Sendable {
     init(
         kind: SemanticUsageWindowKind,
         label: String? = nil,
+        title: String? = nil,
         usedPercent: Double,
         resetAt: Date? = nil,
         durationSeconds: TimeInterval? = nil,
@@ -199,7 +214,8 @@ struct CustomUsageWindow: Codable, Equatable, Sendable {
         limitCount: Int? = nil
     ) {
         self.kind = kind
-        self.label = Self.normalizedLabel(label)
+        self.label = Self.normalizedText(label)
+        self.title = Self.normalizedText(title)
         self.usedPercent = usedPercent
         self.resetAt = resetAt
         self.durationSeconds = durationSeconds
@@ -213,6 +229,7 @@ struct CustomUsageWindow: Codable, Equatable, Sendable {
         self.init(
             kind: try container.decode(SemanticUsageWindowKind.self, forKey: .kind),
             label: try container.decodeIfPresent(String.self, forKey: .label),
+            title: try container.decodeIfPresent(String.self, forKey: .title),
             usedPercent: try container.decode(Double.self, forKey: .usedPercent),
             resetAt: try container.decodeIfPresent(Date.self, forKey: .resetAt),
             durationSeconds: try container.decodeIfPresent(TimeInterval.self, forKey: .durationSeconds),
@@ -222,7 +239,7 @@ struct CustomUsageWindow: Codable, Equatable, Sendable {
         )
     }
 
-    private static func normalizedLabel(_ value: String?) -> String? {
+    private static func normalizedText(_ value: String?) -> String? {
         guard let value else { return nil }
         let normalized = value.trimmingCharacters(in: .whitespacesAndNewlines)
         return normalized.isEmpty ? nil : normalized
@@ -232,6 +249,7 @@ struct CustomUsageWindow: Codable, Equatable, Sendable {
         SemanticUsageWindow(
             kind: kind,
             label: label,
+            title: title,
             usedPercent: usedPercent,
             resetAt: resetAt,
             durationSeconds: durationSeconds,
