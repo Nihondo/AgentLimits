@@ -2,7 +2,7 @@
 
 **開発中**
 
-macOS Sonoma以降向けのメニューバーアプリと通知センターウィジェットで、ChatGPT Codex / Claude Code の使用量（5時間+週、またはプロバイダが月間ウィンドウを返す場合は月間）、GitHub Copilot の使用量（月間プレミアムリクエスト）、ccusage のトークン使用量を表示します。
+macOS Sonoma以降向けのメニューバーアプリと通知センターウィジェットで、ChatGPT Codex / Claude Code の使用量（5時間+週、またはプロバイダが月間ウィンドウを返す場合は月間）、GitHub Copilot の使用量（月間プレミアムリクエスト）、ccusage のトークン使用量を表示します。カスタム使用量スクリプトを使えば、他の任意のサービス(例: Cursor、Google Antigravity)の使用量も同じように表示できます。詳しくは[カスタム使用量スクリプトの作成](#カスタム使用量スクリプトの作成)を参照してください。
 
 ![](./images/agentlimit_sample.png)
 

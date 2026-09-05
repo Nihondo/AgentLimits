@@ -2,7 +2,7 @@
 
 **In Development**
 
-AgentLimits is a macOS Sonoma+ menu bar app with Notification Center widgets. It shows usage limits for ChatGPT Codex / Claude Code (5-hour + weekly, or monthly when the provider returns a monthly window), GitHub Copilot (monthly premium requests), and ccusage token usage.
+AgentLimits is a macOS Sonoma+ menu bar app with Notification Center widgets. It shows usage limits for ChatGPT Codex / Claude Code (5-hour + weekly, or monthly when the provider returns a monthly window), GitHub Copilot (monthly premium requests), and ccusage token usage. Custom usage scripts also let you track any other service's usage (e.g. Cursor, Google Antigravity) the same way — see [Custom Usage Script Authoring](#custom-usage-script-authoring).
 
 ![](./images/agentlimit_sample.png)
 
