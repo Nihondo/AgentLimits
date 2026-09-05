@@ -83,7 +83,7 @@ Pacemaker shows a time-based usage benchmark to help you stay on track.
 - Update time shown as `HH:mm` (or `--:--` if older than 24h)
 
 ### Custom Usage Widget
-- Add the single **Custom Usage** widget kind, then right-click it and choose **Edit Widget** to select a service.
+- Add the single **Custom Usage** widget kind, then right-click it and choose **Edit "Custom Usage"...** to select a service.
 - Each widget instance can select a different custom service.
 - Small and medium widgets show one or two windows in `5h` → `1w` → `1month` order and reuse the usage colors, Used/Remaining mode, pacemaker, and update time.
 - A window can set its own `label`. Custom labels are used in the widget, dashboard, and notification settings; their pacemaker ring is continuous rather than divided.
@@ -106,6 +106,7 @@ Pacemaker shows a time-based usage benchmark to help you stay on track.
 - Widget tap action is configurable (default opens `https://ccusage.com/`)
 
 ## Settings Guide
+
 ### Usage
 1. Open **Usage**.
 2. Select Codex, Claude Code, or Copilot.
@@ -117,13 +118,67 @@ Pacemaker shows a time-based usage benchmark to help you stay on track.
 8. Sign in via the embedded WebView (chatgpt.com / claude.ai / github.com).
 9. Use **Clear Data** to remove login data, website storage, and cached usage snapshots if sign-in gets stuck or you want to reset login history.
 
+### Wake Up
+1. Open **Wake Up**.
+2. Select provider (Codex / Claude Code). Note: Copilot is not supported.
+3. Enable schedule.
+4. Choose hours to run (0–23).
+5. Use **Test Now** to verify CLI execution.
+
+### Notification
+1. Open **Notification**.
+2. Request notification permission (first time only).
+3. Select a built-in or custom service from the service menu.
+4. Configure thresholds for each available semantic window (5-hour, weekly, or monthly).
+5. Adjust usage colors (donut + status colors) if needed.
+
+### Pacemaker
+1. Open **Pacemaker**.
+2. Toggle the menu bar pacemaker value display.
+3. Toggle the widget ring warning segments (color-coded segments when exceeding pacemaker).
+4. Adjust pacemaker warning/danger deltas.
+5. Customize pacemaker ring/text colors.
+
+### ccusage
+1. Open **ccusage**.
+2. Select provider (Codex / Claude Code).
+3. Choose refresh interval (1–10 minutes).
+4. Enable periodic fetch and set additional CLI args if needed.
+5. Use **Test Now** to verify CLI execution.
+6. For Copilot: billing data is fetched automatically when Copilot usage is refreshed — just enable the toggle.
+
 ### Custom Usage
 1. Open **Custom Usage** and add a service.
 2. Enter a display name and a permanent lowercase Provider ID matching `^[a-z0-9][a-z0-9_-]{0,62}$`.
 3. Select an executable regular file. AgentLimits runs the file directly from its parent folder; arguments and free-form shell commands are not accepted.
 4. Optionally add an HTTP/HTTPS website, then choose automatic refresh, menu bar, and dashboard visibility.
-5. Use **Run Test**. The executable must exit with code 0 within 60 seconds and print exactly one JSON object to stdout; write logs to stderr.
+5. Use **Run Test** to check the configured executable.
 6. Custom services use the Usage refresh interval. Manual tests and widget refresh taps still run when automatic refresh is disabled.
+
+### Update
+1. Open **Update**.
+2. Review the current version and the time of the last update check.
+3. Choose **Check Now** to look for an update manually.
+4. Toggle automatic update checks.
+5. Open the releases page when you need release details.
+
+### Advanced
+1. Open **Advanced**.
+2. Set full paths for `codex`, `claude`, `npx` if needed (blank = resolve via PATH).
+3. Review PATH resolution results.
+4. Choose widget tap action (open website / refresh data).
+5. Toggle **Hide menu bar icon** to completely hide the icon from the menu bar. To access settings while hidden, double-click the app icon while it is still running.
+6. Copy the bundled status line script path if needed.
+
+## Custom Usage Script Authoring
+
+### Creating a Custom Usage Script
+
+To create a script for a service that is not built in, ask an AI coding agent to create it. Give the agent the repository-root [CUSTOM_USAGE_SCRIPT_GUIDE.md](CUSTOM_USAGE_SCRIPT_GUIDE.md), which defines the required decisions, execution constraints, JSON contract, and validation rules. The agent can then implement and test an executable for the chosen service. A sample is available at [scripts/cursor_usage.py](scripts/cursor_usage.py).
+
+### JSON Snapshot Output
+
+The executable must exit with code 0 within 60 seconds and print exactly one JSON object to stdout. Write diagnostic logs to stderr.
 
 Example stdout:
 
@@ -154,43 +209,6 @@ Example stdout:
 ```
 
 `fetchedAt` requires a timezone-aware ISO 8601 value. `kind` also accepts `custom` for a window that doesn't fit `5h` / `1w` / `1month` — an arbitrary or expiry-less window (it always sorts last, and its default label without `label` is `•`). `label`, `title`, `resetAt`, `durationSeconds`, and `isPacemakerEnabled` are optional. `label` is the short label shown in the donut center and dashboard row; `title` is a longer heading shown in the widget's detail column, the notification settings section, and notification bodies — the two are independent. An omitted or blank `title` falls back to `label`, and an omitted or blank `label` falls back to the `kind` label; pacemaker is enabled by default. When supplied, `resetAt` must be timezone-aware ISO 8601 and `durationSeconds` must be positive. `usedCount` and `limitCount` are optional, but must be supplied together as nonnegative integers with `limitCount > 0`. Unknown fields are allowed. A no-expiry window re-sends an enabled threshold notification only after usage falls below the threshold and exceeds it again. stdout is limited to 256 KiB and stderr to 64 KiB. Invalid output never overwrites the last successful snapshot.
-
-### ccusage
-1. Open **ccusage**.
-2. Select provider (Codex / Claude Code).
-3. Choose refresh interval (1–10 minutes).
-4. Enable periodic fetch and set additional CLI args if needed.
-5. Use **Test Now** to verify CLI execution.
-6. For Copilot: billing data is fetched automatically when Copilot usage is refreshed — just enable the toggle.
-
-### Wake Up
-1. Open **Wake Up**.
-2. Select provider (Codex / Claude Code). Note: Copilot is not supported.
-3. Enable schedule.
-4. Choose hours to run (0–23).
-5. Use **Test Now** to verify CLI execution.
-
-### Notification
-1. Open **Notification**.
-2. Request notification permission (first time only).
-3. Select a built-in or custom service from the service menu.
-4. Configure thresholds for each available semantic window (5-hour, weekly, or monthly).
-5. Adjust usage colors (donut + status colors) if needed.
-
-### Pacemaker
-1. Open **Pacemaker**.
-2. Toggle the menu bar pacemaker value display.
-3. Toggle the widget ring warning segments (color-coded segments when exceeding pacemaker).
-4. Adjust pacemaker warning/danger deltas.
-5. Customize pacemaker ring/text colors.
-
-### Advanced
-1. Open **Advanced**.
-2. Set full paths for `codex`, `claude`, `npx` if needed (blank = resolve via PATH).
-3. Review PATH resolution results.
-4. Choose widget tap action (open website / refresh data).
-5. Toggle **Hide menu bar icon** to completely hide the icon from the menu bar. To access settings while hidden, double-click the app icon while it is still running.
-6. Copy the bundled status line script path if needed.
 
 ## Wake Up (CLI Scheduler)
 - Runs scheduled commands:

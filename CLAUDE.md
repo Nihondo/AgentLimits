@@ -117,6 +117,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 | `AgentLimits/Notification/ThresholdSettingsView.swift` | Threshold notification settings UI (thresholds + usage colors) |
 | `AgentLimits/Pacemaker/PacemakerSettingsView.swift` | Pacemaker settings UI (menu bar toggle + ring warning toggle + thresholds + colors) |
 | `AgentLimits/Scripts/agentlimits_statusline_claude.sh` | Claude Code status line script (reads App Group snapshots) |
+| `scripts/cursor_usage.py` | Sample Custom Usage CLI for Cursor's current billing-cycle plan usage (reads Cursor's local state DB and calls its internal usage endpoint) |
 
 ### Features
 
@@ -171,6 +172,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 - Dynamic services are identified by immutable provider slugs matching `^[a-z0-9][a-z0-9_-]{0,62}$`; there is no `isCustom` field.
 - Common identity uses `builtIn:<rawValue>` or `custom:<slug>`. Semantic window kinds are `5h`, `1w`, `1month`, and `custom` (for a window that doesn't semantically fit the first three — e.g. an arbitrary or expiry-less interval; it always sorts last and its default label is `•`). `durationSeconds`, not the `kind` value, drives pacemaker division count, so `custom` can still get 5- or 7-way divisions.
 - A custom executable runs directly with no arguments, from its parent directory, with the standard AgentLimits PATH prefix. Limits are 60 seconds, 256 KiB stdout, and 64 KiB stderr.
+- `scripts/cursor_usage.py` is a standalone sample custom-service executable: it reads `cursorAuth/accessToken` from Cursor's local `state.vscdb` and calls `DashboardService/GetCurrentPeriodUsage` on `api2.cursor.sh`. It emits the current billing-cycle plan usage as a `1month` window using Cursor's returned percentage and reset time. It must never log the access token; Cursor's internal endpoint is intentionally treated as an unstable integration.
 - stdout must be schema version 1 JSON with a matching provider, timezone-aware `fetchedAt`, and one or two unique windows. `label`, `title`, `resetAt`, `durationSeconds`, and `isPacemakerEnabled` are optional; supplied reset dates are timezone-aware and supplied durations are finite positive values. `label` is the short compact-display name (donut center, dashboard row) and also disables pacemaker ring divisions when set; `title` is an independent longer heading used for the widget's medium-size detail column, the notification settings section title, and notification bodies — it resolves as `title ?? label ?? kind's default text` (`SemanticUsageWindow.heading(fallback:)`) and never affects pacemaker ring divisions. Pacemaker rendering requires the enabled flag, reset date, and duration. Unknown fields are accepted.
 - Expiry-backed threshold notifications deduplicate by reset date. No-expiry windows persist an active-threshold flag, notify once while usage remains above a level, and become eligible again only after usage falls below that level.
 - Successful output is validated before the original bytes (including the trailing newline) are atomically saved. Validation and execution failures never overwrite the last success.
