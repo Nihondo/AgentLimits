@@ -14,6 +14,40 @@ struct ThresholdLevelSettings: Codable, Equatable {
     var thresholdPercent: Int
     /// Reset time of the last notification (for duplicate prevention)
     var lastNotifiedResetAt: Date?
+    /// 期限がない利用枠で、現在の閾値超過を通知済みかを表します。
+    var isThresholdCurrentlyExceeded: Bool
+
+    init(
+        isEnabled: Bool,
+        thresholdPercent: Int,
+        lastNotifiedResetAt: Date?,
+        isThresholdCurrentlyExceeded: Bool = false
+    ) {
+        self.isEnabled = isEnabled
+        self.thresholdPercent = thresholdPercent
+        self.lastNotifiedResetAt = lastNotifiedResetAt
+        self.isThresholdCurrentlyExceeded = isThresholdCurrentlyExceeded
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case isEnabled
+        case thresholdPercent
+        case lastNotifiedResetAt
+        case isThresholdCurrentlyExceeded
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            isEnabled: try container.decode(Bool.self, forKey: .isEnabled),
+            thresholdPercent: try container.decode(Int.self, forKey: .thresholdPercent),
+            lastNotifiedResetAt: try container.decodeIfPresent(Date.self, forKey: .lastNotifiedResetAt),
+            isThresholdCurrentlyExceeded: try container.decodeIfPresent(
+                Bool.self,
+                forKey: .isThresholdCurrentlyExceeded
+            ) ?? false
+        )
+    }
 
     /// Default settings for warning level
     static func makeWarningSettings() -> ThresholdLevelSettings {

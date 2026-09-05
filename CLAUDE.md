@@ -163,7 +163,8 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 - Dynamic services are identified by immutable provider slugs matching `^[a-z0-9][a-z0-9_-]{0,62}$`; there is no `isCustom` field.
 - Common identity uses `builtIn:<rawValue>` or `custom:<slug>`. Semantic window kinds are `5h`, `1w`, and `1month`.
 - A custom executable runs directly with no arguments, from its parent directory, with the standard AgentLimits PATH prefix. Limits are 60 seconds, 256 KiB stdout, and 64 KiB stderr.
-- stdout must be schema version 1 JSON with a matching provider, timezone-aware `fetchedAt`/`resetAt`, and one or two unique windows. Unknown fields are accepted.
+- stdout must be schema version 1 JSON with a matching provider, timezone-aware `fetchedAt`, and one or two unique windows. `label`, `resetAt`, `durationSeconds`, and `isPacemakerEnabled` are optional; supplied reset dates are timezone-aware and supplied durations are finite positive values. A custom label disables pacemaker ring divisions, and pacemaker rendering requires the enabled flag, reset date, and duration. Unknown fields are accepted.
+- Expiry-backed threshold notifications deduplicate by reset date. No-expiry windows persist an active-threshold flag, notify once while usage remains above a level, and become eligible again only after usage falls below that level.
 - Successful output is validated before the original bytes (including the trailing newline) are atomically saved. Validation and execution failures never overwrite the last success.
 - Service settings include display name, script path, optional HTTP/HTTPS URL, auto refresh, menu bar visibility, and dashboard visibility. Run status stores last attempt, last success, and the latest error.
 - Custom services share the Usage 1–10 minute interval. Startup/periodic refresh respects auto refresh; manual tests and widget refresh deep links do not.
@@ -220,6 +221,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 - `UsageServiceKey`: `builtIn:<rawValue>` or `custom:<slug>`
 - `SemanticUsageWindowKind`: `.fiveHours`, `.oneWeek`, `.oneMonth`
 - `UsagePresentationSnapshot`: normalizes legacy primary/secondary windows and custom snapshots for menu, dashboard, colors, pacemaker, and notifications
+- `SemanticUsageWindow`: owns the resolved label and the optional expiry/pacemaker capability used consistently by widgets, dashboard, menu bar, and notifications
 - `CustomUsageSnapshotStore`: validates then atomically writes the unmodified stdout bytes
 
 `UsageWindow` stores per-window usage data:

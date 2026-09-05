@@ -33,7 +33,7 @@ final class ThresholdNotificationStoreMigrationTests: XCTestCase {
         XCTAssertNil(copilotV2.windows[.oneWeek])
     }
 
-    func testCustomResetDatePersistsForDuplicatePrevention() throws {
+    func testCustomNotificationStatesPersistForBothExpiryModes() throws {
         let suiteName = "ThresholdNotificationStoreDuplicateTests"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
         defaults.removePersistentDomain(forName: suiteName)
@@ -41,14 +41,34 @@ final class ThresholdNotificationStoreMigrationTests: XCTestCase {
         let store = ThresholdNotificationStore(userDefaults: defaults)
         let resetAt = Date(timeIntervalSince1970: 1_888_888_888)
 
-        store.updateLastNotifiedResetAt(
+        store.updateNotificationState(
             for: .custom("cursor"),
             windowKind: .fiveHours,
             level: .warning,
-            resetAt: resetAt
+            resetAt: resetAt,
+            isThresholdCurrentlyExceeded: false
+        )
+
+        store.updateNotificationState(
+            for: .custom("cursor"),
+            windowKind: .oneWeek,
+            level: .danger,
+            resetAt: nil,
+            isThresholdCurrentlyExceeded: true
         )
 
         let settings = store.loadServiceSettings()[.custom("cursor")]
         XCTAssertEqual(settings?.settings(for: .fiveHours).warning.lastNotifiedResetAt, resetAt)
+        XCTAssertTrue(settings?.settings(for: .oneWeek).danger.isThresholdCurrentlyExceeded ?? false)
+
+        store.clearNoResetNotificationState(
+            for: .custom("cursor"),
+            windowKind: .oneWeek,
+            level: .danger
+        )
+        XCTAssertFalse(
+            store.loadServiceSettings()[.custom("cursor")]?.settings(for: .oneWeek)
+                .danger.isThresholdCurrentlyExceeded ?? true
+        )
     }
 }

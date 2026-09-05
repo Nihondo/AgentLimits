@@ -124,6 +124,7 @@
 "notification.alertBody5h" = "Ліміт використання 5 годин досяг %d%%";
 "notification.alertBodyWeek" = "Тижневий ліміт використання досяг %d%%";
 "notification.alertBodyMonth" = "Місячний ліміт використання досяг %d%%";
+"notification.alertBodyCustom" = "Використання %@ досягло %d%%";
 "notification.monthlyWindow" = "Місячний ліміт";
 
 /* ccusage */

@@ -207,13 +207,16 @@ private struct CustomUsageWidgetEntryView: View {
         } else if entry.selectedProviderID == nil {
             unavailableView("widget.custom.configure".widgetLocalized())
         } else if let snapshot = entry.snapshot, let descriptor = entry.descriptor {
-            let windows = snapshot.windows.sorted { $0.kind.displayOrder < $1.kind.displayOrder }
+            let windows = snapshot.windows
+                .map(\.semanticWindow)
+                .sorted { $0.kind.displayOrder < $1.kind.displayOrder }
             if family == .systemMedium {
                 GeometryReader { proxy in
                     let detailWidth = WidgetDonutLayout.detailColumnWidth
                     let spacing = WidgetDonutLayout.columnSpacing
                     let leftWidth = max(0, proxy.size.width - detailWidth - spacing)
                     let donutSize = WidgetDonutLayout.donutSize(availableWidth: leftWidth, columnCount: windows.count)
+                    let columnHeight = WidgetDonutLayout.columnHeight(donutSize: donutSize)
                     HStack(alignment: .center, spacing: 0) {
                         donutRow(windows: windows, providerID: descriptor.providerID, donutSize: donutSize)
                             .frame(width: leftWidth, alignment: .leading)
@@ -223,16 +226,21 @@ private struct CustomUsageWidgetEntryView: View {
                             .padding(.trailing, 12)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .frame(height: max(donutSize + 30, 96), alignment: .center)
+                    .frame(height: max(columnHeight, 96), alignment: .center)
                 }
-                .frame(height: 100)
+                .frame(height: WidgetDonutLayout.contentHeight)
+                .padding(.top, WidgetDonutLayout.contentTopPadding)
             } else {
                 GeometryReader { proxy in
                     let donutSize = WidgetDonutLayout.donutSize(availableWidth: proxy.size.width, columnCount: windows.count)
                     donutRow(windows: windows, providerID: descriptor.providerID, donutSize: donutSize)
-                        .frame(height: donutSize + 30, alignment: .center)
+                        .frame(
+                            height: WidgetDonutLayout.columnHeight(donutSize: donutSize),
+                            alignment: .center
+                        )
                 }
-                .frame(height: 100)
+                .frame(height: WidgetDonutLayout.contentHeight)
+                .padding(.top, WidgetDonutLayout.contentTopPadding)
             }
             Text("\("widget.updatedAt".widgetLocalized()) \(WidgetUpdateTimeFormatter.formatUpdateTime(since: snapshot.fetchedAt))")
                 .font(.caption2)
@@ -243,29 +251,34 @@ private struct CustomUsageWidgetEntryView: View {
         }
     }
 
-    private func donutRow(windows: [CustomUsageWindow], providerID: String, donutSize: CGFloat) -> some View {
+    private func donutRow(windows: [SemanticUsageWindow], providerID: String, donutSize: CGFloat) -> some View {
         HStack(spacing: windows.count == 1 ? 0 : WidgetDonutLayout.columnSpacing) {
             ForEach(windows, id: \.kind) { window in
                 CustomUsageDonutColumn(
                     serviceKey: .custom(providerID),
-                    window: window.semanticWindow,
+                    window: window,
                     displayMode: displayMode,
                     size: donutSize
                 )
                 .frame(maxWidth: .infinity)
+                .frame(
+                    height: WidgetDonutLayout.columnHeight(donutSize: donutSize),
+                    alignment: .center
+                )
             }
         }
     }
 
-    private func detailColumn(windows: [CustomUsageWindow]) -> some View {
+    private func detailColumn(windows: [SemanticUsageWindow]) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             ForEach(Array(windows.enumerated()), id: \.element.kind) { index, window in
                 VStack(alignment: .leading, spacing: 2) {
                     UsageDetailSectionView(
-                        title: window.kind.detailTitle,
-                        window: window.semanticWindow.usageWindow,
+                        title: window.hasCustomLabel ? window.displayLabel : window.kind.detailTitle,
+                        window: window.usageWindow,
                         showRelative: windows.count > 1 && index == 0,
-                        showDateTime: !(windows.count > 1 && index == 0)
+                        showDateTime: !(windows.count > 1 && index == 0),
+                        showReset: window.resetAt != nil
                     )
                     if let used = window.usedCount, let limit = window.limitCount {
                         Text("  \(used) / \(limit)")
@@ -308,7 +321,7 @@ private struct CustomUsageDonutColumn: View {
     var body: some View {
         VStack(spacing: 4) {
             UsageRingGaugeView(
-                centerLabel: window.kind.compactLabel,
+                centerLabel: window.displayLabel,
                 progress: displayProgress,
                 ringColor: ringColor,
                 pacemakerSegments: pacemakerSegments,
@@ -316,7 +329,7 @@ private struct CustomUsageDonutColumn: View {
                 pacemakerRingColor: UsageColorSettings.loadPacemakerRingColor(),
                 pacemakerWarningColor: UsageColorSettings.loadPacemakerStatusOrangeColor(),
                 pacemakerDangerColor: UsageColorSettings.loadPacemakerStatusRedColor(),
-                divisionCount: window.usageWindow.pacemakerDivisionCount,
+                divisionCount: window.hasCustomLabel ? 1 : window.usageWindow.pacemakerDivisionCount,
                 size: size,
                 accessibilityPercentText: UsagePercentFormatter.formatPercentText(displayPercent, placeholder: "0%")
             )
@@ -331,12 +344,13 @@ private struct CustomUsageDonutColumn: View {
 
     private var pacemakerSegments: PacemakerRingSegments? {
         let thresholds = UsageStatusThresholdStore.loadThresholds(for: serviceKey, windowKind: window.kind)
-        let isEligible = isPacemakerRingWarningEnabled
+        let isEligible = window.canShowPacemaker
+            && isPacemakerRingWarningEnabled
             && displayMode != .remaining
             && !WidgetRingWarningGate.isBlockedByStatusColor(usedPercent: window.usedPercent, thresholds: thresholds)
         return PacemakerRingSegments.compute(
             usedPercent: window.usedPercent,
-            pacemakerPercent: window.usageWindow.calculatePacemakerPercent(),
+            pacemakerPercent: pacemakerPercent,
             progress: displayProgress,
             isEligible: isEligible
         )
@@ -346,7 +360,7 @@ private struct CustomUsageDonutColumn: View {
     private var percentText: some View {
         let text = UsagePercentFormatter.formatPercentText(displayPercent)
         if isPacemakerIndicatorEnabled,
-           let pacemaker = window.usageWindow.calculatePacemakerPercent() {
+           let pacemaker = pacemakerPercent {
             let level = UsageStatusLevelResolver.levelForPacemakerMode(
                 usedPercent: window.usedPercent,
                 pacemakerPercent: pacemaker,
@@ -367,7 +381,13 @@ private struct CustomUsageDonutColumn: View {
     private var displayProgress: Double { max(0, min(1, displayPercent / 100)) }
 
     private var pacemakerProgress: Double? {
-        window.usageWindow.displayPacemakerPercent(for: displayMode).map { max(0, min(1, $0 / 100)) }
+        guard window.canShowPacemaker else { return nil }
+        return window.usageWindow.displayPacemakerPercent(for: displayMode).map { max(0, min(1, $0 / 100)) }
+    }
+
+    private var pacemakerPercent: Double? {
+        guard window.canShowPacemaker else { return nil }
+        return window.usageWindow.calculatePacemakerPercent()
     }
 
     private var statusColor: Color {

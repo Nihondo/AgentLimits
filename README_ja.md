@@ -85,6 +85,8 @@ macOS Sonoma以降向けのメニューバーアプリと通知センターウ�
 - 1種類の **カスタム使用量** ウィジェットを追加し、右クリックして **ウィジェットを編集** からサービスを選択します
 - 複数のウィジェットインスタンスで、それぞれ異なるカスタムサービスを選択できます
 - 小・中サイズとも `5h` → `1w` → `1month` 順で1〜2枠を表示し、使用量の色、使用率/残り率、ペースメーカー、更新時刻を共通利用します
+- 各枠に任意の `label` を指定できます。カスタムラベルはウィジェット、ダッシュボード、通知設定に表示され、ペースメーカーリングは分割されません
+- `resetAt` または `durationSeconds` がない枠、または `isPacemakerEnabled: false` の枠は、ペースメーカーリングと比較インジケーターなしで使用量を表示します
 - 選択済みサービスを削除すると、サービスを利用できないことを表示します
 
 ### トークン使用量ウィジェット（Codex / Claude Code）
@@ -132,6 +134,7 @@ stdoutの例：
   "windows": [
     {
       "kind": "5h",
+      "label": "Fast Requests",
       "usedPercent": 42.5,
       "resetAt": "2026-08-23T15:00:00Z",
       "durationSeconds": 18000,
@@ -148,7 +151,7 @@ stdoutの例：
 }
 ```
 
-`fetchedAt` と `resetAt` はタイムゾーン付きISO 8601、`usedPercent` は0〜100、`durationSeconds` は正数で指定します。`usedCount` と `limitCount` は任意ですが、使用する場合は両方を非負整数で指定し、`limitCount > 0` とします。未知フィールドは許容されます。stdout上限は256 KiB、stderr上限は64 KiBです。無効な出力で最終成功スナップショットが上書きされることはありません。
+`fetchedAt` はタイムゾーン付きISO 8601で指定します。`label`、`resetAt`、`durationSeconds`、`isPacemakerEnabled` は任意です。labelを省略または空文字にすると `kind` のラベルを使い、ペースメーカーは既定で有効です。指定する場合、`resetAt` はタイムゾーン付きISO 8601、`durationSeconds` は正数にします。`usedCount` と `limitCount` は任意ですが、使用する場合は両方を非負整数で指定し、`limitCount > 0` とします。未知フィールドは許容されます。期限なしの枠は、使用量が閾値未満に戻ってから再び超過した場合だけ、有効な閾値通知を再送します。stdout上限は256 KiB、stderr上限は64 KiBです。無効な出力で最終成功スナップショットが上書きされることはありません。
 
 ### ccusage
 1. **ccusage**タブを開く

@@ -38,6 +38,57 @@ final class CustomUsageModelsTests: XCTestCase {
         let presentation = UsagePresentationSnapshot(custom: snapshot, displayName: "Cursor")
         XCTAssertEqual(presentation.serviceKey, .custom("cursor"))
         XCTAssertEqual(presentation.windows.map(\.kind), [.fiveHours, .oneWeek])
+        XCTAssertEqual(presentation.windows.map(\.displayLabel), ["5h", "1w"])
+        XCTAssertTrue(presentation.windows.allSatisfy(\.canShowPacemaker))
+    }
+
+    func testCustomLabelAndNoExpiryDisablePacemakerWithoutBreakingValidation() throws {
+        let json = """
+        {
+          "schemaVersion": 1,
+          "provider": "cursor",
+          "fetchedAt": "2026-08-23T12:34:56Z",
+          "windows": [
+            {
+              "kind": "5h",
+              "label": "  Credits  ",
+              "usedPercent": 42.5,
+              "isPacemakerEnabled": false
+            }
+          ]
+        }
+        """
+        let snapshot = try CustomUsageSnapshotValidator.decodeAndValidate(
+            try XCTUnwrap(json.data(using: .utf8)),
+            expectedProviderID: "cursor"
+        )
+        let window = try XCTUnwrap(snapshot.windows.first?.semanticWindow)
+        XCTAssertEqual(window.displayLabel, "Credits")
+        XCTAssertTrue(window.hasCustomLabel)
+        XCTAssertFalse(window.canShowPacemaker)
+        XCTAssertNil(window.resetAt)
+        XCTAssertNil(window.durationSeconds)
+    }
+
+    func testPartialExpiryDataAndInvalidProvidedDurationAreHandledCorrectly() throws {
+        let partialExpiry = validJSON.replacingOccurrences(
+            of: "\"durationSeconds\": 18000,",
+            with: ""
+        )
+        XCTAssertNoThrow(
+            try CustomUsageSnapshotValidator.decodeAndValidate(
+                try XCTUnwrap(partialExpiry.data(using: .utf8)),
+                expectedProviderID: "cursor"
+            )
+        )
+
+        let invalidDuration = validJSON.replacingOccurrences(of: "18000", with: "0")
+        XCTAssertThrowsError(
+            try CustomUsageSnapshotValidator.decodeAndValidate(
+                try XCTUnwrap(invalidDuration.data(using: .utf8)),
+                expectedProviderID: "cursor"
+            )
+        )
     }
 
     func testProviderMismatchIsRejected() throws {

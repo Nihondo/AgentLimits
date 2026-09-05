@@ -100,7 +100,7 @@ struct AgentLimitsWidgetEntryView: View {
                     GeometryReader { proxy in
                         let spacing = WidgetDonutLayout.columnSpacing
                         let donutSize = WidgetDonutLayout.donutSize(availableWidth: proxy.size.width, columnCount: 2)
-                        let columnHeight = donutSize + 30
+                        let columnHeight = WidgetDonutLayout.columnHeight(donutSize: donutSize)
                         UsageDonutRow(
                             provider: entry.provider,
                             displayMode: snapshot.displayMode,
@@ -112,15 +112,15 @@ struct AgentLimitsWidgetEntryView: View {
                         )
                         .frame(height: columnHeight, alignment: .center)
                     }
-                    .frame(height: 100)
-                    .padding(.top, 6)
+                    .frame(height: WidgetDonutLayout.contentHeight)
+                    .padding(.top, WidgetDonutLayout.contentTopPadding)
                 case .systemMedium:
                     GeometryReader { proxy in
                         let detailWidth = WidgetDonutLayout.detailColumnWidth
                         let spacing = WidgetDonutLayout.columnSpacing
                         let leftWidth = max(0, proxy.size.width - detailWidth - spacing)
                         let donutSize = WidgetDonutLayout.donutSize(availableWidth: leftWidth, columnCount: 2)
-                        let columnHeight = donutSize + 30
+                        let columnHeight = WidgetDonutLayout.columnHeight(donutSize: donutSize)
                         HStack(alignment: .center, spacing: 0) {
                             UsageDonutRow(
                                 provider: entry.provider,
@@ -146,8 +146,8 @@ struct AgentLimitsWidgetEntryView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .frame(height: max(columnHeight, 96), alignment: .center)
                     }
-                    .frame(height: 100)
-                    .padding(.top, 6)
+                    .frame(height: WidgetDonutLayout.contentHeight)
+                    .padding(.top, WidgetDonutLayout.contentTopPadding)
                 default:
                     UsageDonutRow(
                         provider: entry.provider,
@@ -475,6 +475,7 @@ struct UsageDetailSectionView: View {
     let window: UsageWindow?
     let showRelative: Bool
     let showDateTime: Bool
+    var showReset: Bool = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
@@ -482,12 +483,14 @@ struct UsageDetailSectionView: View {
                 .font(.title3)
                 .fontWeight(.bold)
                 .monospacedDigit()
-            Text("  " + "widget.reset".widgetLocalized())
-                .font(.headline)
-                .monospacedDigit()
-            Text("  "+resetText)
-                .font(.headline)
-                .monospacedDigit()
+            if showReset {
+                Text("  " + "widget.reset".widgetLocalized())
+                    .font(.headline)
+                    .monospacedDigit()
+                Text("  "+resetText)
+                    .font(.headline)
+                    .monospacedDigit()
+            }
         }
     }
 

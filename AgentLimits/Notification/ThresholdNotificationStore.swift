@@ -75,12 +75,13 @@ final class ThresholdNotificationStore: @unchecked Sendable {
         }
     }
 
-    /// 動的サービスの通知済みリセット時刻を更新します。
-    func updateLastNotifiedResetAt(
+    /// 動的サービスの通知済み状態を更新します。
+    func updateNotificationState(
         for serviceKey: UsageServiceKey,
         windowKind: SemanticUsageWindowKind,
         level: UsageThresholdLevel,
-        resetAt: Date
+        resetAt: Date?,
+        isThresholdCurrentlyExceeded: Bool
     ) {
         var allSettings = loadServiceSettings()
         var serviceSettings = allSettings[serviceKey] ?? .defaultSettings(
@@ -89,8 +90,30 @@ final class ThresholdNotificationStore: @unchecked Sendable {
         )
         var windowSettings = serviceSettings.settings(for: windowKind)
         switch level {
-        case .warning: windowSettings.warning.lastNotifiedResetAt = resetAt
-        case .danger: windowSettings.danger.lastNotifiedResetAt = resetAt
+        case .warning:
+            windowSettings.warning.lastNotifiedResetAt = resetAt
+            windowSettings.warning.isThresholdCurrentlyExceeded = isThresholdCurrentlyExceeded
+        case .danger:
+            windowSettings.danger.lastNotifiedResetAt = resetAt
+            windowSettings.danger.isThresholdCurrentlyExceeded = isThresholdCurrentlyExceeded
+        }
+        serviceSettings.windows[windowKind] = windowSettings
+        allSettings[serviceKey] = serviceSettings
+        saveServiceSettings(allSettings)
+    }
+
+    /// 期限なし利用枠で使う通知済み状態だけを解除します。
+    func clearNoResetNotificationState(
+        for serviceKey: UsageServiceKey,
+        windowKind: SemanticUsageWindowKind,
+        level: UsageThresholdLevel
+    ) {
+        var allSettings = loadServiceSettings()
+        guard var serviceSettings = allSettings[serviceKey] else { return }
+        var windowSettings = serviceSettings.settings(for: windowKind)
+        switch level {
+        case .warning: windowSettings.warning.isThresholdCurrentlyExceeded = false
+        case .danger: windowSettings.danger.isThresholdCurrentlyExceeded = false
         }
         serviceSettings.windows[windowKind] = windowSettings
         allSettings[serviceKey] = serviceSettings

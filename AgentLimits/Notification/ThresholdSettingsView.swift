@@ -131,6 +131,13 @@ struct ThresholdSettingsView: View {
     }
 
     private func title(for kind: SemanticUsageWindowKind) -> String {
+        if let providerID = selectedServiceKey.customProviderID,
+           let window = CustomUsageSnapshotStore.shared.loadSnapshot(providerID: providerID)?
+            .windows
+            .first(where: { $0.kind == kind }),
+           window.semanticWindow.hasCustomLabel {
+            return window.semanticWindow.displayLabel
+        }
         switch kind {
         case .fiveHours: return "notification.primaryWindow".localized()
         case .oneWeek: return "notification.secondaryWindow".localized()

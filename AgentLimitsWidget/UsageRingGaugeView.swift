@@ -115,6 +115,13 @@ enum WidgetDonutLayout {
     static let targetDonutSize: CGFloat = 66
     static let columnSpacing: CGFloat = 12
     static let detailColumnWidth: CGFloat = 170
+    static let contentHeight: CGFloat = 100
+    static let contentTopPadding: CGFloat = 6
+
+    /// ドーナツと使用率ラベルを含む列の共通高さを返します。
+    static func columnHeight(donutSize: CGFloat) -> CGFloat {
+        donutSize + 30
+    }
 
     /// 利用可能幅と列数から、targetDonutSizeを超えないドーナツサイズを算出します。
     static func donutSize(availableWidth: CGFloat, columnCount: Int) -> CGFloat {
@@ -180,6 +187,10 @@ struct UsageRingGaugeView: View {
             Text(centerLabel)
                 .font(.title3)
                 .fontWeight(.bold)
+                .lineLimit(1)
+                .minimumScaleFactor(0.55)
+                .allowsTightening(true)
+                .frame(maxWidth: size * 0.72)
         }
         .frame(width: size, height: size)
         .accessibilityLabel(centerLabel)

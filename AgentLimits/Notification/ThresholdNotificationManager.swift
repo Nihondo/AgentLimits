@@ -228,24 +228,56 @@ final class ThresholdNotificationManager: ObservableObject {
         level: UsageThresholdLevel,
         levelSettings: ThresholdLevelSettings
     ) async {
-        guard levelSettings.isEnabled,
-              Int(window.usedPercent) >= levelSettings.thresholdPercent else { return }
-        if let lastNotified = levelSettings.lastNotifiedResetAt,
-           abs(lastNotified.timeIntervalSince(window.resetAt)) <= 10 {
+        guard levelSettings.isEnabled else { return }
+
+        let isThresholdExceeded = Int(window.usedPercent) >= levelSettings.thresholdPercent
+        guard isThresholdExceeded else {
+            if window.resetAt == nil, levelSettings.isThresholdCurrentlyExceeded {
+                store.updateNotificationState(
+                    for: snapshot.serviceKey,
+                    windowKind: window.kind,
+                    level: level,
+                    resetAt: nil,
+                    isThresholdCurrentlyExceeded: false
+                )
+                serviceSettings = store.loadServiceSettings()
+            }
             return
         }
-        await sendSemanticNotification(
+
+        if window.resetAt != nil, levelSettings.isThresholdCurrentlyExceeded {
+            store.clearNoResetNotificationState(
+                for: snapshot.serviceKey,
+                windowKind: window.kind,
+                level: level
+            )
+            serviceSettings = store.loadServiceSettings()
+        }
+        if let resetAt = window.resetAt,
+           let lastNotified = levelSettings.lastNotifiedResetAt,
+           abs(lastNotified.timeIntervalSince(resetAt)) <= 10 {
+            return
+        }
+        if window.resetAt == nil, levelSettings.isThresholdCurrentlyExceeded {
+            return
+        }
+
+        let didSend = await sendSemanticNotification(
             serviceKey: snapshot.serviceKey,
             displayName: snapshot.displayName,
             windowKind: window.kind,
+            windowLabel: window.displayLabel,
+            hasCustomLabel: window.hasCustomLabel,
             level: level,
             usedPercent: Int(window.usedPercent)
         )
-        store.updateLastNotifiedResetAt(
+        guard didSend else { return }
+        store.updateNotificationState(
             for: snapshot.serviceKey,
             windowKind: window.kind,
             level: level,
-            resetAt: window.resetAt
+            resetAt: window.resetAt,
+            isThresholdCurrentlyExceeded: window.resetAt == nil
         )
         serviceSettings = store.loadServiceSettings()
     }
@@ -254,21 +286,31 @@ final class ThresholdNotificationManager: ObservableObject {
         serviceKey: UsageServiceKey,
         displayName: String,
         windowKind: SemanticUsageWindowKind,
+        windowLabel: String,
+        hasCustomLabel: Bool,
         level: UsageThresholdLevel,
         usedPercent: Int
-    ) async {
+    ) async -> Bool {
         let content = UNMutableNotificationContent()
         let titleKey = level == .warning
             ? "notification.alertTitleWarning"
             : "notification.alertTitleDanger"
         content.title = String(format: titleKey.localized(), displayName)
-        let bodyKey: String
-        switch windowKind {
-        case .fiveHours: bodyKey = "notification.alertBody5h"
-        case .oneWeek: bodyKey = "notification.alertBodyWeek"
-        case .oneMonth: bodyKey = "notification.alertBodyMonth"
+        if hasCustomLabel {
+            content.body = String(
+                format: "notification.alertBodyCustom".localized(),
+                windowLabel,
+                usedPercent
+            )
+        } else {
+            let bodyKey: String
+            switch windowKind {
+            case .fiveHours: bodyKey = "notification.alertBody5h"
+            case .oneWeek: bodyKey = "notification.alertBodyWeek"
+            case .oneMonth: bodyKey = "notification.alertBodyMonth"
+            }
+            content.body = String(format: bodyKey.localized(), usedPercent)
         }
-        content.body = String(format: bodyKey.localized(), usedPercent)
         content.sound = .default
         let request = UNNotificationRequest(
             identifier: NotificationIdentifier.makeId(
@@ -281,8 +323,10 @@ final class ThresholdNotificationManager: ObservableObject {
         )
         do {
             try await notificationCenter.add(request)
+            return true
         } catch {
             Logger.notification.error("Failed to send custom threshold notification: \(error.localizedDescription)")
+            return false
         }
     }
 
@@ -293,6 +337,7 @@ final class ThresholdNotificationManager: ObservableObject {
         guard shouldResetNotification(oldLevel: oldLevel, newLevel: newLevel) else { return newLevel }
         var updated = newLevel
         updated.lastNotifiedResetAt = nil
+        updated.isThresholdCurrentlyExceeded = false
         return updated
     }
 

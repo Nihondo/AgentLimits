@@ -86,6 +86,8 @@ Pacemaker shows a time-based usage benchmark to help you stay on track.
 - Add the single **Custom Usage** widget kind, then right-click it and choose **Edit Widget** to select a service.
 - Each widget instance can select a different custom service.
 - Small and medium widgets show one or two windows in `5h` → `1w` → `1month` order and reuse the usage colors, Used/Remaining mode, pacemaker, and update time.
+- A window can set its own `label`. Custom labels are used in the widget, dashboard, and notification settings; their pacemaker ring is continuous rather than divided.
+- Windows without `resetAt` or `durationSeconds`, or with `isPacemakerEnabled: false`, show usage without a pacemaker ring or comparison indicator.
 - If the selected service is deleted, the widget shows that the service is unavailable.
 
 ### Token Usage Widgets (Codex / Claude Code)
@@ -133,6 +135,7 @@ Example stdout:
   "windows": [
     {
       "kind": "5h",
+      "label": "Fast Requests",
       "usedPercent": 42.5,
       "resetAt": "2026-08-23T15:00:00Z",
       "durationSeconds": 18000,
@@ -149,7 +152,7 @@ Example stdout:
 }
 ```
 
-`fetchedAt` and `resetAt` require timezone-aware ISO 8601 values. `usedPercent` must be 0–100 and `durationSeconds` must be positive. `usedCount` and `limitCount` are optional, but must be supplied together as nonnegative integers with `limitCount > 0`. Unknown fields are allowed. stdout is limited to 256 KiB and stderr to 64 KiB. Invalid output never overwrites the last successful snapshot.
+`fetchedAt` requires a timezone-aware ISO 8601 value. `label`, `resetAt`, `durationSeconds`, and `isPacemakerEnabled` are optional; an omitted or blank label uses the `kind` label, and pacemaker is enabled by default. When supplied, `resetAt` must be timezone-aware ISO 8601 and `durationSeconds` must be positive. `usedCount` and `limitCount` are optional, but must be supplied together as nonnegative integers with `limitCount > 0`. Unknown fields are allowed. A no-expiry window re-sends an enabled threshold notification only after usage falls below the threshold and exceeds it again. stdout is limited to 256 KiB and stderr to 64 KiB. Invalid output never overwrites the last successful snapshot.
 
 ### ccusage
 1. Open **ccusage**.

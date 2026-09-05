@@ -124,6 +124,7 @@
 "notification.alertBody5h" = "El límite de uso de 5 horas ha alcanzado %d%%";
 "notification.alertBodyWeek" = "El límite de uso semanal ha alcanzado %d%%";
 "notification.alertBodyMonth" = "El límite de uso mensual ha alcanzado %d%%";
+"notification.alertBodyCustom" = "El uso de %@ ha alcanzado %d%%";
 "notification.monthlyWindow" = "Límite mensual";
 
 /* ccusage */

@@ -124,6 +124,7 @@
 "notification.alertBody5h" = "5 saatlik kullanım limiti %d%% seviyesine ulaştı";
 "notification.alertBodyWeek" = "Haftalık kullanım limiti %d%% seviyesine ulaştı";
 "notification.alertBodyMonth" = "Aylık kullanım limiti %d%% seviyesine ulaştı";
+"notification.alertBodyCustom" = "%@ kullanımı %d%% seviyesine ulaştı";
 "notification.monthlyWindow" = "Aylık limit";
 
 /* ccusage */

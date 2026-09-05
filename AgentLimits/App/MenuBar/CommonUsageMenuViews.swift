@@ -93,6 +93,7 @@ private struct CommonUsagePercentText: View {
         let text = UsagePercentFormatter.formatPercentText(percent)
         let color = adjustedColor(statusColor)
         if showPacemakerValue,
+           window.canShowPacemaker,
            let pacemaker = usageWindow.calculatePacemakerPercent() {
             let level = UsageStatusLevelResolver.levelForPacemakerMode(
                 usedPercent: window.usedPercent,
@@ -161,7 +162,7 @@ struct CustomUsageDashboardMenuItemView: View {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .foregroundStyle(.orange)
                     }
-                    DashboardResetLabels(resetDates: snapshot.windows.map { Optional($0.resetAt) })
+                    DashboardResetLabels(resetDates: snapshot.windows.map(\.resetAt))
                 }
                 .font(.system(size: 11))
                 ForEach(snapshot.windows, id: \.kind) { window in
@@ -188,20 +189,23 @@ struct CustomUsageDashboardMenuItemView: View {
         let usageWindow = window.usageWindow
         let displayModeRaw = displayMode.makeDisplayModeRaw()
         let percent = displayMode.displayPercent(from: window.usedPercent, window: usageWindow)
-        let pacemakerPercent = usageWindow.displayPacemakerPercent(for: displayModeRaw)
+        let pacemakerPercent = window.canShowPacemaker
+            ? usageWindow.displayPacemakerPercent(for: displayModeRaw)
+            : nil
         let thresholds = UsageStatusThresholdStore.loadThresholds(for: snapshot.serviceKey, windowKind: window.kind)
-        let isEligible = PacemakerRingWarningSettings.isWarningEnabled()
+        let isEligible = window.canShowPacemaker
+            && PacemakerRingWarningSettings.isWarningEnabled()
             && displayModeRaw != .remaining
             && !LinearWarningGate.isBlockedByStatusColor(usedPercent: window.usedPercent, thresholds: thresholds)
         let segments = PacemakerLinearSegments.compute(
             usedPercent: window.usedPercent,
-            pacemakerPercent: usageWindow.calculatePacemakerPercent(),
+            pacemakerPercent: window.canShowPacemaker ? usageWindow.calculatePacemakerPercent() : nil,
             progress: max(0, min(1, percent / 100)),
             isEligible: isEligible
         )
 
         return HStack(spacing: 6) {
-            Text(window.kind.compactLabel)
+            Text(window.displayLabel)
                 .font(.system(size: 10))
                 .foregroundStyle(.secondary)
                 .frame(minWidth: 18, alignment: .trailing)
@@ -214,7 +218,7 @@ struct CustomUsageDashboardMenuItemView: View {
                 pacemakerRingColor: UsageColorSettings.loadPacemakerRingColor(),
                 pacemakerWarningColor: UsageColorSettings.loadPacemakerStatusOrangeColor(),
                 pacemakerDangerColor: UsageColorSettings.loadPacemakerStatusRedColor(),
-                divisionCount: usageWindow.pacemakerDivisionCount
+                divisionCount: window.hasCustomLabel ? 1 : usageWindow.pacemakerDivisionCount
             )
 
             Text(UsagePercentFormatter.formatPercentText(percent))

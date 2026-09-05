@@ -125,6 +125,7 @@
 "notification.alertBody5h" = "5時間の使用制限の%d%%に達しました";
 "notification.alertBodyWeek" = "週間の使用制限の%d%%に達しました";
 "notification.alertBodyMonth" = "月間の使用制限の%d%%に達しました";
+"notification.alertBodyCustom" = "「%@」の使用量が%d%%に達しました";
 "notification.monthlyWindow" = "月間の使用制限";
 
 /* ccusage */

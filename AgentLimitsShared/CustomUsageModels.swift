@@ -48,24 +48,48 @@ enum SemanticUsageWindowKind: String, Codable, CaseIterable, Hashable, Sendable 
         }
     }
 
-    var compactLabel: String { rawValue }
+    /// 組み込み利用枠に使う短い既定ラベルです。
+    var compactLabel: String {
+        switch self {
+        case .fiveHours: return "5h"
+        case .oneWeek: return "1w"
+        case .oneMonth: return "1mo"
+        }
+    }
 }
 
 /// 共通表示層で扱う単一の利用枠です。
 struct SemanticUsageWindow: Hashable, Sendable {
     let kind: SemanticUsageWindowKind
+    let label: String?
     let usedPercent: Double
-    let resetAt: Date
-    let durationSeconds: TimeInterval
+    let resetAt: Date?
+    let durationSeconds: TimeInterval?
+    let isPacemakerEnabled: Bool
     let usedCount: Int?
     let limitCount: Int?
+
+    /// スクリプト指定を優先し、未指定時は利用枠種別の既定ラベルを返します。
+    var displayLabel: String {
+        label ?? kind.compactLabel
+    }
+
+    /// 任意ラベルが有効に指定されているかを返します。
+    var hasCustomLabel: Bool {
+        label != nil
+    }
+
+    /// ペースメーカーを表示・計算できる利用枠かを返します。
+    var canShowPacemaker: Bool {
+        isPacemakerEnabled && resetAt != nil && durationSeconds != nil
+    }
 
     var usageWindow: UsageWindow {
         UsageWindow(
             kind: kind == .oneWeek ? .secondary : .primary,
             usedPercent: usedPercent,
             resetAt: resetAt,
-            limitWindowSeconds: durationSeconds,
+            limitWindowSeconds: durationSeconds ?? 0,
             usedCount: usedCount,
             limitCount: limitCount
         )
@@ -90,9 +114,11 @@ extension UsagePresentationSnapshot {
             let kind: SemanticUsageWindowKind = snapshot.isSingleMonthlyWindow ? .oneMonth : .fiveHours
             resolvedWindows.append(SemanticUsageWindow(
                 kind: kind,
+                label: nil,
                 usedPercent: primary.usedPercent,
                 resetAt: resetAt,
                 durationSeconds: primary.limitWindowSeconds,
+                isPacemakerEnabled: true,
                 usedCount: primary.usedCount,
                 limitCount: primary.limitCount
             ))
@@ -100,9 +126,11 @@ extension UsagePresentationSnapshot {
         if let secondary = snapshot.secondaryWindow, let resetAt = secondary.resetAt {
             resolvedWindows.append(SemanticUsageWindow(
                 kind: .oneWeek,
+                label: nil,
                 usedPercent: secondary.usedPercent,
                 resetAt: resetAt,
                 durationSeconds: secondary.limitWindowSeconds,
+                isPacemakerEnabled: true,
                 usedCount: secondary.usedCount,
                 limitCount: secondary.limitCount
             ))
@@ -141,18 +169,73 @@ struct CustomUsageSnapshot: Codable, Equatable, Sendable {
 /// カスタムスナップショット内の単一利用枠です。
 struct CustomUsageWindow: Codable, Equatable, Sendable {
     let kind: SemanticUsageWindowKind
+    let label: String?
     let usedPercent: Double
-    let resetAt: Date
-    let durationSeconds: TimeInterval
+    let resetAt: Date?
+    let durationSeconds: TimeInterval?
+    let isPacemakerEnabled: Bool
     let usedCount: Int?
     let limitCount: Int?
+
+    private enum CodingKeys: String, CodingKey {
+        case kind
+        case label
+        case usedPercent
+        case resetAt
+        case durationSeconds
+        case isPacemakerEnabled
+        case usedCount
+        case limitCount
+    }
+
+    init(
+        kind: SemanticUsageWindowKind,
+        label: String? = nil,
+        usedPercent: Double,
+        resetAt: Date? = nil,
+        durationSeconds: TimeInterval? = nil,
+        isPacemakerEnabled: Bool = true,
+        usedCount: Int? = nil,
+        limitCount: Int? = nil
+    ) {
+        self.kind = kind
+        self.label = Self.normalizedLabel(label)
+        self.usedPercent = usedPercent
+        self.resetAt = resetAt
+        self.durationSeconds = durationSeconds
+        self.isPacemakerEnabled = isPacemakerEnabled
+        self.usedCount = usedCount
+        self.limitCount = limitCount
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            kind: try container.decode(SemanticUsageWindowKind.self, forKey: .kind),
+            label: try container.decodeIfPresent(String.self, forKey: .label),
+            usedPercent: try container.decode(Double.self, forKey: .usedPercent),
+            resetAt: try container.decodeIfPresent(Date.self, forKey: .resetAt),
+            durationSeconds: try container.decodeIfPresent(TimeInterval.self, forKey: .durationSeconds),
+            isPacemakerEnabled: try container.decodeIfPresent(Bool.self, forKey: .isPacemakerEnabled) ?? true,
+            usedCount: try container.decodeIfPresent(Int.self, forKey: .usedCount),
+            limitCount: try container.decodeIfPresent(Int.self, forKey: .limitCount)
+        )
+    }
+
+    private static func normalizedLabel(_ value: String?) -> String? {
+        guard let value else { return nil }
+        let normalized = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        return normalized.isEmpty ? nil : normalized
+    }
 
     var semanticWindow: SemanticUsageWindow {
         SemanticUsageWindow(
             kind: kind,
+            label: label,
             usedPercent: usedPercent,
             resetAt: resetAt,
             durationSeconds: durationSeconds,
+            isPacemakerEnabled: isPacemakerEnabled,
             usedCount: usedCount,
             limitCount: limitCount
         )
@@ -268,7 +351,8 @@ enum CustomUsageSnapshotValidator {
             guard window.usedPercent.isFinite, (0...100).contains(window.usedPercent) else {
                 throw CustomUsageSnapshotValidationError.invalidUsedPercent(window.kind)
             }
-            guard window.durationSeconds.isFinite, window.durationSeconds > 0 else {
+            if let durationSeconds = window.durationSeconds,
+               (!durationSeconds.isFinite || durationSeconds <= 0) {
                 throw CustomUsageSnapshotValidationError.invalidDuration(window.kind)
             }
             let hasUsedCount = window.usedCount != nil
