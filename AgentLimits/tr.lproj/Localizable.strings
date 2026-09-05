@@ -136,8 +136,8 @@
 "ccusage.settings" = "Ayarlar";
 "ccusage.enabled" = "Periyodik getirimi etkinleştir";
 "ccusage.command" = "Komut";
-"ccusage.additionalArgs" = "Ek Argümanlar";
-"ccusage.additionalArgsPlaceholder" = "örn. --timezone <<timezone>>";
+"ccusage.resetToDefault" = "Varsayılana Sıfırla";
+"ccusage.command.note" = "{{since}}, çalıştırıldığında geçerli ayın ilk günü (YYYYAAGG) ile değiştirilir.";
 "ccusage.testNow" = "Şimdi test et";
 "ccusage.status" = "Durum";
 "ccusage.lastResult" = "Son sonuç:";

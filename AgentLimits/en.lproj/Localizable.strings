@@ -137,8 +137,8 @@
 "ccusage.settings" = "Settings";
 "ccusage.enabled" = "Enable periodic fetch";
 "ccusage.command" = "Command";
-"ccusage.additionalArgs" = "Additional Arguments";
-"ccusage.additionalArgsPlaceholder" = "e.g. --timezone <<timezone>>";
+"ccusage.resetToDefault" = "Reset to Default";
+"ccusage.command.note" = "{{since}} is replaced with the first day of the current month (YYYYMMDD) when the command runs.";
 "ccusage.testNow" = "Test Now";
 "ccusage.status" = "Status";
 "ccusage.lastResult" = "Last result:";

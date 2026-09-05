@@ -136,8 +136,8 @@
 "ccusage.settings" = "Налаштування";
 "ccusage.enabled" = "Увімкнути періодичне отримання";
 "ccusage.command" = "Команда";
-"ccusage.additionalArgs" = "Додаткові аргументи";
-"ccusage.additionalArgsPlaceholder" = "напр. --timezone <<timezone>>";
+"ccusage.resetToDefault" = "Скинути до типового";
+"ccusage.command.note" = "Під час виконання {{since}} замінюється першим днем поточного місяця (РРРРММДД).";
 "ccusage.testNow" = "Перевірити зараз";
 "ccusage.status" = "Статус";
 "ccusage.lastResult" = "Останній результат:";

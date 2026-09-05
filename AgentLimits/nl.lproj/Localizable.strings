@@ -136,8 +136,8 @@
 "ccusage.settings" = "Instellingen";
 "ccusage.enabled" = "Periodiek ophalen inschakelen";
 "ccusage.command" = "Opdracht";
-"ccusage.additionalArgs" = "Aanvullende argumenten";
-"ccusage.additionalArgsPlaceholder" = "bijv. --timezone <<timezone>>";
+"ccusage.resetToDefault" = "Standaardwaarden herstellen";
+"ccusage.command.note" = "{{since}} wordt bij uitvoering vervangen door de eerste dag van de huidige maand (JJJJMMDD).";
 "ccusage.testNow" = "Nu testen";
 "ccusage.status" = "Status";
 "ccusage.lastResult" = "Laatste resultaat:";

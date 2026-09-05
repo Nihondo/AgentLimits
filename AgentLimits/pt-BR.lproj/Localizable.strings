@@ -136,8 +136,8 @@
 "ccusage.settings" = "Configurações";
 "ccusage.enabled" = "Ativar busca periódica";
 "ccusage.command" = "Comando";
-"ccusage.additionalArgs" = "Argumentos adicionais";
-"ccusage.additionalArgsPlaceholder" = "ex.: --timezone <<timezone>>";
+"ccusage.resetToDefault" = "Restaurar padrão";
+"ccusage.command.note" = "{{since}} é substituído pelo primeiro dia do mês atual (AAAAMMDD) na execução.";
 "ccusage.testNow" = "Testar agora";
 "ccusage.status" = "Status";
 "ccusage.lastResult" = "Último resultado:";

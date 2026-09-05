@@ -43,6 +43,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 5. `CCUsageFetcher` runs CLI to fetch token usage:
    - Codex: `npx -y ccusage@latest codex daily`
    - Claude Code: `npx -y ccusage@latest claude daily`
+   - The executed command is a per-provider editable template (`CCUsageSettings.commandTemplate`); when empty, it falls back to the generated default above plus additional args. `{{since}}` in the template expands to the current month's start date (YYYYMMDD) at execution time; `-j` and the placeholder itself are part of the template, not auto-appended.
 6. `CopilotBillingFetcher` fetches billing usage via WebView JS (triggered after Copilot entitlement fetch):
    - API: `https://github.com/settings/billing/usage_table?group=0&period=3&product=&query=`
 7. `TokenUsageViewModel` manages auto-refresh (configurable 1-10 minutes) and snapshot persistence
@@ -184,7 +185,8 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 #### Token Usage (ccusage)
 - CLI-based fetch and parsing for Codex/Claude Code
 - Separate widgets for ccusage token usage (small and medium sizes)
-- Per-provider enable/disable with additional CLI arguments support
+- Per-provider enable/disable
+- The full command is user-editable per provider (e.g. to swap in a custom ccusage-compatible script that merges data across machines); `{{since}}` expands to the current month's start date, and clearing the field restores the generated default
 - **Small widget**: Usage summary (today/week/month cost and tokens)
 - **Medium widget**: Usage summary + GitHub-style heatmap
   - Layout: 7 rows (Sun-Sat) × 4-6 columns (weeks of current month)
@@ -290,7 +292,7 @@ Monthly-only usage windows:
 | `app_language` | Language preference (App Group shared) |
 | `usage_refresh_interval_minutes` | Usage limits auto-refresh interval (minutes) |
 | `token_usage_refresh_interval_minutes` | ccusage auto-refresh interval (minutes) |
-| `ccusage_settings` | ccusage settings (JSON) |
+| `ccusage_settings` | ccusage settings (JSON), including per-provider `commandTemplate` override |
 | `cli_path_codex` | Full path override for codex |
 | `cli_path_claude` | Full path override for claude |
 | `cli_path_npx` | Full path override for npx |

@@ -136,8 +136,8 @@
 "ccusage.settings" = "Ustawienia";
 "ccusage.enabled" = "Włącz okresowe pobieranie";
 "ccusage.command" = "Polecenie";
-"ccusage.additionalArgs" = "Dodatkowe argumenty";
-"ccusage.additionalArgsPlaceholder" = "np. --timezone <<timezone>>";
+"ccusage.resetToDefault" = "Przywróć domyślne";
+"ccusage.command.note" = "{{since}} jest zastępowane pierwszym dniem bieżącego miesiąca (RRRRMMDD) podczas wykonywania.";
 "ccusage.testNow" = "Testuj teraz";
 "ccusage.status" = "Status";
 "ccusage.lastResult" = "Ostatni wynik:";

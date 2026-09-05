@@ -136,8 +136,8 @@
 "ccusage.settings" = "설정";
 "ccusage.enabled" = "정기 가져오기 사용";
 "ccusage.command" = "명령";
-"ccusage.additionalArgs" = "추가 인수";
-"ccusage.additionalArgsPlaceholder" = "예: --timezone <<timezone>>";
+"ccusage.resetToDefault" = "기본값으로 재설정";
+"ccusage.command.note" = "실행 시 {{since}}는 이번 달 첫째 날(YYYYMMDD)로 대체됩니다.";
 "ccusage.testNow" = "지금 테스트 실행";
 "ccusage.status" = "상태";
 "ccusage.lastResult" = "마지막 결과:";

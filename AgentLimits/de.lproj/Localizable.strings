@@ -137,8 +137,8 @@
 "ccusage.settings" = "Einstellungen";
 "ccusage.enabled" = "Regelmäßigen Abruf aktivieren";
 "ccusage.command" = "Befehl";
-"ccusage.additionalArgs" = "Zusätzliche Argumente";
-"ccusage.additionalArgsPlaceholder" = "z. B. --timezone <<timezone>>";
+"ccusage.resetToDefault" = "Auf Standard zurücksetzen";
+"ccusage.command.note" = "{{since}} wird beim Ausführen durch den ersten Tag des aktuellen Monats (JJJJMMTT) ersetzt.";
 "ccusage.testNow" = "Jetzt testen";
 "ccusage.status" = "Status";
 "ccusage.lastResult" = "Letztes Ergebnis:";

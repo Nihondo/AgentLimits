@@ -27,6 +27,7 @@ macOS Sonoma以降向けのメニューバーアプリと通知センターウ�
 - **トークン使用量（ccusage）**: CLIで日/週/月のトークン数とコストを取得
   - Codex: `npx -y ccusage@latest codex daily`
   - Claude Code: `npx -y ccusage@latest claude daily`
+  - 実行コマンドは設定画面でプロバイダごとに編集可能です。複数マシンの使用量を集約するような、ccusage互換の独自スクリプトに差し替えられます。コマンド内で `{{since}}` を使うと当月初日に置き換えられます。空欄のままにするとデフォルトのコマンドが使われます。
 - **プレミアムリクエスト使用量（Copilot）**: WebView経由で日別のプレミアムリクエスト数とコストを取得
   - API: `https://github.com/settings/billing/usage_table`（Copilot使用量の取得時に自動取得）
 

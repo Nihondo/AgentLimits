@@ -136,8 +136,8 @@
 "ccusage.settings" = "設定";
 "ccusage.enabled" = "啟用定期取得";
 "ccusage.command" = "指令";
-"ccusage.additionalArgs" = "附加參數";
-"ccusage.additionalArgsPlaceholder" = "例如：--timezone <<timezone>>";
+"ccusage.resetToDefault" = "還原預設值";
+"ccusage.command.note" = "執行時 {{since}} 會替換為當月第一天（YYYYMMDD 格式）。";
 "ccusage.testNow" = "立即測試";
 "ccusage.status" = "狀態";
 "ccusage.lastResult" = "上次結果：";

@@ -136,8 +136,8 @@
 "ccusage.settings" = "Paramètres";
 "ccusage.enabled" = "Activer la récupération périodique";
 "ccusage.command" = "Commande";
-"ccusage.additionalArgs" = "Arguments supplémentaires";
-"ccusage.additionalArgsPlaceholder" = "ex. --timezone <<timezone>>";
+"ccusage.resetToDefault" = "Réinitialiser";
+"ccusage.command.note" = "{{since}} est remplacé par le premier jour du mois en cours (AAAAMMJJ) lors de l'exécution.";
 "ccusage.testNow" = "Tester maintenant";
 "ccusage.status" = "Statut";
 "ccusage.lastResult" = "Dernier résultat :";

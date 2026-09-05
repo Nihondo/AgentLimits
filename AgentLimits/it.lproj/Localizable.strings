@@ -136,8 +136,8 @@
 "ccusage.settings" = "Impostazioni";
 "ccusage.enabled" = "Abilita recupero periodico";
 "ccusage.command" = "Comando";
-"ccusage.additionalArgs" = "Argomenti aggiuntivi";
-"ccusage.additionalArgsPlaceholder" = "es. --timezone <<timezone>>";
+"ccusage.resetToDefault" = "Ripristina predefinito";
+"ccusage.command.note" = "{{since}} viene sostituito con il primo giorno del mese corrente (AAAAMMGG) all'esecuzione.";
 "ccusage.testNow" = "Testa ora";
 "ccusage.status" = "Stato";
 "ccusage.lastResult" = "Ultimo risultato:";

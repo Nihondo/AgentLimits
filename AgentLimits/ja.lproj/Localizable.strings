@@ -137,8 +137,8 @@
 "ccusage.settings" = "設定";
 "ccusage.enabled" = "定期取得を有効にする";
 "ccusage.command" = "実行コマンド";
-"ccusage.additionalArgs" = "追加引数";
-"ccusage.additionalArgsPlaceholder" = "例: --timezone <<timezone>>";
+"ccusage.resetToDefault" = "デフォルトに戻す";
+"ccusage.command.note" = "実行時に {{since}} は当月初日（YYYYMMDD形式）に置き換えられます。";
 "ccusage.testNow" = "今すぐテスト実行";
 "ccusage.status" = "ステータス";
 "ccusage.lastResult" = "最終結果:";

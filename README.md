@@ -27,6 +27,7 @@ Download the latest build: [Download](https://github.com/Nihondo/AgentLimits/rel
 - **Token usage (ccusage):** daily/weekly/monthly tokens and cost via CLI.
   - Codex: `npx -y ccusage@latest codex daily`
   - Claude Code: `npx -y ccusage@latest claude daily`
+  - The command is editable per provider in Settings — swap in your own ccusage-compatible script (e.g. one that merges usage across machines). Use `{{since}}` in the command to insert the current month's start date; leave the field empty to use the generated default.
 - **Premium request usage (Copilot):** daily premium request count and cost via WebView.
   - API: `https://github.com/settings/billing/usage_table` (fetched automatically with Copilot usage)
 
