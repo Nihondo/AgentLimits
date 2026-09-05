@@ -24,9 +24,12 @@ KEYRING_BASE64_PREFIX = "go-keyring-base64:"
 
 # This script never performs the OAuth refresh grant itself (that would
 # require embedding/extracting Antigravity's own OAuth client secret out of
-# its binary). Instead it relies on the access token Antigravity/`agy` itself
-# keeps refreshed in the Keychain whenever the app or CLI is used.
+# its binary). Instead, when the cached access token is at/near expiry, it
+# shells out to a lightweight authenticated `agy` subcommand so `agy` itself
+# performs the refresh and rewrites the Keychain entry, then re-reads it.
 REFRESH_BUFFER_SECONDS = 60
+AGY_REFRESH_COMMAND = ["agy", "models"]
+AGY_REFRESH_TIMEOUT_SECONDS = 15
 
 # `retrieveUserQuotaSummary` is the same endpoint Antigravity's own "Models &
 # Quota" panel uses; it returns the real 5-hour and weekly Gemini buckets with
@@ -232,6 +235,18 @@ def build_snapshot(windows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def is_token_near_expiry(expires_at: datetime | None) -> bool:
+    """アクセストークンがREFRESH_BUFFER_SECONDS以内に失効するか判定します。"""
+    if expires_at is None:
+        return False
+    return (expires_at - datetime.now(timezone.utc)).total_seconds() <= REFRESH_BUFFER_SECONDS
+
+
+def refresh_access_token_via_agy() -> None:
+    """`agy`の軽量サブコマンドを実行し、OAuthアクセストークンのリフレッシュを促します。"""
+    run_command(AGY_REFRESH_COMMAND, timeout=AGY_REFRESH_TIMEOUT_SECONDS)
+
+
 def fetch_quota_buckets() -> dict[str, dict[str, Any]]:
     """Keychainのアクセストークンを検証し、retrieveUserQuotaSummaryのバケット一覧を取得します。"""
     credentials = load_keychain_access_token()
@@ -240,13 +255,18 @@ def fetch_quota_buckets() -> dict[str, dict[str, Any]]:
             "no Antigravity/agy Keychain credentials were found; sign in to Antigravity or run `agy` at least once"
         )
     access_token, expires_at = credentials
-    if expires_at is not None:
-        now = datetime.now(timezone.utc)
-        if (expires_at - now).total_seconds() <= REFRESH_BUFFER_SECONDS:
+
+    if is_token_near_expiry(expires_at):
+        refresh_access_token_via_agy()
+        refreshed = load_keychain_access_token()
+        if refreshed is not None:
+            access_token, expires_at = refreshed
+        if is_token_near_expiry(expires_at):
             raise AntigravityUsageError(
-                "stored access token has expired; open Antigravity or run `agy` again to refresh it "
-                "(this script does not perform an OAuth refresh)"
+                "stored access token is expired and `agy` did not refresh it; "
+                "open Antigravity or run `agy` again manually to refresh it"
             )
+
     return extract_buckets(fetch_quota_summary(access_token))
 
 
