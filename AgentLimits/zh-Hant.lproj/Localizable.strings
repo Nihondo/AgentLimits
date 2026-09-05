@@ -217,6 +217,7 @@
 "customUsage.delete.confirmTitle" = "Delete Custom Service?";
 "customUsage.delete.action" = "Delete";
 "customUsage.add" = "Add Service";
+"customUsage.add.providerIDHint" = "新增後可編輯顯示名稱、指令碼等設定。";
 "customUsage.empty.title" = "No Custom Services";
 "customUsage.empty.message" = "Add a service that outputs an AgentLimits usage snapshot.";
 "customUsage.identity" = "Service Identity";
@@ -234,9 +235,7 @@
 "customUsage.lastSuccess" = "Last Success";
 "customUsage.schemaHelp" = "The script must output one JSON object to stdout. Write logs to stderr.";
 "customUsage.snapshotFile" = "Snapshot File";
-"customUsage.error.displayName" = "Enter a display name.";
-"customUsage.error.executable" = "Choose an executable regular file.";
-"customUsage.error.website" = "Enter a valid HTTP or HTTPS URL.";
+"customUsage.refreshIntervalHint" = "自訂服務與「使用量」分頁中設定的重新整理間隔共用。";
 "customUsage.notification.runFirst" = "Run this service successfully before configuring notifications.";
 "customUsage.validation.invalidProviderID" = "Provider ID must use lowercase letters, numbers, underscores, or hyphens.";
 "customUsage.validation.unsupportedSchemaVersion" = "Unsupported schemaVersion: %d.";

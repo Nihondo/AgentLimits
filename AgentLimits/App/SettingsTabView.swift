@@ -7,11 +7,11 @@ import SwiftUI
 
 enum SettingsTab: String, Hashable, CaseIterable, Identifiable {
     case usage
-    case customUsage
     case wakeUp
     case threshold
     case pacemaker
     case ccusage
+    case customUsage
     case update
     case advanced
 
@@ -20,11 +20,11 @@ enum SettingsTab: String, Hashable, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .usage: return "tab.usage".localized()
-        case .customUsage: return "tab.customUsage".localized()
         case .wakeUp: return "tab.wakeUp".localized()
         case .threshold: return "tab.notification".localized()
         case .pacemaker: return "tab.pacemaker".localized()
         case .ccusage: return "tab.ccusage".localized()
+        case .customUsage: return "tab.customUsage".localized()
         case .update: return "tab.update".localized()
         case .advanced: return "tab.advanced".localized()
         }
@@ -33,11 +33,11 @@ enum SettingsTab: String, Hashable, CaseIterable, Identifiable {
     var iconName: String {
         switch self {
         case .usage: return "chart.pie"
-        case .customUsage: return "terminal"
         case .wakeUp: return "alarm"
         case .threshold: return "bell"
         case .pacemaker: return "gauge"
         case .ccusage: return "chart.bar"
+        case .customUsage: return "terminal"
         case .update: return "arrow.down.circle"
         case .advanced: return "gearshape"
         }
@@ -91,8 +91,6 @@ struct SettingsTabView: View {
         switch SettingsTab(rawValue: selectedTabRaw) ?? .usage {
         case .usage:
             ContentView(viewModel: viewModel, webViewPool: webViewPool)
-        case .customUsage:
-            CustomUsageSettingsView(viewModel: customUsageViewModel)
         case .wakeUp:
             WakeUpSettingsView(scheduler: .shared)
         case .threshold:
@@ -101,6 +99,8 @@ struct SettingsTabView: View {
             PacemakerSettingsView()
         case .ccusage:
             CCUsageSettingsView(viewModel: tokenUsageViewModel)
+        case .customUsage:
+            CustomUsageSettingsView(viewModel: customUsageViewModel)
         case .update:
             UpdateSettingsView(releasesURL: URL(string: "https://github.com/Nihondo/AgentLimits/releases")!)
         case .advanced:

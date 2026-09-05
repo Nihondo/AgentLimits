@@ -216,6 +216,7 @@
 "customUsage.delete.confirmTitle" = "Delete Custom Service?";
 "customUsage.delete.action" = "Delete";
 "customUsage.add" = "Add Service";
+"customUsage.add.providerIDHint" = "You can edit the display name, script, and other settings after adding.";
 "customUsage.empty.title" = "No Custom Services";
 "customUsage.empty.message" = "Add a service that outputs an AgentLimits usage snapshot.";
 "customUsage.identity" = "Service Identity";
@@ -233,9 +234,7 @@
 "customUsage.lastSuccess" = "Last Success";
 "customUsage.schemaHelp" = "The script must output one JSON object to stdout. Write logs to stderr.";
 "customUsage.snapshotFile" = "Snapshot File";
-"customUsage.error.displayName" = "Enter a display name.";
-"customUsage.error.executable" = "Choose an executable regular file.";
-"customUsage.error.website" = "Enter a valid HTTP or HTTPS URL.";
+"customUsage.refreshIntervalHint" = "Custom services share the refresh interval configured in the Usage tab.";
 "customUsage.notification.runFirst" = "Run this service successfully before configuring notifications.";
 "customUsage.validation.invalidProviderID" = "Provider ID must use lowercase letters, numbers, underscores, or hyphens.";
 "customUsage.validation.unsupportedSchemaVersion" = "Unsupported schemaVersion: %d.";

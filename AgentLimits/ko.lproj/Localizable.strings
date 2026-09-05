@@ -217,6 +217,7 @@
 "customUsage.delete.confirmTitle" = "Delete Custom Service?";
 "customUsage.delete.action" = "Delete";
 "customUsage.add" = "Add Service";
+"customUsage.add.providerIDHint" = "표시 이름, 스크립트 등의 설정은 추가한 후에 편집할 수 있습니다.";
 "customUsage.empty.title" = "No Custom Services";
 "customUsage.empty.message" = "Add a service that outputs an AgentLimits usage snapshot.";
 "customUsage.identity" = "Service Identity";
@@ -234,9 +235,7 @@
 "customUsage.lastSuccess" = "Last Success";
 "customUsage.schemaHelp" = "The script must output one JSON object to stdout. Write logs to stderr.";
 "customUsage.snapshotFile" = "Snapshot File";
-"customUsage.error.displayName" = "Enter a display name.";
-"customUsage.error.executable" = "Choose an executable regular file.";
-"customUsage.error.website" = "Enter a valid HTTP or HTTPS URL.";
+"customUsage.refreshIntervalHint" = "사용자 지정 서비스는 사용량 탭에서 설정한 새로고침 간격을 공유합니다.";
 "customUsage.notification.runFirst" = "Run this service successfully before configuring notifications.";
 "customUsage.validation.invalidProviderID" = "Provider ID must use lowercase letters, numbers, underscores, or hyphens.";
 "customUsage.validation.unsupportedSchemaVersion" = "Unsupported schemaVersion: %d.";

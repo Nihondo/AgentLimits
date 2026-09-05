@@ -1,5 +1,6 @@
 // MARK: - CustomUsageSettingsView.swift
-// List-detail settings UI for script-backed custom usage services.
+// Picker-based single-pane settings UI for script-backed custom usage services,
+// matching the Usage/ccusage/Wake Up/Notification tabs' convention.
 
 import AppKit
 import SwiftUI
@@ -20,13 +21,43 @@ struct CustomUsageSettingsView: View {
     }
 
     var body: some View {
-        HSplitView {
-            serviceList
-                .frame(minWidth: 190, idealWidth: 220, maxWidth: 260)
-            detailView
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        Form {
+            SettingsFormSection {
+                LabeledContent("notification.provider".localized()) {
+                    HStack {
+                        servicePicker
+                        Button {
+                            isShowingAddSheet = true
+                        } label: {
+                            Image(systemName: "plus")
+                        }
+                        .accessibilityLabel("customUsage.add".localized())
+
+                        Button(role: .destructive) {
+                            isShowingDeleteConfirmation = true
+                        } label: {
+                            Image(systemName: "minus")
+                        }
+                        .disabled(selectedProviderID == nil)
+                        .accessibilityLabel("customUsage.delete.action".localized())
+                    }
+                }
+            }
+
+            if let providerID = selectedProviderID,
+               let service = serviceStore.service(providerID: providerID) {
+                serviceFormSections(service)
+            } else {
+                Section {
+                    ContentUnavailableView(
+                        "customUsage.empty.title".localized(),
+                        systemImage: "terminal",
+                        description: Text("customUsage.empty.message".localized())
+                    )
+                }
+            }
         }
-        .padding(DesignTokens.Spacing.large)
+        .formStyle(.grouped)
         .onAppear {
             selectPreferredServiceIfAvailable()
             selectFirstServiceIfNeeded()
@@ -47,9 +78,6 @@ struct CustomUsageSettingsView: View {
                 selectedProviderID = service.providerID
                 UserDefaults.standard.set(service.providerID, forKey: "selected_custom_usage_provider")
                 WidgetCenter.shared.reloadTimelines(ofKind: CustomUsageViewModel.widgetKind)
-                if service.isAutoRefreshEnabled {
-                    Task { await viewModel.refresh(providerID: service.providerID) }
-                }
             }
         }
         .confirmationDialog(
@@ -67,121 +95,87 @@ struct CustomUsageSettingsView: View {
         }
     }
 
-    private var serviceList: some View {
-        VStack(spacing: DesignTokens.Spacing.small) {
-            List(serviceStore.services, selection: $selectedProviderID) { service in
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(service.displayName)
-                    Text(service.providerID)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                .tag(service.providerID)
-            }
-            .listStyle(.sidebar)
+    // MARK: - Service Picker
 
-            HStack {
-                Button {
-                    isShowingAddSheet = true
-                } label: {
-                    Image(systemName: "plus")
-                }
-                .accessibilityLabel("customUsage.add".localized())
-
-                Button(role: .destructive) {
-                    isShowingDeleteConfirmation = true
-                } label: {
-                    Image(systemName: "minus")
-                }
-                .disabled(selectedProviderID == nil)
-                .accessibilityLabel("customUsage.delete.action".localized())
-                Spacer()
+    private var servicePicker: some View {
+        Picker("", selection: $selectedProviderID) {
+            ForEach(serviceStore.services) { service in
+                Text("\(service.providerID) - \(service.displayName)")
+                    .tag(Optional(service.providerID))
             }
-            .buttonStyle(.borderless)
-            .padding(.horizontal, DesignTokens.Spacing.small)
         }
+        .pickerStyle(.menu)
+        .frame(maxWidth: 260)
+        .labelsHidden()
     }
 
     @ViewBuilder
-    private var detailView: some View {
-        if let providerID = selectedProviderID,
-           let service = serviceStore.service(providerID: providerID) {
-            serviceForm(service)
-        } else {
-            ContentUnavailableView(
-                "customUsage.empty.title".localized(),
-                systemImage: "terminal",
-                description: Text("customUsage.empty.message".localized())
-            )
-        }
-    }
-
-    private func serviceForm(_ service: CustomUsageService) -> some View {
-        Form {
-            SettingsFormSection(title: "customUsage.identity".localized()) {
-                LabeledContent("customUsage.displayName".localized()) {
-                    TextField("", text: serviceBinding(service, keyPath: \.displayName))
-                        .textFieldStyle(.roundedBorder)
-                }
-                LabeledContent("customUsage.providerID".localized()) {
-                    Text(service.providerID)
-                        .font(.system(.body, design: .monospaced))
-                        .textSelection(.enabled)
-                }
-                LabeledContent("customUsage.website".localized()) {
-                    TextField("https://", text: serviceBinding(service, keyPath: \.websiteURLString))
-                        .textFieldStyle(.roundedBorder)
-                }
+    private func serviceFormSections(_ service: CustomUsageService) -> some View {
+        SettingsFormSection(title: "customUsage.identity".localized()) {
+            LabeledContent("customUsage.displayName".localized()) {
+                TextField("", text: serviceBinding(service, keyPath: \.displayName))
+                    .textFieldStyle(.roundedBorder)
             }
+            LabeledContent("customUsage.providerID".localized()) {
+                Text(service.providerID)
+                    .font(.system(.body, design: .monospaced))
+                    .textSelection(.enabled)
+            }
+            LabeledContent("customUsage.website".localized()) {
+                TextField("", text: serviceBinding(service, keyPath: \.websiteURLString), prompt: Text("https://"))
+                    .textFieldStyle(.roundedBorder)
+            }
+        }
 
-            SettingsFormSection(title: "customUsage.script".localized()) {
-                LabeledContent("customUsage.scriptPath".localized()) {
-                    HStack {
-                        Text(service.scriptPath)
-                            .font(.system(.footnote, design: .monospaced))
-                            .lineLimit(1)
-                            .truncationMode(.middle)
-                            .textSelection(.enabled)
-                        Button("customUsage.chooseScript".localized()) {
-                            if let path = chooseExecutableScript() {
-                                var updated = service
-                                updated.scriptPath = path
-                                serviceStore.updateService(updated)
-                            }
+        SettingsFormSection(
+            title: "customUsage.script".localized(),
+            footerText: "customUsage.refreshIntervalHint".localized()
+        ) {
+            LabeledContent("customUsage.scriptPath".localized()) {
+                HStack {
+                    Text(service.scriptPath)
+                        .font(.system(.footnote, design: .monospaced))
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                        .textSelection(.enabled)
+                    Button("customUsage.chooseScript".localized()) {
+                        if let path = chooseExecutableScript() {
+                            var updated = service
+                            updated.scriptPath = path
+                            serviceStore.updateService(updated)
                         }
                     }
                 }
-                Toggle(
-                    "customUsage.autoRefresh".localized(),
-                    isOn: serviceBinding(service, keyPath: \.isAutoRefreshEnabled)
-                )
-                Toggle(
-                    "settings.showInMenuBar".localized(),
-                    isOn: serviceBinding(service, keyPath: \.isMenuBarEnabled)
-                )
-                Toggle(
-                    "settings.showMenuDashboard".localized(),
-                    isOn: serviceBinding(service, keyPath: \.isDashboardEnabled)
-                )
             }
-
-            SettingsFormSection(title: "customUsage.status".localized()) {
-                statusView(providerID: service.providerID)
-                Button("customUsage.testNow".localized()) {
-                    Task { await viewModel.refresh(providerID: service.providerID) }
-                }
-                .disabled(viewModel.runningProviderIDs.contains(service.providerID))
-                .settingsButtonStyle(.primary)
-            }
-
-            SettingsFormSection(footerText: "customUsage.schemaHelp".localized()) {
-                Text("customUsage.snapshotFile".localized() + " usage_snapshot_custom_\(service.providerID).json")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .textSelection(.enabled)
-            }
+            Toggle(
+                "customUsage.autoRefresh".localized(),
+                isOn: serviceBinding(service, keyPath: \.isAutoRefreshEnabled)
+            )
+            Toggle(
+                "settings.showInMenuBar".localized(),
+                isOn: serviceBinding(service, keyPath: \.isMenuBarEnabled)
+            )
+            Toggle(
+                "settings.showMenuDashboard".localized(),
+                isOn: serviceBinding(service, keyPath: \.isDashboardEnabled)
+            )
         }
-        .formStyle(.grouped)
+
+        SettingsFormSection(title: "customUsage.status".localized()) {
+            statusView(providerID: service.providerID)
+            Button("customUsage.testNow".localized()) {
+                Task { await viewModel.refresh(providerID: service.providerID) }
+            }
+            .disabled(viewModel.runningProviderIDs.contains(service.providerID))
+            .settingsButtonStyle(.primary)
+        }
+
+        SettingsFormSection(footerText: "customUsage.schemaHelp".localized()) {
+            Text("customUsage.snapshotFile".localized() + " usage_snapshot_custom_\(service.providerID).json")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .textSelection(.enabled)
+        }
     }
 
     private func statusView(providerID: String) -> some View {
@@ -206,9 +200,16 @@ struct CustomUsageSettingsView: View {
         }
     }
 
+    private static let timeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.timeStyle = .short
+        return formatter
+    }()
+
     private func dateText(_ date: Date?) -> Text {
         guard let date else { return Text("-") }
-        return Text(date, style: .relative)
+        return Text(Self.timeFormatter.string(from: date))
     }
 
     private func serviceBinding<Value>(
@@ -241,13 +242,11 @@ struct CustomUsageSettingsView: View {
     }
 }
 
-/// 新規カスタムサービスを作成するシートです。
+/// 新規カスタムサービスをProvider IDのみで作成するシートです。
+/// 表示名・スクリプト・Webサイト・トグルは、追加後に開く詳細ペインで編集します。
 private struct AddCustomUsageServiceView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var displayName = ""
     @State private var providerID = ""
-    @State private var scriptPath = ""
-    @State private var websiteURLString = ""
     @State private var validationMessage: String?
     let onSave: (CustomUsageService) throws -> Void
 
@@ -256,27 +255,14 @@ private struct AddCustomUsageServiceView: View {
             Text("customUsage.add".localized())
                 .font(.title2.bold())
             Form {
-                LabeledContent("customUsage.displayName".localized()) {
-                    TextField("", text: $displayName)
-                }
                 LabeledContent("customUsage.providerID".localized()) {
-                    TextField("cursor", text: $providerID)
+                    TextField("", text: $providerID, prompt: Text("cursor"))
                         .font(.system(.body, design: .monospaced))
                 }
-                LabeledContent("customUsage.scriptPath".localized()) {
-                    HStack {
-                        Text(scriptPath.isEmpty ? "-" : scriptPath)
-                            .lineLimit(1)
-                            .truncationMode(.middle)
-                        Button("customUsage.chooseScript".localized()) {
-                            scriptPath = chooseExecutableScript() ?? scriptPath
-                        }
-                    }
-                }
-                LabeledContent("customUsage.website".localized()) {
-                    TextField("https://", text: $websiteURLString)
-                }
             }
+            Text("customUsage.add.providerIDHint".localized())
+                .font(.footnote)
+                .foregroundStyle(.secondary)
             if let validationMessage {
                 Text(validationMessage)
                     .font(.footnote)
@@ -290,45 +276,21 @@ private struct AddCustomUsageServiceView: View {
             }
         }
         .padding(24)
-        .frame(width: 520)
+        .frame(width: 360)
     }
 
     private func save() {
         let normalizedID = providerID.trimmingCharacters(in: .whitespacesAndNewlines)
-        let normalizedName = displayName.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !normalizedName.isEmpty else {
-            validationMessage = "customUsage.error.displayName".localized()
-            return
-        }
         guard CustomUsageSnapshotValidator.isProviderIDValid(normalizedID) else {
             validationMessage = CustomUsageSnapshotValidationError.invalidProviderID.localizedDescription
             return
         }
-        guard isRegularExecutableFile(atPath: scriptPath) else {
-            validationMessage = "customUsage.error.executable".localized()
-            return
-        }
-        if !websiteURLString.isEmpty {
-            let candidate = CustomUsageService(
-                providerID: normalizedID,
-                displayName: normalizedName,
-                scriptPath: scriptPath,
-                websiteURLString: websiteURLString,
-                isAutoRefreshEnabled: true,
-                isMenuBarEnabled: false,
-                isDashboardEnabled: true
-            )
-            guard candidate.websiteURL != nil else {
-                validationMessage = "customUsage.error.website".localized()
-                return
-            }
-        }
         do {
             try onSave(CustomUsageService(
                 providerID: normalizedID,
-                displayName: normalizedName,
-                scriptPath: scriptPath,
-                websiteURLString: websiteURLString,
+                displayName: normalizedID,
+                scriptPath: "",
+                websiteURLString: "",
                 isAutoRefreshEnabled: true,
                 isMenuBarEnabled: false,
                 isDashboardEnabled: true

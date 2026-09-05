@@ -216,6 +216,7 @@
 "customUsage.delete.confirmTitle" = "カスタムサービスを削除しますか？";
 "customUsage.delete.action" = "削除";
 "customUsage.add" = "サービスを追加";
+"customUsage.add.providerIDHint" = "表示名やスクリプトなどの設定は、追加後に編集できます。";
 "customUsage.empty.title" = "カスタムサービスがありません";
 "customUsage.empty.message" = "AgentLimits形式の使用量スナップショットを出力するサービスを追加します。";
 "customUsage.identity" = "サービス情報";
@@ -233,9 +234,7 @@
 "customUsage.lastSuccess" = "最終成功";
 "customUsage.schemaHelp" = "スクリプトはstdoutへJSONオブジェクトを1つ出力し、ログはstderrへ出力してください。";
 "customUsage.snapshotFile" = "スナップショットファイル";
-"customUsage.error.displayName" = "表示名を入力してください。";
-"customUsage.error.executable" = "実行可能な通常ファイルを選択してください。";
-"customUsage.error.website" = "有効なHTTPまたはHTTPS URLを入力してください。";
+"customUsage.refreshIntervalHint" = "カスタムサービスは「使用量」タブの更新間隔設定を共有します。";
 "customUsage.notification.runFirst" = "通知を設定する前に、このサービスを正常に実行してください。";
 "customUsage.validation.invalidProviderID" = "Provider IDには小文字、数字、アンダースコア、ハイフンのみ使用できます。";
 "customUsage.validation.unsupportedSchemaVersion" = "未対応のschemaVersionです：%d。";
