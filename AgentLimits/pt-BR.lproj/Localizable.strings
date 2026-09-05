@@ -124,7 +124,10 @@
 "notification.alertBody5h" = "O limite de uso de 5 horas atingiu %d%%";
 "notification.alertBodyWeek" = "O limite de uso semanal atingiu %d%%";
 "notification.alertBodyMonth" = "O limite de uso mensal atingiu %d%%";
+"notification.alertBodyCustomWindow" = "O limite de uso personalizado atingiu %d%%";
+"notification.alertBodyCustom" = "O uso de %@ atingiu %d%%";
 "notification.monthlyWindow" = "Limite mensal";
+"notification.customWindow" = "Limite personalizado";
 
 /* ccusage */
 "tab.ccusage" = "ccusage";
@@ -133,8 +136,8 @@
 "ccusage.settings" = "Configurações";
 "ccusage.enabled" = "Ativar busca periódica";
 "ccusage.command" = "Comando";
-"ccusage.additionalArgs" = "Argumentos adicionais";
-"ccusage.additionalArgsPlaceholder" = "ex.: --timezone <<timezone>>";
+"ccusage.resetToDefault" = "Restaurar padrão";
+"ccusage.command.note" = "{{since}} é substituído pelo primeiro dia do mês atual (YYYYMMDD) na execução.";
 "ccusage.testNow" = "Testar agora";
 "ccusage.status" = "Status";
 "ccusage.lastResult" = "Último resultado:";
@@ -196,16 +199,58 @@
 "notification.pacemakerThresholds.warning" = "Aviso";
 "notification.pacemakerThresholds.danger" = "Perigo";
 "pacemaker.showRingWarningSegment" = "Mostrar segmentos de aviso do anel";
-"content.month" = "Monthly";
+"content.month" = "Mensal";
 
 /* Update */
-"menu.checkForUpdates" = "Check for Updates...";
-"tab.update" = "Update";
-"update.currentVersion" = "Current Version";
-"update.lastChecked" = "Last checked";
-"update.checkNow" = "Check for Updates Now";
-"update.automaticChecks" = "Check for updates automatically";
-"update.releasesPage" = "View All Releases";
-"update.neverChecked" = "Never";
+"menu.checkForUpdates" = "Verificar atualizações...";
+"tab.update" = "Atualização";
+"update.currentVersion" = "Versão atual";
+"update.lastChecked" = "Última verificação";
+"update.checkNow" = "Verificar atualizações agora";
+"update.automaticChecks" = "Verificar atualizações automaticamente";
+"update.releasesPage" = "Ver todas as versões";
+"update.neverChecked" = "Nunca";
 
 "settings.providerOrder" = "Ordem de exibição";
+
+"tab.customUsage" = "Uso personalizado";
+"customUsage.delete.confirmTitle" = "Excluir serviço personalizado?";
+"customUsage.delete.action" = "Excluir";
+"customUsage.add" = "Adicionar serviço";
+"customUsage.add.providerIDHint" = "Você poderá editar o nome de exibição, o script e outras configurações depois de adicionar.";
+"customUsage.empty.title" = "Nenhum serviço personalizado";
+"customUsage.empty.message" = "Adicione um serviço que produza um snapshot de uso do AgentLimits.";
+"customUsage.identity" = "Identidade do serviço";
+"customUsage.displayName" = "Nome de exibição";
+"customUsage.providerID" = "ID do provedor";
+"customUsage.website" = "Site (opcional)";
+"customUsage.script" = "Script executável";
+"customUsage.scriptPath" = "Caminho do script";
+"customUsage.chooseScript" = "Escolher…";
+"customUsage.autoRefresh" = "Atualização automática";
+"customUsage.status" = "Status";
+"customUsage.testNow" = "Executar teste";
+"customUsage.running" = "Executando…";
+"customUsage.lastAttempt" = "Última tentativa";
+"customUsage.lastSuccess" = "Último sucesso";
+"customUsage.schemaHelp" = "O script deve gerar um objeto JSON na stdout. Escreva os logs na stderr.";
+"customUsage.snapshotFile" = "Arquivo de snapshot";
+"customUsage.refreshIntervalHint" = "Os serviços personalizados compartilham o intervalo de atualização configurado na aba Limite de uso.";
+"customUsage.notification.runFirst" = "Execute este serviço com sucesso antes de configurar as notificações.";
+"customUsage.validation.invalidProviderID" = "O ID do provedor deve usar letras minúsculas, números, sublinhados ou hífens.";
+"customUsage.validation.unsupportedSchemaVersion" = "schemaVersion não suportada: %d.";
+"customUsage.validation.providerMismatch" = "O provedor do snapshot '%@' não corresponde ao provedor configurado '%@'.";
+"customUsage.validation.invalidWindowCount" = "O snapshot deve conter uma ou duas janelas.";
+"customUsage.validation.duplicateWindowKind" = "O snapshot contém um tipo de janela duplicado '%@'.";
+"customUsage.validation.invalidUsedPercent" = "usedPercent para '%@' deve estar entre 0 e 100.";
+"customUsage.validation.invalidDuration" = "durationSeconds para '%@' deve ser maior que zero.";
+"customUsage.validation.invalidCounts" = "usedCount e limitCount para '%@' devem ser válidos e fornecidos juntos.";
+"customUsage.validation.invalidJSON" = "JSON de uso personalizado inválido: %@";
+"customUsage.runner.fileNotFound" = "Não foi possível encontrar o script selecionado.";
+"customUsage.runner.notExecutable" = "O script selecionado não é executável.";
+"customUsage.runner.launchFailed" = "Falha ao iniciar o script: %@";
+"customUsage.runner.timedOut" = "O script atingiu o tempo limite após 60 segundos.";
+"customUsage.runner.executionFailed" = "O script falhou (%d): %@";
+"customUsage.runner.stdoutTooLarge" = "A saída stdout do script excedeu 256 KiB.";
+"customUsage.runner.stderrTooLarge" = "A saída stderr do script excedeu 64 KiB.";
+"customUsage.error.duplicateProviderID" = "Já existe um serviço personalizado com este ID de provedor.";

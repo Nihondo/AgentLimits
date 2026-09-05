@@ -235,35 +235,103 @@ enum CCUsageLinks {
     static let repoURL = URL(string: "https://github.com/ryoppippi/ccusage")
 }
 
+/// Placeholders usable inside a user-edited command template.
+enum CCUsageCommandPlaceholder {
+    /// Replaced with the current month's start date (YYYYMMDD) at execution time.
+    static let since = "{{since}}"
+}
+
 /// Settings for ccusage CLI execution
 struct CCUsageSettings: Codable, Equatable {
     let provider: TokenUsageProvider
     var isEnabled: Bool
-    var additionalArgs: String
+    /// User-edited full command template. Empty means "use the generated default".
+    var commandTemplate: String
 
-    /// Full CLI command with additional arguments
-    var cliCommand: String {
-        // Append additional args only when provided by user.
-        var cmd = provider.cliCommandBase
-        if !additionalArgs.isEmpty {
-            cmd += " " + additionalArgs
-        }
-        return cmd
+    // MARK: - Coding Keys
+
+    private enum CodingKeys: String, CodingKey {
+        case provider, isEnabled, commandTemplate
     }
 
-    /// CLI command for display (includes -s startDate -j)
+    /// Key for the `additionalArgs` field used by settings saved before it was
+    /// folded into `commandTemplate`. Kept separate from `CodingKeys` so
+    /// Encodable synthesis (which requires every case to map to a stored
+    /// property) is unaffected.
+    private enum LegacyCodingKeys: String, CodingKey {
+        case additionalArgs
+    }
+
+    // MARK: - Initializers
+
+    /// Standard initializer with all properties.
+    init(
+        provider: TokenUsageProvider,
+        isEnabled: Bool,
+        commandTemplate: String = ""
+    ) {
+        self.provider = provider
+        self.isEnabled = isEnabled
+        self.commandTemplate = commandTemplate
+    }
+
+    /// Custom Decodable for backward compatibility with settings saved before
+    /// `commandTemplate` existed (and after the removal of the separate
+    /// `additionalArgs` field, which is folded into `commandTemplate` here so
+    /// previously configured arguments keep working unchanged).
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let provider = try container.decode(TokenUsageProvider.self, forKey: .provider)
+        self.provider = provider
+        isEnabled = try container.decode(Bool.self, forKey: .isEnabled)
+
+        let legacyContainer = try? decoder.container(keyedBy: LegacyCodingKeys.self)
+
+        if let template = try container.decodeIfPresent(String.self, forKey: .commandTemplate),
+           !template.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            commandTemplate = template
+        } else if let legacyArgs = try legacyContainer?.decodeIfPresent(String.self, forKey: .additionalArgs),
+                  !legacyArgs.isEmpty {
+            // Legacy settings stored additional args separately; bake them into
+            // an equivalent explicit template so behavior is unchanged.
+            var cmd = provider.cliCommandBase
+            cmd += " " + legacyArgs
+            cmd += " --since \(CCUsageCommandPlaceholder.since) -j"
+            commandTemplate = cmd
+        } else {
+            commandTemplate = ""
+        }
+    }
+
+    /// Whether the user has replaced the generated default with a custom command.
+    var isCommandCustomized: Bool {
+        !commandTemplate.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    /// Generated default template (base command + since/json flags) used
+    /// whenever the user hasn't edited the command.
+    var defaultCommandTemplate: String {
+        "\(provider.cliCommandBase) --since \(CCUsageCommandPlaceholder.since) -j"
+    }
+
+    /// Template actually used to build the executed command.
+    var resolvedCommandTemplate: String {
+        isCommandCustomized ? commandTemplate : defaultCommandTemplate
+    }
+
+    /// CLI command for display (placeholders expanded using the current month's start date)
     var displayCommand: String {
         makeCLICommand(startDate: Self.currentStartOfMonth)
     }
 
-    /// Builds the full CLI command with start date and JSON output flag.
+    /// Builds the full CLI command by expanding placeholders in the resolved template.
     /// - Parameter startDate: Start date in YYYYMMDD format.
-    /// - Returns: CLI command string with date and JSON arguments.
+    /// - Returns: CLI command string with placeholders expanded.
     func makeCLICommand(startDate: String) -> String {
-        // Include start date and JSON flag for parsing.
-        var cmd = cliCommand
-        cmd += " --since \(startDate) -j"
-        return cmd
+        resolvedCommandTemplate.replacingOccurrences(
+            of: CCUsageCommandPlaceholder.since,
+            with: startDate
+        )
     }
 
     /// Current month's start date in YYYYMMDD format
@@ -273,7 +341,7 @@ struct CCUsageSettings: Codable, Equatable {
 
     /// Default settings for a provider
     static func defaultSettings(for provider: TokenUsageProvider) -> CCUsageSettings {
-        CCUsageSettings(provider: provider, isEnabled: false, additionalArgs: "")
+        CCUsageSettings(provider: provider, isEnabled: false)
     }
 }
 

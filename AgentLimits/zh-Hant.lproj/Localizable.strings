@@ -124,7 +124,10 @@
 "notification.alertBody5h" = "5 小時使用限制已達 %d%%";
 "notification.alertBodyWeek" = "每週使用限制已達 %d%%";
 "notification.alertBodyMonth" = "每月使用限制已達 %d%%";
+"notification.alertBodyCustomWindow" = "自訂使用限制已達 %d%%";
+"notification.alertBodyCustom" = "%@ 使用量已達 %d%%";
 "notification.monthlyWindow" = "每月限制";
+"notification.customWindow" = "自訂限制";
 
 /* ccusage */
 "tab.ccusage" = "ccusage";
@@ -133,8 +136,8 @@
 "ccusage.settings" = "設定";
 "ccusage.enabled" = "啟用定期取得";
 "ccusage.command" = "指令";
-"ccusage.additionalArgs" = "附加參數";
-"ccusage.additionalArgsPlaceholder" = "例如：--timezone <<timezone>>";
+"ccusage.resetToDefault" = "還原預設值";
+"ccusage.command.note" = "執行時 {{since}} 會替換為當月第一天（YYYYMMDD 格式）。";
 "ccusage.testNow" = "立即測試";
 "ccusage.status" = "狀態";
 "ccusage.lastResult" = "上次結果：";
@@ -196,16 +199,58 @@
 "notification.pacemakerThresholds.warning" = "警告區域";
 "notification.pacemakerThresholds.danger" = "危險區域";
 "pacemaker.showRingWarningSegment" = "顯示環形警告區段";
-"content.month" = "Monthly";
+"content.month" = "每月";
 
 /* Update */
-"menu.checkForUpdates" = "Check for Updates...";
-"tab.update" = "Update";
-"update.currentVersion" = "Current Version";
-"update.lastChecked" = "Last checked";
-"update.checkNow" = "Check for Updates Now";
-"update.automaticChecks" = "Check for updates automatically";
-"update.releasesPage" = "View All Releases";
-"update.neverChecked" = "Never";
+"menu.checkForUpdates" = "檢查更新…";
+"tab.update" = "更新";
+"update.currentVersion" = "目前版本";
+"update.lastChecked" = "上次檢查";
+"update.checkNow" = "立即檢查更新";
+"update.automaticChecks" = "自動檢查更新";
+"update.releasesPage" = "查看所有版本";
+"update.neverChecked" = "從未";
 
 "settings.providerOrder" = "顯示順序";
+
+"tab.customUsage" = "自訂用量";
+"customUsage.delete.confirmTitle" = "刪除自訂服務？";
+"customUsage.delete.action" = "刪除";
+"customUsage.add" = "新增服務";
+"customUsage.add.providerIDHint" = "新增後可編輯顯示名稱、指令碼等設定。";
+"customUsage.empty.title" = "沒有自訂服務";
+"customUsage.empty.message" = "新增一個可輸出 AgentLimits 使用量快照的服務。";
+"customUsage.identity" = "服務識別資訊";
+"customUsage.displayName" = "顯示名稱";
+"customUsage.providerID" = "提供者 ID";
+"customUsage.website" = "網站（選填）";
+"customUsage.script" = "可執行指令碼";
+"customUsage.scriptPath" = "指令碼路徑";
+"customUsage.chooseScript" = "選擇…";
+"customUsage.autoRefresh" = "自動重新整理";
+"customUsage.status" = "狀態";
+"customUsage.testNow" = "執行測試";
+"customUsage.running" = "執行中…";
+"customUsage.lastAttempt" = "上次嘗試";
+"customUsage.lastSuccess" = "上次成功";
+"customUsage.schemaHelp" = "指令碼必須向 stdout 輸出一個 JSON 物件。請將記錄寫入 stderr。";
+"customUsage.snapshotFile" = "快照檔案";
+"customUsage.refreshIntervalHint" = "自訂服務與「使用限制」分頁中設定的重新整理間隔共用。";
+"customUsage.notification.runFirst" = "請先成功執行此服務，再設定通知。";
+"customUsage.validation.invalidProviderID" = "提供者 ID 只能使用小寫字母、數字、底線或連字號。";
+"customUsage.validation.unsupportedSchemaVersion" = "不支援的 schemaVersion：%d。";
+"customUsage.validation.providerMismatch" = "快照的提供者「%@」與設定的提供者「%@」不符。";
+"customUsage.validation.invalidWindowCount" = "快照必須包含一或兩個視窗。";
+"customUsage.validation.duplicateWindowKind" = "快照包含重複的視窗類型「%@」。";
+"customUsage.validation.invalidUsedPercent" = "「%@」的 usedPercent 必須介於 0 到 100 之間。";
+"customUsage.validation.invalidDuration" = "「%@」的 durationSeconds 必須大於零。";
+"customUsage.validation.invalidCounts" = "「%@」的 usedCount 與 limitCount 必須有效且同時提供。";
+"customUsage.validation.invalidJSON" = "無效的自訂用量 JSON：%@";
+"customUsage.runner.fileNotFound" = "找不到所選的指令碼。";
+"customUsage.runner.notExecutable" = "所選的指令碼無法執行。";
+"customUsage.runner.launchFailed" = "啟動指令碼失敗：%@";
+"customUsage.runner.timedOut" = "指令碼在 60 秒後逾時。";
+"customUsage.runner.executionFailed" = "指令碼執行失敗 (%d)：%@";
+"customUsage.runner.stdoutTooLarge" = "指令碼的 stdout 輸出超過 256 KiB。";
+"customUsage.runner.stderrTooLarge" = "指令碼的 stderr 輸出超過 64 KiB。";
+"customUsage.error.duplicateProviderID" = "已存在使用此提供者 ID 的自訂服務。";

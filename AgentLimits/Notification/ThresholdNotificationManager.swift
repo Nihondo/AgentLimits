@@ -14,6 +14,14 @@ private enum NotificationIdentifier {
     static func makeId(provider: UsageProvider, windowKind: UsageWindowKind, level: UsageThresholdLevel) -> String {
         "threshold-\(provider.rawValue)-\(windowKind.rawValue)-\(level.rawValue)"
     }
+
+    static func makeId(
+        serviceKey: UsageServiceKey,
+        windowKind: SemanticUsageWindowKind,
+        level: UsageThresholdLevel
+    ) -> String {
+        "threshold-v2-\(serviceKey.rawValue)-\(windowKind.rawValue)-\(level.rawValue)"
+    }
 }
 
 // MARK: - Threshold Notification Manager
@@ -24,6 +32,7 @@ final class ThresholdNotificationManager: ObservableObject {
     static let shared = ThresholdNotificationManager()
 
     @Published private(set) var settings: [UsageProvider: ProviderThresholdSettings]
+    @Published private(set) var serviceSettings: [UsageServiceKey: ServiceThresholdSettings]
     @Published private(set) var isNotificationAuthorized: Bool = false
 
     private let store: ThresholdNotificationStore
@@ -42,7 +51,9 @@ final class ThresholdNotificationManager: ObservableObject {
             useStore.saveSettings(sanitizedSettings)
         }
         self.settings = sanitizedSettings
+        self.serviceSettings = useStore.loadServiceSettings()
         syncUsageStatusThresholds(from: sanitizedSettings)
+        syncServiceUsageStatusThresholds()
 
         Task {
             await checkAuthorizationStatus()
@@ -105,6 +116,7 @@ final class ThresholdNotificationManager: ObservableObject {
         settings[providerSettings.provider] = updatedSettings
         store.saveSettings(settings)
         syncUsageStatusThresholds(from: settings)
+        syncLegacyProviderToServiceSettings(updatedSettings)
     }
 
     /// Returns settings for a provider
@@ -118,161 +130,204 @@ final class ThresholdNotificationManager: ObservableObject {
         settings[provider] = defaultSettings
         store.saveSettings(settings)
         syncUsageStatusThresholds(from: settings)
+        syncLegacyProviderToServiceSettings(defaultSettings)
+    }
+
+    /// 共通サービスの指定利用枠設定を返します。
+    func getSettings(
+        for serviceKey: UsageServiceKey,
+        windowKind: SemanticUsageWindowKind
+    ) -> WindowThresholdSettings {
+        serviceSettings[serviceKey]?.settings(for: windowKind) ?? .defaultSettings()
+    }
+
+    /// 共通サービスの指定利用枠設定を更新します。
+    func updateSettings(
+        _ newSettings: WindowThresholdSettings,
+        for serviceKey: UsageServiceKey,
+        windowKind: SemanticUsageWindowKind
+    ) {
+        var normalized = Self.normalizeWindowSettings(newSettings)
+        let oldSettings = getSettings(for: serviceKey, windowKind: windowKind)
+        normalized.warning = makeResetLevelSettings(
+            oldLevel: oldSettings.warning,
+            newLevel: normalized.warning
+        )
+        normalized.danger = makeResetLevelSettings(
+            oldLevel: oldSettings.danger,
+            newLevel: normalized.danger
+        )
+        var service = serviceSettings[serviceKey] ?? .defaultSettings(
+            for: serviceKey,
+            windowKinds: [windowKind]
+        )
+        service.windows[windowKind] = normalized
+        serviceSettings[serviceKey] = service
+        store.saveServiceSettings(serviceSettings)
+        syncServiceUsageStatusThresholds()
+    }
+
+    /// 共通サービスの通知設定を既定値へ戻します。
+    func resetSettings(
+        for serviceKey: UsageServiceKey,
+        windowKinds: [SemanticUsageWindowKind]
+    ) {
+        serviceSettings[serviceKey] = .defaultSettings(
+            for: serviceKey,
+            windowKinds: windowKinds
+        )
+        store.saveServiceSettings(serviceSettings)
+        syncServiceUsageStatusThresholds()
+    }
+
+    /// 削除されたカスタムサービスの通知設定を除去します。
+    func deleteSettings(for serviceKey: UsageServiceKey) {
+        serviceSettings.removeValue(forKey: serviceKey)
+        store.deleteServiceSettings(for: serviceKey)
+        UsageStatusThresholdStore.removeThresholds(for: serviceKey)
+        syncServiceUsageStatusThresholds()
     }
 
     // MARK: - Threshold Checking
 
+    /// 新しい共通スナップショットの利用枠を通知設定へ登録します。
+    func registerSnapshot(_ snapshot: UsagePresentationSnapshot) {
+        ensureSettingsExist(for: snapshot)
+    }
+
     /// Checks thresholds for a snapshot and sends notifications if needed
     func checkThresholdsIfNeeded(for snapshot: UsageSnapshot) async {
+        await checkThresholdsIfNeeded(for: UsagePresentationSnapshot(builtIn: snapshot))
+    }
+
+    /// 共通表示スナップショットの各利用枠を通知閾値と比較します。
+    func checkThresholdsIfNeeded(for snapshot: UsagePresentationSnapshot) async {
         guard isNotificationAuthorized else { return }
 
-        let providerSettings = getSettings(for: snapshot.provider)
-
-        // Check primary window (5h)
-        if let window = snapshot.primaryWindow {
-            await checkWindowThreshold(
-                provider: snapshot.provider,
+        ensureSettingsExist(for: snapshot)
+        for window in snapshot.windows {
+            let windowSettings = getSettings(for: snapshot.serviceKey, windowKind: window.kind)
+            await checkSemanticWindowThreshold(
+                snapshot: snapshot,
                 window: window,
                 level: .warning,
-                levelSettings: providerSettings.primaryWindow.warning
+                levelSettings: windowSettings.warning
             )
-            await checkWindowThreshold(
-                provider: snapshot.provider,
+            await checkSemanticWindowThreshold(
+                snapshot: snapshot,
                 window: window,
                 level: .danger,
-                levelSettings: providerSettings.primaryWindow.danger
-            )
-        }
-
-        // Check secondary window (weekly)
-        if let window = snapshot.secondaryWindow {
-            await checkWindowThreshold(
-                provider: snapshot.provider,
-                window: window,
-                level: .warning,
-                levelSettings: providerSettings.secondaryWindow.warning
-            )
-            await checkWindowThreshold(
-                provider: snapshot.provider,
-                window: window,
-                level: .danger,
-                levelSettings: providerSettings.secondaryWindow.danger
+                levelSettings: windowSettings.danger
             )
         }
     }
 
-    /// Checks a single window against its threshold
-    private func checkWindowThreshold(
-        provider: UsageProvider,
-        window: UsageWindow,
+    private func checkSemanticWindowThreshold(
+        snapshot: UsagePresentationSnapshot,
+        window: SemanticUsageWindow,
         level: UsageThresholdLevel,
         levelSettings: ThresholdLevelSettings
     ) async {
-        // Skip if disabled
         guard levelSettings.isEnabled else { return }
 
-        // Skip if below threshold
-        let usedPercent = Int(window.usedPercent)
-        guard usedPercent >= levelSettings.thresholdPercent else { return }
-
-        if shouldSkipDuplicateNotification(
-            provider: provider,
-            window: window,
-            level: level,
-            lastNotifiedResetAt: levelSettings.lastNotifiedResetAt
-        ) {
+        let isThresholdExceeded = Int(window.usedPercent) >= levelSettings.thresholdPercent
+        guard isThresholdExceeded else {
+            if window.resetAt == nil, levelSettings.isThresholdCurrentlyExceeded {
+                store.updateNotificationState(
+                    for: snapshot.serviceKey,
+                    windowKind: window.kind,
+                    level: level,
+                    resetAt: nil,
+                    isThresholdCurrentlyExceeded: false
+                )
+                serviceSettings = store.loadServiceSettings()
+            }
             return
         }
 
-        // Send notification
-        await sendNotification(
-            provider: provider,
+        if window.resetAt != nil, levelSettings.isThresholdCurrentlyExceeded {
+            store.clearNoResetNotificationState(
+                for: snapshot.serviceKey,
+                windowKind: window.kind,
+                level: level
+            )
+            serviceSettings = store.loadServiceSettings()
+        }
+        if let resetAt = window.resetAt,
+           let lastNotified = levelSettings.lastNotifiedResetAt,
+           abs(lastNotified.timeIntervalSince(resetAt)) <= 10 {
+            return
+        }
+        if window.resetAt == nil, levelSettings.isThresholdCurrentlyExceeded {
+            return
+        }
+
+        let didSend = await sendSemanticNotification(
+            serviceKey: snapshot.serviceKey,
+            displayName: snapshot.displayName,
+            windowKind: window.kind,
+            windowHeading: window.heading(fallback: window.displayLabel),
+            hasCustomHeading: window.title != nil || window.hasCustomLabel,
+            level: level,
+            usedPercent: Int(window.usedPercent)
+        )
+        guard didSend else { return }
+        store.updateNotificationState(
+            for: snapshot.serviceKey,
             windowKind: window.kind,
             level: level,
-            usedPercent: usedPercent
+            resetAt: window.resetAt,
+            isThresholdCurrentlyExceeded: window.resetAt == nil
         )
-
-        // Update lastNotifiedResetAt to prevent duplicates
-        if let resetAt = window.resetAt {
-            store.updateLastNotifiedResetAt(
-                for: provider,
-                windowKind: window.kind,
-                level: level,
-                resetAt: resetAt
-            )
-            // Reload settings to update published property
-            settings = store.loadSettings()
-        }
+        serviceSettings = store.loadServiceSettings()
     }
 
-    private func shouldSkipDuplicateNotification(
-        provider: UsageProvider,
-        window: UsageWindow,
-        level: UsageThresholdLevel,
-        lastNotifiedResetAt: Date?
-    ) -> Bool {
-        // Allow 10 seconds tolerance to handle API returning slightly different timestamps
-        if let lastNotified = lastNotifiedResetAt,
-           let resetAt = window.resetAt {
-            let lastNotifiedSeconds = Int(lastNotified.timeIntervalSince1970)
-            let resetAtSeconds = Int(resetAt.timeIntervalSince1970)
-            let diff = abs(lastNotifiedSeconds - resetAtSeconds)
-            Logger.notification.debug("ThresholdNotificationManager: \(provider.displayName) \(window.kind.rawValue) \(level.rawValue) lastNotified=\(lastNotifiedSeconds) resetAt=\(resetAtSeconds) diff=\(diff)")
-            if diff <= 10 {
-                Logger.notification.debug("ThresholdNotificationManager: Skipping duplicate notification (within 10s tolerance)")
-                return true
-            }
-            return false
-        }
-
-        Logger.notification.debug("ThresholdNotificationManager: \(provider.displayName) \(window.kind.rawValue) \(level.rawValue) lastNotified=\(lastNotifiedResetAt?.description ?? "nil") resetAt=\(window.resetAt?.description ?? "nil")")
-        return false
-    }
-
-    /// Sends a notification for threshold exceeded
-    private func sendNotification(
-        provider: UsageProvider,
-        windowKind: UsageWindowKind,
+    private func sendSemanticNotification(
+        serviceKey: UsageServiceKey,
+        displayName: String,
+        windowKind: SemanticUsageWindowKind,
+        windowHeading: String,
+        hasCustomHeading: Bool,
         level: UsageThresholdLevel,
         usedPercent: Int
-    ) async {
+    ) async -> Bool {
         let content = UNMutableNotificationContent()
-
-        // Title: "Codex 使用量警告" or "Claude Code 使用量警告"
         let titleKey = level == .warning
             ? "notification.alertTitleWarning"
             : "notification.alertTitleDanger"
-        content.title = String(
-            format: titleKey.localized(),
-            provider.displayName
-        )
-
-        // Body: window-specific message
-        let bodyKey: String
-        switch (provider, windowKind) {
-        case (.githubCopilot, .primary):
-            bodyKey = "notification.alertBodyMonth"
-        case (_, .primary):
-            bodyKey = "notification.alertBody5h"
-        case (_, .secondary):
-            bodyKey = "notification.alertBodyWeek"
+        content.title = String(format: titleKey.localized(), displayName)
+        if hasCustomHeading {
+            content.body = String(
+                format: "notification.alertBodyCustom".localized(),
+                windowHeading,
+                usedPercent
+            )
+        } else {
+            let bodyKey: String
+            switch windowKind {
+            case .fiveHours: bodyKey = "notification.alertBody5h"
+            case .oneWeek: bodyKey = "notification.alertBodyWeek"
+            case .oneMonth: bodyKey = "notification.alertBodyMonth"
+            case .custom: bodyKey = "notification.alertBodyCustomWindow"
+            }
+            content.body = String(format: bodyKey.localized(), usedPercent)
         }
-        content.body = String(format: bodyKey.localized(), usedPercent)
-
         content.sound = .default
-
-        let identifier = NotificationIdentifier.makeId(provider: provider, windowKind: windowKind, level: level)
         let request = UNNotificationRequest(
-            identifier: identifier,
+            identifier: NotificationIdentifier.makeId(
+                serviceKey: serviceKey,
+                windowKind: windowKind,
+                level: level
+            ),
             content: content,
-            trigger: nil  // Deliver immediately
+            trigger: nil
         )
-
         do {
             try await notificationCenter.add(request)
-            Logger.notification.info("ThresholdNotificationManager: Sent notification for \(provider.displayName) \(windowKind.rawValue) \(level.rawValue) at \(usedPercent)%")
+            return true
         } catch {
-            Logger.notification.error("ThresholdNotificationManager: Failed to send notification: \(error.localizedDescription)")
+            Logger.notification.error("Failed to send custom threshold notification: \(error.localizedDescription)")
+            return false
         }
     }
 
@@ -283,6 +338,7 @@ final class ThresholdNotificationManager: ObservableObject {
         guard shouldResetNotification(oldLevel: oldLevel, newLevel: newLevel) else { return newLevel }
         var updated = newLevel
         updated.lastNotifiedResetAt = nil
+        updated.isThresholdCurrentlyExceeded = false
         return updated
     }
 
@@ -333,6 +389,48 @@ final class ThresholdNotificationManager: ObservableObject {
         UsageStatusThresholdStore.bumpRevision()
     }
 
+    private func ensureSettingsExist(for snapshot: UsagePresentationSnapshot) {
+        var service = serviceSettings[snapshot.serviceKey] ?? .defaultSettings(
+            for: snapshot.serviceKey,
+            windowKinds: snapshot.windows.map(\.kind)
+        )
+        var changed = serviceSettings[snapshot.serviceKey] == nil
+        for window in snapshot.windows where service.windows[window.kind] == nil {
+            service.windows[window.kind] = .defaultSettings()
+            changed = true
+        }
+        guard changed else { return }
+        serviceSettings[snapshot.serviceKey] = service
+        store.saveServiceSettings(serviceSettings)
+        syncServiceUsageStatusThresholds()
+    }
+
+    private func syncLegacyProviderToServiceSettings(_ legacy: ProviderThresholdSettings) {
+        let serviceKey = UsageServiceKey.builtIn(legacy.provider)
+        let windows: [SemanticUsageWindowKind: WindowThresholdSettings]
+        if legacy.provider == .githubCopilot {
+            windows = [.oneMonth: legacy.primaryWindow]
+        } else {
+            windows = [.fiveHours: legacy.primaryWindow, .oneWeek: legacy.secondaryWindow]
+        }
+        serviceSettings[serviceKey] = ServiceThresholdSettings(serviceKey: serviceKey, windows: windows)
+        store.saveServiceSettings(serviceSettings)
+        syncServiceUsageStatusThresholds()
+    }
+
+    private func syncServiceUsageStatusThresholds() {
+        for (serviceKey, service) in serviceSettings {
+            for (windowKind, settings) in service.windows {
+                UsageStatusThresholdStore.saveThresholds(
+                    makeUsageStatusThresholds(from: settings),
+                    for: serviceKey,
+                    windowKind: windowKind
+                )
+            }
+        }
+        UsageStatusThresholdStore.bumpRevision()
+    }
+
     private func makeUsageStatusThresholds(from settings: WindowThresholdSettings) -> UsageStatusThresholds {
         let warningPercent = Self.clampPercent(settings.warning.thresholdPercent)
         let dangerPercent = Self.clampPercent(settings.danger.thresholdPercent)
@@ -363,5 +461,6 @@ final class ThresholdNotificationManager: ObservableObject {
     /// For testing: reloads settings from store
     func reloadSettings() {
         settings = store.loadSettings()
+        serviceSettings = store.loadServiceSettings()
     }
 }

@@ -11,6 +11,7 @@ enum SettingsTab: String, Hashable, CaseIterable, Identifiable {
     case threshold
     case pacemaker
     case ccusage
+    case customUsage
     case update
     case advanced
 
@@ -23,6 +24,7 @@ enum SettingsTab: String, Hashable, CaseIterable, Identifiable {
         case .threshold: return "tab.notification".localized()
         case .pacemaker: return "tab.pacemaker".localized()
         case .ccusage: return "tab.ccusage".localized()
+        case .customUsage: return "tab.customUsage".localized()
         case .update: return "tab.update".localized()
         case .advanced: return "tab.advanced".localized()
         }
@@ -35,6 +37,7 @@ enum SettingsTab: String, Hashable, CaseIterable, Identifiable {
         case .threshold: return "bell"
         case .pacemaker: return "gauge"
         case .ccusage: return "chart.bar"
+        case .customUsage: return "terminal"
         case .update: return "arrow.down.circle"
         case .advanced: return "gearshape"
         }
@@ -48,6 +51,7 @@ struct SettingsTabView: View {
     let viewModel: UsageViewModel
     let webViewPool: UsageWebViewPool
     let tokenUsageViewModel: TokenUsageViewModel
+    let customUsageViewModel: CustomUsageViewModel
 
     private var selectedTabBinding: Binding<SettingsTab?> {
         Binding(
@@ -95,6 +99,8 @@ struct SettingsTabView: View {
             PacemakerSettingsView()
         case .ccusage:
             CCUsageSettingsView(viewModel: tokenUsageViewModel)
+        case .customUsage:
+            CustomUsageSettingsView(viewModel: customUsageViewModel)
         case .update:
             UpdateSettingsView(releasesURL: URL(string: "https://github.com/Nihondo/AgentLimits/releases")!)
         case .advanced:

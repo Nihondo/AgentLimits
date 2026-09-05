@@ -124,7 +124,10 @@
 "notification.alertBody5h" = "De 5-uur gebruikslimiet heeft %d%% bereikt";
 "notification.alertBodyWeek" = "De wekelijkse gebruikslimiet heeft %d%% bereikt";
 "notification.alertBodyMonth" = "De maandelijkse gebruikslimiet heeft %d%% bereikt";
+"notification.alertBodyCustomWindow" = "De aangepaste gebruikslimiet heeft %d%% bereikt";
+"notification.alertBodyCustom" = "%@-gebruik heeft %d%% bereikt";
 "notification.monthlyWindow" = "Maandelijkse limiet";
+"notification.customWindow" = "Aangepaste limiet";
 
 /* ccusage */
 "tab.ccusage" = "ccusage";
@@ -133,8 +136,8 @@
 "ccusage.settings" = "Instellingen";
 "ccusage.enabled" = "Periodiek ophalen inschakelen";
 "ccusage.command" = "Opdracht";
-"ccusage.additionalArgs" = "Aanvullende argumenten";
-"ccusage.additionalArgsPlaceholder" = "bijv. --timezone <<timezone>>";
+"ccusage.resetToDefault" = "Standaardwaarden herstellen";
+"ccusage.command.note" = "{{since}} wordt bij uitvoering vervangen door de eerste dag van de huidige maand (YYYYMMDD).";
 "ccusage.testNow" = "Nu testen";
 "ccusage.status" = "Status";
 "ccusage.lastResult" = "Laatste resultaat:";
@@ -196,16 +199,58 @@
 "notification.pacemakerThresholds.warning" = "Waarschuwing";
 "notification.pacemakerThresholds.danger" = "Gevaar";
 "pacemaker.showRingWarningSegment" = "Waarschuwingssegmenten van ring weergeven";
-"content.month" = "Monthly";
+"content.month" = "Maandelijks";
 
 /* Update */
-"menu.checkForUpdates" = "Check for Updates...";
+"menu.checkForUpdates" = "Controleren op updates...";
 "tab.update" = "Update";
-"update.currentVersion" = "Current Version";
-"update.lastChecked" = "Last checked";
-"update.checkNow" = "Check for Updates Now";
-"update.automaticChecks" = "Check for updates automatically";
-"update.releasesPage" = "View All Releases";
-"update.neverChecked" = "Never";
+"update.currentVersion" = "Huidige versie";
+"update.lastChecked" = "Laatst gecontroleerd";
+"update.checkNow" = "Nu controleren op updates";
+"update.automaticChecks" = "Automatisch controleren op updates";
+"update.releasesPage" = "Alle releases bekijken";
+"update.neverChecked" = "Nooit";
 
 "settings.providerOrder" = "Weergavevolgorde";
+
+"tab.customUsage" = "Aangepast gebruik";
+"customUsage.delete.confirmTitle" = "Aangepaste service verwijderen?";
+"customUsage.delete.action" = "Verwijderen";
+"customUsage.add" = "Service toevoegen";
+"customUsage.add.providerIDHint" = "Je kunt de weergavenaam, het script en andere instellingen na het toevoegen bewerken.";
+"customUsage.empty.title" = "Geen aangepaste services";
+"customUsage.empty.message" = "Voeg een service toe die een AgentLimits-gebruikssnapshot uitvoert.";
+"customUsage.identity" = "Service-identiteit";
+"customUsage.displayName" = "Weergavenaam";
+"customUsage.providerID" = "Provider-ID";
+"customUsage.website" = "Website (optioneel)";
+"customUsage.script" = "Uitvoerbaar script";
+"customUsage.scriptPath" = "Scriptpad";
+"customUsage.chooseScript" = "Kiezen…";
+"customUsage.autoRefresh" = "Automatisch verversen";
+"customUsage.status" = "Status";
+"customUsage.testNow" = "Test uitvoeren";
+"customUsage.running" = "Bezig met uitvoeren…";
+"customUsage.lastAttempt" = "Laatste poging";
+"customUsage.lastSuccess" = "Laatste succes";
+"customUsage.schemaHelp" = "Het script moet één JSON-object naar stdout uitvoeren. Schrijf logs naar stderr.";
+"customUsage.snapshotFile" = "Snapshotbestand";
+"customUsage.refreshIntervalHint" = "Aangepaste services delen het vernieuwingsinterval dat is ingesteld in het tabblad Gebruikslimiet.";
+"customUsage.notification.runFirst" = "Voer deze service succesvol uit voordat je meldingen configureert.";
+"customUsage.validation.invalidProviderID" = "Provider-ID mag alleen kleine letters, cijfers, underscores of koppeltekens bevatten.";
+"customUsage.validation.unsupportedSchemaVersion" = "Niet-ondersteunde schemaVersion: %d.";
+"customUsage.validation.providerMismatch" = "De provider van de snapshot '%@' komt niet overeen met de geconfigureerde provider '%@'.";
+"customUsage.validation.invalidWindowCount" = "De snapshot moet één of twee vensters bevatten.";
+"customUsage.validation.duplicateWindowKind" = "De snapshot bevat een dubbel venstertype '%@'.";
+"customUsage.validation.invalidUsedPercent" = "usedPercent voor '%@' moet tussen 0 en 100 liggen.";
+"customUsage.validation.invalidDuration" = "durationSeconds voor '%@' moet groter zijn dan nul.";
+"customUsage.validation.invalidCounts" = "usedCount en limitCount voor '%@' moeten geldig zijn en samen worden opgegeven.";
+"customUsage.validation.invalidJSON" = "Ongeldige aangepaste gebruiks-JSON: %@";
+"customUsage.runner.fileNotFound" = "Het geselecteerde script kon niet worden gevonden.";
+"customUsage.runner.notExecutable" = "Het geselecteerde script is niet uitvoerbaar.";
+"customUsage.runner.launchFailed" = "Kan script niet starten: %@";
+"customUsage.runner.timedOut" = "Het script is na 60 seconden verlopen (time-out).";
+"customUsage.runner.executionFailed" = "Script mislukt (%d): %@";
+"customUsage.runner.stdoutTooLarge" = "De stdout-uitvoer van het script heeft 256 KiB overschreden.";
+"customUsage.runner.stderrTooLarge" = "De stderr-uitvoer van het script heeft 64 KiB overschreden.";
+"customUsage.error.duplicateProviderID" = "Er bestaat al een aangepaste service met deze Provider-ID.";

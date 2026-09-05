@@ -124,7 +124,10 @@
 "notification.alertBody5h" = "5시간 사용 제한이 %d%%에 도달했습니다";
 "notification.alertBodyWeek" = "주간 사용 제한이 %d%%에 도달했습니다";
 "notification.alertBodyMonth" = "월간 사용 제한이 %d%%에 도달했습니다";
+"notification.alertBodyCustomWindow" = "사용자 지정 사용 제한이 %d%%에 도달했습니다";
+"notification.alertBodyCustom" = "%@ 사용량이 %d%%에 도달했습니다";
 "notification.monthlyWindow" = "월간 제한";
+"notification.customWindow" = "사용자 지정 제한";
 
 /* ccusage */
 "tab.ccusage" = "ccusage";
@@ -133,8 +136,8 @@
 "ccusage.settings" = "설정";
 "ccusage.enabled" = "정기 가져오기 사용";
 "ccusage.command" = "명령";
-"ccusage.additionalArgs" = "추가 인수";
-"ccusage.additionalArgsPlaceholder" = "예: --timezone <<timezone>>";
+"ccusage.resetToDefault" = "기본값으로 재설정";
+"ccusage.command.note" = "실행 시 {{since}}는 이번 달 첫째 날(YYYYMMDD)로 대체됩니다.";
 "ccusage.testNow" = "지금 테스트 실행";
 "ccusage.status" = "상태";
 "ccusage.lastResult" = "마지막 결과:";
@@ -196,16 +199,58 @@
 "notification.pacemakerThresholds.warning" = "경고 영역";
 "notification.pacemakerThresholds.danger" = "위험 영역";
 "pacemaker.showRingWarningSegment" = "링 경고 구간 표시";
-"content.month" = "Monthly";
+"content.month" = "월간";
 
 /* Update */
-"menu.checkForUpdates" = "Check for Updates...";
-"tab.update" = "Update";
-"update.currentVersion" = "Current Version";
-"update.lastChecked" = "Last checked";
-"update.checkNow" = "Check for Updates Now";
-"update.automaticChecks" = "Check for updates automatically";
-"update.releasesPage" = "View All Releases";
-"update.neverChecked" = "Never";
+"menu.checkForUpdates" = "업데이트 확인...";
+"tab.update" = "업데이트";
+"update.currentVersion" = "현재 버전";
+"update.lastChecked" = "마지막 확인";
+"update.checkNow" = "지금 업데이트 확인";
+"update.automaticChecks" = "자동으로 업데이트 확인";
+"update.releasesPage" = "모든 릴리스 보기";
+"update.neverChecked" = "없음";
 
 "settings.providerOrder" = "표시 순서";
+
+"tab.customUsage" = "사용자 지정 사용량";
+"customUsage.delete.confirmTitle" = "사용자 지정 서비스를 삭제할까요?";
+"customUsage.delete.action" = "삭제";
+"customUsage.add" = "서비스 추가";
+"customUsage.add.providerIDHint" = "표시 이름, 스크립트 등의 설정은 추가한 후에 편집할 수 있습니다.";
+"customUsage.empty.title" = "사용자 지정 서비스 없음";
+"customUsage.empty.message" = "AgentLimits 사용량 스냅샷을 출력하는 서비스를 추가하세요.";
+"customUsage.identity" = "서비스 식별 정보";
+"customUsage.displayName" = "표시 이름";
+"customUsage.providerID" = "제공자 ID";
+"customUsage.website" = "웹사이트 (선택 사항)";
+"customUsage.script" = "실행 스크립트";
+"customUsage.scriptPath" = "스크립트 경로";
+"customUsage.chooseScript" = "선택…";
+"customUsage.autoRefresh" = "자동 새로고침";
+"customUsage.status" = "상태";
+"customUsage.testNow" = "테스트 실행";
+"customUsage.running" = "실행 중…";
+"customUsage.lastAttempt" = "마지막 시도";
+"customUsage.lastSuccess" = "마지막 성공";
+"customUsage.schemaHelp" = "스크립트는 stdout에 하나의 JSON 객체를 출력해야 합니다. 로그는 stderr에 작성하세요.";
+"customUsage.snapshotFile" = "스냅샷 파일";
+"customUsage.refreshIntervalHint" = "사용자 지정 서비스는 사용 제한 탭에서 설정한 새로고침 간격을 공유합니다.";
+"customUsage.notification.runFirst" = "알림을 설정하기 전에 이 서비스를 성공적으로 실행하세요.";
+"customUsage.validation.invalidProviderID" = "제공자 ID는 소문자, 숫자, 밑줄(_) 또는 하이픈(-)만 사용할 수 있습니다.";
+"customUsage.validation.unsupportedSchemaVersion" = "지원되지 않는 schemaVersion입니다: %d.";
+"customUsage.validation.providerMismatch" = "스냅샷의 제공자 '%@'가 설정된 제공자 '%@'와 일치하지 않습니다.";
+"customUsage.validation.invalidWindowCount" = "스냅샷에는 하나 또는 두 개의 윈도우가 포함되어야 합니다.";
+"customUsage.validation.duplicateWindowKind" = "스냅샷에 중복된 윈도우 종류 '%@'가 있습니다.";
+"customUsage.validation.invalidUsedPercent" = "'%@'의 usedPercent는 0에서 100 사이여야 합니다.";
+"customUsage.validation.invalidDuration" = "'%@'의 durationSeconds는 0보다 커야 합니다.";
+"customUsage.validation.invalidCounts" = "'%@'의 usedCount와 limitCount는 유효해야 하며 함께 제공되어야 합니다.";
+"customUsage.validation.invalidJSON" = "잘못된 사용자 지정 사용량 JSON: %@";
+"customUsage.runner.fileNotFound" = "선택한 스크립트를 찾을 수 없습니다.";
+"customUsage.runner.notExecutable" = "선택한 스크립트를 실행할 수 없습니다.";
+"customUsage.runner.launchFailed" = "스크립트를 실행하지 못했습니다: %@";
+"customUsage.runner.timedOut" = "스크립트가 60초 후 시간 초과되었습니다.";
+"customUsage.runner.executionFailed" = "스크립트 실패 (%d): %@";
+"customUsage.runner.stdoutTooLarge" = "스크립트 stdout이 256KiB를 초과했습니다.";
+"customUsage.runner.stderrTooLarge" = "스크립트 stderr이 64KiB를 초과했습니다.";
+"customUsage.error.duplicateProviderID" = "이 제공자 ID를 사용하는 사용자 지정 서비스가 이미 있습니다.";

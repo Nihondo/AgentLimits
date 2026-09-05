@@ -124,7 +124,10 @@
 "notification.alertBody5h" = "5 小时使用限制已达到 %d%%";
 "notification.alertBodyWeek" = "每周使用限制已达到 %d%%";
 "notification.alertBodyMonth" = "每月使用限制已达到 %d%%";
+"notification.alertBodyCustomWindow" = "自定义使用限制已达到 %d%%";
+"notification.alertBodyCustom" = "%@ 使用量已达到 %d%%";
 "notification.monthlyWindow" = "每月限制";
+"notification.customWindow" = "自定义限制";
 
 /* ccusage */
 "tab.ccusage" = "ccusage";
@@ -133,8 +136,8 @@
 "ccusage.settings" = "设置";
 "ccusage.enabled" = "启用定期获取";
 "ccusage.command" = "命令";
-"ccusage.additionalArgs" = "附加参数";
-"ccusage.additionalArgsPlaceholder" = "例如：--timezone <<timezone>>";
+"ccusage.resetToDefault" = "恢复默认";
+"ccusage.command.note" = "运行时 {{since}} 会替换为当月第一天（YYYYMMDD 格式）。";
 "ccusage.testNow" = "立即测试";
 "ccusage.status" = "状态";
 "ccusage.lastResult" = "上次结果：";
@@ -196,16 +199,58 @@
 "notification.pacemakerThresholds.warning" = "警告区域";
 "notification.pacemakerThresholds.danger" = "危险区域";
 "pacemaker.showRingWarningSegment" = "显示环形警告分段";
-"content.month" = "Monthly";
+"content.month" = "每月";
 
 /* Update */
-"menu.checkForUpdates" = "Check for Updates...";
-"tab.update" = "Update";
-"update.currentVersion" = "Current Version";
-"update.lastChecked" = "Last checked";
-"update.checkNow" = "Check for Updates Now";
-"update.automaticChecks" = "Check for updates automatically";
-"update.releasesPage" = "View All Releases";
-"update.neverChecked" = "Never";
+"menu.checkForUpdates" = "检查更新…";
+"tab.update" = "更新";
+"update.currentVersion" = "当前版本";
+"update.lastChecked" = "上次检查";
+"update.checkNow" = "立即检查更新";
+"update.automaticChecks" = "自动检查更新";
+"update.releasesPage" = "查看所有版本";
+"update.neverChecked" = "从未";
 
 "settings.providerOrder" = "显示顺序";
+
+"tab.customUsage" = "自定义用量";
+"customUsage.delete.confirmTitle" = "删除自定义服务？";
+"customUsage.delete.action" = "删除";
+"customUsage.add" = "添加服务";
+"customUsage.add.providerIDHint" = "添加后可以编辑显示名称、脚本等设置。";
+"customUsage.empty.title" = "没有自定义服务";
+"customUsage.empty.message" = "添加一个可输出 AgentLimits 使用量快照的服务。";
+"customUsage.identity" = "服务标识";
+"customUsage.displayName" = "显示名称";
+"customUsage.providerID" = "提供方 ID";
+"customUsage.website" = "网站（可选）";
+"customUsage.script" = "可执行脚本";
+"customUsage.scriptPath" = "脚本路径";
+"customUsage.chooseScript" = "选择…";
+"customUsage.autoRefresh" = "自动刷新";
+"customUsage.status" = "状态";
+"customUsage.testNow" = "运行测试";
+"customUsage.running" = "运行中…";
+"customUsage.lastAttempt" = "上次尝试";
+"customUsage.lastSuccess" = "上次成功";
+"customUsage.schemaHelp" = "脚本必须向 stdout 输出一个 JSON 对象。请将日志写入 stderr。";
+"customUsage.snapshotFile" = "快照文件";
+"customUsage.refreshIntervalHint" = "自定义服务与“使用限制”标签页中设置的刷新间隔共用。";
+"customUsage.notification.runFirst" = "请先成功运行此服务，然后再配置通知。";
+"customUsage.validation.invalidProviderID" = "提供方 ID 只能使用小写字母、数字、下划线或连字符。";
+"customUsage.validation.unsupportedSchemaVersion" = "不支持的 schemaVersion：%d。";
+"customUsage.validation.providerMismatch" = "快照的提供方“%@”与配置的提供方“%@”不匹配。";
+"customUsage.validation.invalidWindowCount" = "快照必须包含一个或两个窗口。";
+"customUsage.validation.duplicateWindowKind" = "快照包含重复的窗口类型“%@”。";
+"customUsage.validation.invalidUsedPercent" = "“%@”的 usedPercent 必须在 0 到 100 之间。";
+"customUsage.validation.invalidDuration" = "“%@”的 durationSeconds 必须大于零。";
+"customUsage.validation.invalidCounts" = "“%@”的 usedCount 和 limitCount 必须有效并同时提供。";
+"customUsage.validation.invalidJSON" = "无效的自定义用量 JSON：%@";
+"customUsage.runner.fileNotFound" = "找不到所选脚本。";
+"customUsage.runner.notExecutable" = "所选脚本不可执行。";
+"customUsage.runner.launchFailed" = "启动脚本失败：%@";
+"customUsage.runner.timedOut" = "脚本在 60 秒后超时。";
+"customUsage.runner.executionFailed" = "脚本执行失败 (%d)：%@";
+"customUsage.runner.stdoutTooLarge" = "脚本的 stdout 输出超过了 256 KiB。";
+"customUsage.runner.stderrTooLarge" = "脚本的 stderr 输出超过了 64 KiB。";
+"customUsage.error.duplicateProviderID" = "已存在使用此提供方 ID 的自定义服务。";

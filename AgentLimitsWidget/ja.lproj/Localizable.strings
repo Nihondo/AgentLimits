@@ -22,5 +22,15 @@
 "widget.tokenUsageDescription" = "トークン使用量とコストを表示します。";
 "widget.pleaseOpenApp" = "アプリを開いてください";
 "widget.monthlyLimit" = "月間リミット";
+"widget.customLimit" = "カスタムの使用制限";
 "widget.premiumRequests" = "プレミアムリクエスト";
 "widget.copilotBillingDescription" = "Copilotの課金使用量とコストを表示します。";
+
+"widget.custom.service" = "サービス";
+"widget.custom.configuration" = "カスタム使用量";
+"widget.custom.configurationDescription" = "このウィジェットに表示するカスタム使用量サービスを選択します。";
+"widget.custom.title" = "カスタム使用量";
+"widget.custom.description" = "AgentLimitsのカスタムサービスから使用量を表示します。";
+"widget.custom.unavailable" = "サービスを利用できません";
+"widget.custom.configure" = "AgentLimitsでカスタムサービスを追加してください。";
+"widget.custom.openSettings" = "設定を開く";

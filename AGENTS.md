@@ -8,6 +8,7 @@
 - ccusage token usage is fetched via CLI:
   - Codex: `npx -y ccusage@latest codex daily`
   - Claude Code: `npx -y ccusage@latest claude daily`
+  - The command is a per-provider editable template (empty = generated default); `{{since}}` expands to the current month's start date at execution time.
 - Each widget reads a provider-specific snapshot from the App Group storage and only renders UI.
 - Menu bar displays real-time usage percentages for enabled providers.
 
@@ -49,7 +50,8 @@
 ### Token Usage (ccusage)
 - Periodic CLI fetch (Codex/Claude Code) and snapshot persistence
 - Separate widgets for Codex/Claude Code token usage (today/this week/this month)
-- Per-provider enable/disable with additional CLI arguments support
+- Per-provider enable/disable
+- Full command is user-editable per provider (`{{since}}` placeholder expands to the current month's start date); useful for swapping in a custom ccusage-compatible script
 - **Small widget**: Usage summary only
 - **Medium widget**: Usage summary + GitHub-style heatmap
   - 7 rows (Sun-Sat) × 4-6 columns (weeks)
@@ -145,7 +147,7 @@
 | `app_language` | Language preference (App Group shared) |
 | `usage_refresh_interval_minutes` | Usage limits auto-refresh interval (minutes) |
 | `token_usage_refresh_interval_minutes` | ccusage auto-refresh interval (minutes) |
-| `ccusage_settings` | ccusage settings (JSON) |
+| `ccusage_settings` | ccusage settings (JSON), including per-provider `commandTemplate` override |
 | `cli_path_codex` | Full path override for codex |
 | `cli_path_claude` | Full path override for claude |
 | `cli_path_npx` | Full path override for npx |

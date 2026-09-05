@@ -283,6 +283,56 @@ enum UsageStatusThresholdStore {
         defaults?.set(thresholds.dangerPercent, forKey: makeDangerKey(provider: provider, windowKind: windowKind))
     }
 
+    /// 共通サービスIDと意味ベース利用枠に対応する閾値を読み込みます。
+    static func loadThresholds(
+        for serviceKey: UsageServiceKey,
+        windowKind: SemanticUsageWindowKind
+    ) -> UsageStatusThresholds {
+        let defaults = AppGroupDefaults.shared
+        let warning = loadPercent(
+            from: defaults,
+            key: makeWarningKey(serviceKey: serviceKey, windowKind: windowKind),
+            fallback: UsageStatusThresholdDefaults.warningPercent
+        )
+        let danger = loadPercent(
+            from: defaults,
+            key: makeDangerKey(serviceKey: serviceKey, windowKind: windowKind),
+            fallback: UsageStatusThresholdDefaults.dangerPercent
+        )
+        return UsageStatusThresholds(warningPercent: warning, dangerPercent: danger)
+    }
+
+    /// 共通サービスIDと意味ベース利用枠の閾値を保存します。
+    static func saveThresholds(
+        _ thresholds: UsageStatusThresholds,
+        for serviceKey: UsageServiceKey,
+        windowKind: SemanticUsageWindowKind
+    ) {
+        let defaults = AppGroupDefaults.shared
+        defaults?.set(
+            thresholds.warningPercent,
+            forKey: makeWarningKey(serviceKey: serviceKey, windowKind: windowKind)
+        )
+        defaults?.set(
+            thresholds.dangerPercent,
+            forKey: makeDangerKey(serviceKey: serviceKey, windowKind: windowKind)
+        )
+    }
+
+    /// 削除されたサービスの意味ベース閾値キャッシュを除去します。
+    static func removeThresholds(for serviceKey: UsageServiceKey) {
+        let defaults = AppGroupDefaults.shared
+        for windowKind in SemanticUsageWindowKind.allCases {
+            defaults?.removeObject(
+                forKey: makeWarningKey(serviceKey: serviceKey, windowKind: windowKind)
+            )
+            defaults?.removeObject(
+                forKey: makeDangerKey(serviceKey: serviceKey, windowKind: windowKind)
+            )
+        }
+        bumpRevision()
+    }
+
     static func bumpRevision() {
         let defaults = AppGroupDefaults.shared
         defaults?.set(Date().timeIntervalSince1970, forKey: revisionKey)
@@ -301,6 +351,20 @@ enum UsageStatusThresholdStore {
 
     private static func makeDangerKey(provider: UsageProvider, windowKind: UsageWindowKind) -> String {
         "usage_color_threshold_danger_\(provider.rawValue)_\(windowKind.rawValue)"
+    }
+
+    private static func makeWarningKey(
+        serviceKey: UsageServiceKey,
+        windowKind: SemanticUsageWindowKind
+    ) -> String {
+        "usage_color_threshold_v2_warning_\(serviceKey.rawValue)_\(windowKind.rawValue)"
+    }
+
+    private static func makeDangerKey(
+        serviceKey: UsageServiceKey,
+        windowKind: SemanticUsageWindowKind
+    ) -> String {
+        "usage_color_threshold_v2_danger_\(serviceKey.rawValue)_\(windowKind.rawValue)"
     }
 }
 

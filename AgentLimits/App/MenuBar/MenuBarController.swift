@@ -13,12 +13,12 @@ import SwiftUI
 /// メニューバーアイコンの描画入力を表すキャッシュキー。
 /// 前回と同一であれば ImageRenderer の実行をスキップする。
 private struct MenuBarIconCacheKey: Equatable {
-    struct ProviderEntry: Equatable {
-        let provider: UsageProvider
+    struct ServiceEntry: Equatable {
+        let serviceKey: UsageServiceKey
         let fetchedAt: Date?
         let isEnabled: Bool
     }
-    let providers: [ProviderEntry]
+    let services: [ServiceEntry]
     let displayMode: UsageDisplayMode
     let colorScheme: ColorScheme
 }
@@ -84,18 +84,18 @@ final class MenuBarController: NSObject {
     }
 
     private func updateButtonImage() {
-        let snapshots = appState.viewModel.snapshots
+        let snapshots = allPresentationSnapshots
         let displayMode = loadDisplayMode()
         let colorScheme = resolveButtonColorScheme()
-        let orderedProviders = ProviderOrderStore.loadProviderOrder()
+        let orderedServices = ProviderOrderStore.loadServiceOrder()
 
         // 前回の描画入力と同一であれば ImageRenderer をスキップする
         let cacheKey = MenuBarIconCacheKey(
-            providers: orderedProviders.map { provider in
-                MenuBarIconCacheKey.ProviderEntry(
-                    provider: provider,
-                    fetchedAt: isMenuBarEnabled(provider) ? snapshots[provider]?.fetchedAt : nil,
-                    isEnabled: isMenuBarEnabled(provider)
+            services: orderedServices.map { serviceKey in
+                MenuBarIconCacheKey.ServiceEntry(
+                    serviceKey: serviceKey,
+                    fetchedAt: isMenuBarEnabled(serviceKey) ? snapshots[serviceKey]?.fetchedAt : nil,
+                    isEnabled: isMenuBarEnabled(serviceKey)
                 )
             },
             displayMode: displayMode,
@@ -105,10 +105,10 @@ final class MenuBarController: NSObject {
         lastIconCacheKey = cacheKey
 
         // メニューバーボタン自身の見た目を基準に ImageRenderer の色を決める。
-        let orderedSnapshots = orderedProviders.map { provider in
-            (provider: provider, snapshot: isMenuBarEnabled(provider) ? snapshots[provider] : nil)
+        let orderedSnapshots = orderedServices.map { serviceKey in
+            (serviceKey: serviceKey, snapshot: isMenuBarEnabled(serviceKey) ? snapshots[serviceKey] : nil)
         }
-        let content = MenuBarLabelContentView(
+        let content = CommonUsageMenuBarLabelView(
             orderedSnapshots: orderedSnapshots,
             displayMode: displayMode,
             colorScheme: colorScheme
@@ -134,6 +134,24 @@ final class MenuBarController: NSObject {
         }
     }
 
+    private func isMenuBarEnabled(_ serviceKey: UsageServiceKey) -> Bool {
+        if let provider = serviceKey.builtInProvider {
+            return isMenuBarEnabled(provider)
+        }
+        guard let providerID = serviceKey.customProviderID else { return false }
+        return appState.customUsageViewModel.serviceStore
+            .service(providerID: providerID)?.isMenuBarEnabled == true
+    }
+
+    private var allPresentationSnapshots: [UsageServiceKey: UsagePresentationSnapshot] {
+        var result = Dictionary(uniqueKeysWithValues: appState.viewModel.snapshots.values.map { snapshot in
+            let presentation = UsagePresentationSnapshot(builtIn: snapshot)
+            return (presentation.serviceKey, presentation)
+        })
+        result.merge(appState.customUsageViewModel.presentationSnapshots) { _, custom in custom }
+        return result
+    }
+
     private func loadDisplayMode() -> UsageDisplayMode {
         UsageDisplayMode.makeSelectableMode(
             from: UserDefaults.standard.string(forKey: UserDefaultsKeys.displayMode)
@@ -153,6 +171,10 @@ final class MenuBarController: NSObject {
 
     private func observeChanges() {
         appState.viewModel.objectWillChange
+            .sink { [weak self] _ in self?.scheduleImageUpdate() }
+            .store(in: &cancellables)
+
+        appState.customUsageViewModel.objectWillChange
             .sink { [weak self] _ in self?.scheduleImageUpdate() }
             .store(in: &cancellables)
 
@@ -316,20 +338,34 @@ extension MenuBarController: NSMenuDelegate {
 
         // ダッシュボード行
         let displayMode = loadDisplayMode()
-        let snapshots = appState.viewModel.snapshots
-        let visibleProviders = ProviderOrderStore.loadProviderOrder().filter {
-            isDashboardEnabled($0) && snapshots[$0] != nil
+        let builtInSnapshots = appState.viewModel.snapshots
+        let presentationSnapshots = allPresentationSnapshots
+        let visibleServices = ProviderOrderStore.loadServiceOrder().filter {
+            isDashboardEnabled($0) && presentationSnapshots[$0] != nil
         }
-        for (index, provider) in visibleProviders.enumerated() {
-            guard let snapshot = snapshots[provider] else { continue }
-            let item = makeDashboardItem(provider: provider, snapshot: snapshot, displayMode: displayMode)
+        for (index, serviceKey) in visibleServices.enumerated() {
+            let item: NSMenuItem
+            if let provider = serviceKey.builtInProvider,
+               let snapshot = builtInSnapshots[provider] {
+                item = makeDashboardItem(provider: provider, snapshot: snapshot, displayMode: displayMode)
+            } else if let providerID = serviceKey.customProviderID,
+                      let snapshot = presentationSnapshots[serviceKey],
+                      let service = appState.customUsageViewModel.serviceStore.service(providerID: providerID) {
+                item = makeCustomDashboardItem(
+                    snapshot: snapshot,
+                    service: service,
+                    displayMode: displayMode
+                )
+            } else {
+                continue
+            }
             menu.addItem(item)
             // プロバイダー間にセパレーター（最後は除く）
-            if index < visibleProviders.count - 1 {
+            if index < visibleServices.count - 1 {
                 menu.addItem(.separator())
             }
         }
-        if !visibleProviders.isEmpty {
+        if !visibleServices.isEmpty {
             menu.addItem(.separator())
         }
 
@@ -412,6 +448,35 @@ extension MenuBarController: NSMenuDelegate {
         return item
     }
 
+    private func makeCustomDashboardItem(
+        snapshot: UsagePresentationSnapshot,
+        service: CustomUsageService,
+        displayMode: UsageDisplayMode
+    ) -> NSMenuItem {
+        let status = appState.customUsageViewModel.serviceStore.runStatuses[service.providerID]
+        let view = CustomUsageDashboardMenuItemView(
+            snapshot: snapshot,
+            displayMode: displayMode,
+            websiteURL: service.websiteURL,
+            lastError: status?.lastError
+        )
+        let hosting = NSHostingView(rootView: view)
+        hosting.wantsLayer = true
+        hosting.layer?.backgroundColor = .clear
+        let fittingSize = hosting.fittingSize
+        hosting.frame = NSRect(
+            x: 0,
+            y: 0,
+            width: max(300, fittingSize.width),
+            height: fittingSize.height
+        )
+        hosting.autoresizingMask = [.width]
+        let item = NSMenuItem()
+        item.view = hosting
+        item.isEnabled = true
+        return item
+    }
+
     // MARK: - ヘルパー
 
     private func makeActionItem(title: String, image: NSImage?, action: Selector) -> NSMenuItem {
@@ -432,6 +497,15 @@ extension MenuBarController: NSMenuDelegate {
         case .githubCopilot:
             return defaults.object(forKey: UserDefaultsKeys.menuBarDashboardCopilotEnabled) as? Bool ?? true
         }
+    }
+
+    private func isDashboardEnabled(_ serviceKey: UsageServiceKey) -> Bool {
+        if let provider = serviceKey.builtInProvider {
+            return isDashboardEnabled(provider)
+        }
+        guard let providerID = serviceKey.customProviderID else { return false }
+        return appState.customUsageViewModel.serviceStore
+            .service(providerID: providerID)?.isDashboardEnabled == true
     }
 
     // MARK: - サブメニュー: 表示モード

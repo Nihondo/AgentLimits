@@ -34,11 +34,45 @@ private enum DeepLinkHandler {
                 openURL: { CCUsageLinks.siteURL },
                 refresh: { await AppSharedState.shared.tokenUsageViewModel.refreshNow(for: provider) }
             )
+        case "open-custom-usage":
+            guard let providerValue,
+                  let service = AppSharedState.shared.customUsageViewModel.serviceStore
+                    .service(providerID: providerValue) else {
+                openCustomUsageSettings(providerID: providerValue)
+                return
+            }
+            switch WidgetTapActionStore.loadAction() {
+            case .openWebsite:
+                if let websiteURL = service.websiteURL {
+                    NSWorkspace.shared.open(websiteURL)
+                } else {
+                    openCustomUsageSettings(providerID: providerValue)
+                }
+            case .refreshData:
+                Task {
+                    await AppSharedState.shared.customUsageViewModel.refresh(providerID: providerValue)
+                }
+            }
         case "open-settings":
+            if let tab = components.queryItems?.first(where: { $0.name == "tab" })?.value {
+                UserDefaults.standard.set(tab, forKey: "selectedSettingsTab")
+            }
+            if let providerValue {
+                UserDefaults.standard.set(providerValue, forKey: "selected_custom_usage_provider")
+            }
             SettingsWindowController.shared.showSettingsWindow()
         default:
             break
         }
+    }
+
+    @MainActor
+    private static func openCustomUsageSettings(providerID: String?) {
+        UserDefaults.standard.set(SettingsTab.customUsage.rawValue, forKey: "selectedSettingsTab")
+        if let providerID {
+            UserDefaults.standard.set(providerID, forKey: "selected_custom_usage_provider")
+        }
+        SettingsWindowController.shared.showSettingsWindow()
     }
 
     /// Executes the appropriate tap action based on user settings

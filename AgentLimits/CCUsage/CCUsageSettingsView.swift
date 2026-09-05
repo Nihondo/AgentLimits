@@ -216,26 +216,30 @@ private struct ProviderSettingsView: View {
 
             if settings.isEnabled {
                 LabeledContent("ccusage.command".localized()) {
-                    Text(settings.displayCommand)
-                        .font(.system(.footnote, design: .monospaced))
-                        .foregroundStyle(.primary)
-                        .padding(6)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color.secondary.opacity(0.1))
-                        .cornerRadius(4)
-                        .textSelection(.enabled)
-                }
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 8) {
+                            TextField(
+                                "",
+                                text: commandTemplateBinding
+                            )
+                            .textFieldStyle(.roundedBorder)
+                            .font(.system(.footnote, design: .monospaced))
+                            .multilineTextAlignment(.leading)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .accessibilityLabel(Text("ccusage.command".localized()))
 
-                LabeledContent("ccusage.additionalArgs".localized()) {
-                    TextField(
-                        "",
-                        text: additionalArgsBinding,
-                        prompt: Text("ccusage.additionalArgsPlaceholder".localized())
-                    )
-                    .textFieldStyle(.roundedBorder)
-                    .multilineTextAlignment(.leading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .accessibilityLabel(Text("ccusage.additionalArgs".localized()))
+                            Button("ccusage.resetToDefault".localized()) {
+                                var updated = settings
+                                updated.commandTemplate = ""
+                                onUpdate(updated)
+                            }
+                            .disabled(!settings.isCommandCustomized)
+                        }
+
+                        Text("ccusage.command.note".localized())
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
 
                 HStack {
@@ -262,15 +266,13 @@ private struct ProviderSettingsView: View {
         )
     }
 
-    private var additionalArgsBinding: Binding<String> {
+    private var commandTemplateBinding: Binding<String> {
         Binding(
-            get: { settings.additionalArgs },
+            get: { settings.resolvedCommandTemplate },
             set: { newValue in
-                onUpdate(CCUsageSettings(
-                    provider: settings.provider,
-                    isEnabled: settings.isEnabled,
-                    additionalArgs: newValue
-                ))
+                var updated = settings
+                updated.commandTemplate = newValue
+                onUpdate(updated)
             }
         )
     }

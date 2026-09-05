@@ -124,7 +124,10 @@
 "notification.alertBody5h" = "Ліміт використання 5 годин досяг %d%%";
 "notification.alertBodyWeek" = "Тижневий ліміт використання досяг %d%%";
 "notification.alertBodyMonth" = "Місячний ліміт використання досяг %d%%";
+"notification.alertBodyCustomWindow" = "Власний ліміт використання досяг %d%%";
+"notification.alertBodyCustom" = "Використання %@ досягло %d%%";
 "notification.monthlyWindow" = "Місячний ліміт";
+"notification.customWindow" = "Власний ліміт";
 
 /* ccusage */
 "tab.ccusage" = "ccusage";
@@ -133,8 +136,8 @@
 "ccusage.settings" = "Налаштування";
 "ccusage.enabled" = "Увімкнути періодичне отримання";
 "ccusage.command" = "Команда";
-"ccusage.additionalArgs" = "Додаткові аргументи";
-"ccusage.additionalArgsPlaceholder" = "напр. --timezone <<timezone>>";
+"ccusage.resetToDefault" = "Скинути до типового";
+"ccusage.command.note" = "Під час виконання {{since}} замінюється першим днем поточного місяця (YYYYMMDD).";
 "ccusage.testNow" = "Перевірити зараз";
 "ccusage.status" = "Статус";
 "ccusage.lastResult" = "Останній результат:";
@@ -196,16 +199,58 @@
 "notification.pacemakerThresholds.warning" = "Попередження";
 "notification.pacemakerThresholds.danger" = "Небезпека";
 "pacemaker.showRingWarningSegment" = "Показати сегменти попередження кільця";
-"content.month" = "Monthly";
+"content.month" = "Місячний";
 
 /* Update */
-"menu.checkForUpdates" = "Check for Updates...";
-"tab.update" = "Update";
-"update.currentVersion" = "Current Version";
-"update.lastChecked" = "Last checked";
-"update.checkNow" = "Check for Updates Now";
-"update.automaticChecks" = "Check for updates automatically";
-"update.releasesPage" = "View All Releases";
-"update.neverChecked" = "Never";
+"menu.checkForUpdates" = "Перевірити оновлення...";
+"tab.update" = "Оновлення";
+"update.currentVersion" = "Поточна версія";
+"update.lastChecked" = "Востаннє перевірено";
+"update.checkNow" = "Перевірити оновлення зараз";
+"update.automaticChecks" = "Автоматично перевіряти оновлення";
+"update.releasesPage" = "Переглянути всі релізи";
+"update.neverChecked" = "Ніколи";
 
 "settings.providerOrder" = "Порядок відображення";
+
+"tab.customUsage" = "Власне використання";
+"customUsage.delete.confirmTitle" = "Видалити власний сервіс?";
+"customUsage.delete.action" = "Видалити";
+"customUsage.add" = "Додати сервіс";
+"customUsage.add.providerIDHint" = "Назву відображення, скрипт та інші налаштування можна редагувати після додавання.";
+"customUsage.empty.title" = "Немає власних сервісів";
+"customUsage.empty.message" = "Додайте сервіс, який видає знімок використання AgentLimits.";
+"customUsage.identity" = "Ідентифікація сервісу";
+"customUsage.displayName" = "Назва відображення";
+"customUsage.providerID" = "ID постачальника";
+"customUsage.website" = "Веб-сайт (необов'язково)";
+"customUsage.script" = "Виконуваний скрипт";
+"customUsage.scriptPath" = "Шлях до скрипту";
+"customUsage.chooseScript" = "Вибрати…";
+"customUsage.autoRefresh" = "Автоматичне оновлення";
+"customUsage.status" = "Статус";
+"customUsage.testNow" = "Запустити тест";
+"customUsage.running" = "Виконується…";
+"customUsage.lastAttempt" = "Остання спроба";
+"customUsage.lastSuccess" = "Останній успіх";
+"customUsage.schemaHelp" = "Скрипт має виводити один об'єкт JSON у stdout. Записуйте журнали у stderr.";
+"customUsage.snapshotFile" = "Файл знімка";
+"customUsage.refreshIntervalHint" = "Власні служби використовують інтервал оновлення, налаштований на вкладці «Ліміт використання».";
+"customUsage.notification.runFirst" = "Успішно запустіть цей сервіс перед налаштуванням сповіщень.";
+"customUsage.validation.invalidProviderID" = "ID постачальника може містити лише малі літери, цифри, підкреслення або дефіси.";
+"customUsage.validation.unsupportedSchemaVersion" = "Непідтримувана schemaVersion: %d.";
+"customUsage.validation.providerMismatch" = "Постачальник знімка «%@» не збігається з налаштованим постачальником «%@».";
+"customUsage.validation.invalidWindowCount" = "Знімок повинен містити одне або два вікна.";
+"customUsage.validation.duplicateWindowKind" = "Знімок містить дубльований тип вікна «%@».";
+"customUsage.validation.invalidUsedPercent" = "usedPercent для «%@» має бути в межах від 0 до 100.";
+"customUsage.validation.invalidDuration" = "durationSeconds для «%@» має бути більше нуля.";
+"customUsage.validation.invalidCounts" = "usedCount і limitCount для «%@» мають бути дійсними та вказані разом.";
+"customUsage.validation.invalidJSON" = "Недійсний JSON власного використання: %@";
+"customUsage.runner.fileNotFound" = "Не вдалося знайти вибраний скрипт.";
+"customUsage.runner.notExecutable" = "Вибраний скрипт не є виконуваним.";
+"customUsage.runner.launchFailed" = "Не вдалося запустити скрипт: %@";
+"customUsage.runner.timedOut" = "Час очікування скрипту вичерпано через 60 секунд.";
+"customUsage.runner.executionFailed" = "Помилка скрипту (%d): %@";
+"customUsage.runner.stdoutTooLarge" = "Вивід stdout скрипту перевищив 256 КіБ.";
+"customUsage.runner.stderrTooLarge" = "Вивід stderr скрипту перевищив 64 КіБ.";
+"customUsage.error.duplicateProviderID" = "Власний сервіс із цим ID постачальника вже існує.";

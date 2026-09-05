@@ -124,7 +124,10 @@
 "notification.alertBody5h" = "5 saatlik kullanım limiti %d%% seviyesine ulaştı";
 "notification.alertBodyWeek" = "Haftalık kullanım limiti %d%% seviyesine ulaştı";
 "notification.alertBodyMonth" = "Aylık kullanım limiti %d%% seviyesine ulaştı";
+"notification.alertBodyCustomWindow" = "Özel kullanım limiti %d%% seviyesine ulaştı";
+"notification.alertBodyCustom" = "%@ kullanımı %d%% seviyesine ulaştı";
 "notification.monthlyWindow" = "Aylık limit";
+"notification.customWindow" = "Özel limit";
 
 /* ccusage */
 "tab.ccusage" = "ccusage";
@@ -133,8 +136,8 @@
 "ccusage.settings" = "Ayarlar";
 "ccusage.enabled" = "Periyodik getirimi etkinleştir";
 "ccusage.command" = "Komut";
-"ccusage.additionalArgs" = "Ek Argümanlar";
-"ccusage.additionalArgsPlaceholder" = "örn. --timezone <<timezone>>";
+"ccusage.resetToDefault" = "Varsayılana Sıfırla";
+"ccusage.command.note" = "{{since}}, çalıştırıldığında geçerli ayın ilk günü (YYYYMMDD) ile değiştirilir.";
 "ccusage.testNow" = "Şimdi test et";
 "ccusage.status" = "Durum";
 "ccusage.lastResult" = "Son sonuç:";
@@ -196,16 +199,58 @@
 "notification.pacemakerThresholds.warning" = "Uyarı";
 "notification.pacemakerThresholds.danger" = "Tehlike";
 "pacemaker.showRingWarningSegment" = "Halka uyarı segmentlerini göster";
-"content.month" = "Monthly";
+"content.month" = "Aylık";
 
 /* Update */
-"menu.checkForUpdates" = "Check for Updates...";
-"tab.update" = "Update";
-"update.currentVersion" = "Current Version";
-"update.lastChecked" = "Last checked";
-"update.checkNow" = "Check for Updates Now";
-"update.automaticChecks" = "Check for updates automatically";
-"update.releasesPage" = "View All Releases";
-"update.neverChecked" = "Never";
+"menu.checkForUpdates" = "Güncellemeleri Kontrol Et...";
+"tab.update" = "Güncelleme";
+"update.currentVersion" = "Geçerli Sürüm";
+"update.lastChecked" = "Son kontrol";
+"update.checkNow" = "Şimdi Güncellemeleri Kontrol Et";
+"update.automaticChecks" = "Güncellemeleri otomatik olarak kontrol et";
+"update.releasesPage" = "Tüm Sürümleri Görüntüle";
+"update.neverChecked" = "Hiçbir zaman";
 
 "settings.providerOrder" = "Görüntüleme sırası";
+
+"tab.customUsage" = "Özel Kullanım";
+"customUsage.delete.confirmTitle" = "Özel Hizmet Silinsin mi?";
+"customUsage.delete.action" = "Sil";
+"customUsage.add" = "Hizmet Ekle";
+"customUsage.add.providerIDHint" = "Görünen ad, betik ve diğer ayarları ekledikten sonra düzenleyebilirsiniz.";
+"customUsage.empty.title" = "Özel Hizmet Yok";
+"customUsage.empty.message" = "AgentLimits kullanım anlık görüntüsü üreten bir hizmet ekleyin.";
+"customUsage.identity" = "Hizmet Kimliği";
+"customUsage.displayName" = "Görünen Ad";
+"customUsage.providerID" = "Sağlayıcı Kimliği";
+"customUsage.website" = "Web Sitesi (İsteğe Bağlı)";
+"customUsage.script" = "Çalıştırılabilir Betik";
+"customUsage.scriptPath" = "Betik Yolu";
+"customUsage.chooseScript" = "Seç…";
+"customUsage.autoRefresh" = "Otomatik Yenileme";
+"customUsage.status" = "Durum";
+"customUsage.testNow" = "Testi Çalıştır";
+"customUsage.running" = "Çalıştırılıyor…";
+"customUsage.lastAttempt" = "Son Deneme";
+"customUsage.lastSuccess" = "Son Başarı";
+"customUsage.schemaHelp" = "Betik, stdout'a tek bir JSON nesnesi çıktısı vermelidir. Günlükleri stderr'e yazın.";
+"customUsage.snapshotFile" = "Anlık Görüntü Dosyası";
+"customUsage.refreshIntervalHint" = "Özel hizmetler, Kullanım Limiti sekmesinde yapılandırılan yenileme aralığını paylaşır.";
+"customUsage.notification.runFirst" = "Bildirimleri yapılandırmadan önce bu hizmeti başarıyla çalıştırın.";
+"customUsage.validation.invalidProviderID" = "Sağlayıcı Kimliği yalnızca küçük harfler, rakamlar, alt çizgi veya tire içermelidir.";
+"customUsage.validation.unsupportedSchemaVersion" = "Desteklenmeyen schemaVersion: %d.";
+"customUsage.validation.providerMismatch" = "Anlık görüntü sağlayıcısı '%@', yapılandırılan sağlayıcı '%@' ile eşleşmiyor.";
+"customUsage.validation.invalidWindowCount" = "Anlık görüntü bir veya iki pencere içermelidir.";
+"customUsage.validation.duplicateWindowKind" = "Anlık görüntü, yinelenen '%@' pencere türü içeriyor.";
+"customUsage.validation.invalidUsedPercent" = "'%@' için usedPercent 0 ile 100 arasında olmalıdır.";
+"customUsage.validation.invalidDuration" = "'%@' için durationSeconds sıfırdan büyük olmalıdır.";
+"customUsage.validation.invalidCounts" = "'%@' için usedCount ve limitCount geçerli olmalı ve birlikte sağlanmalıdır.";
+"customUsage.validation.invalidJSON" = "Geçersiz özel kullanım JSON'u: %@";
+"customUsage.runner.fileNotFound" = "Seçilen betik bulunamadı.";
+"customUsage.runner.notExecutable" = "Seçilen betik çalıştırılabilir değil.";
+"customUsage.runner.launchFailed" = "Betik başlatılamadı: %@";
+"customUsage.runner.timedOut" = "Betik 60 saniye sonra zaman aşımına uğradı.";
+"customUsage.runner.executionFailed" = "Betik başarısız oldu (%d): %@";
+"customUsage.runner.stdoutTooLarge" = "Betiğin stdout çıktısı 256 KiB'yi aştı.";
+"customUsage.runner.stderrTooLarge" = "Betiğin stderr çıktısı 64 KiB'yi aştı.";
+"customUsage.error.duplicateProviderID" = "Bu Sağlayıcı Kimliğine sahip bir özel hizmet zaten var.";

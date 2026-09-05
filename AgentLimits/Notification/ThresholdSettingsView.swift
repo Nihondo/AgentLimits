@@ -11,10 +11,12 @@ import WidgetKit
 @MainActor
 struct ThresholdSettingsView: View {
     @ObservedObject private var manager: ThresholdNotificationManager
-    @State private var selectedProvider: UsageProvider = .chatgptCodex
+    @ObservedObject private var customServiceStore: CustomUsageServiceStore
+    @State private var selectedServiceKey: UsageServiceKey = .builtIn(.chatgptCodex)
 
     init(manager: ThresholdNotificationManager) {
         self.manager = manager
+        _customServiceStore = ObservedObject(wrappedValue: .shared)
     }
 
     var body: some View {
@@ -31,28 +33,36 @@ struct ThresholdSettingsView: View {
                 }
             }
 
-            SettingsFormSection(title: primaryWindowTitle) {
-                thresholdSection(
-                    settings: manager.getSettings(for: selectedProvider).primaryWindow,
-                    windowKind: .primary
-                )
-            }
-
-            if selectedProvider != .githubCopilot {
-                SettingsFormSection(title: "notification.secondaryWindow".localized()) {
+            if selectedWindowKinds.isEmpty {
+                SettingsFormSection {
+                    Text("customUsage.notification.runFirst".localized())
+                        .foregroundStyle(.secondary)
+                }
+            } else {
+                ForEach(selectedWindowKinds, id: \.self) { windowKind in
+                    SettingsFormSection(title: title(for: windowKind)) {
                     thresholdSection(
-                        settings: manager.getSettings(for: selectedProvider).secondaryWindow,
-                        windowKind: .secondary
-                    )
+                            settings: manager.getSettings(
+                                for: selectedServiceKey,
+                                windowKind: windowKind
+                            ),
+                            windowKind: windowKind
+                        )
+                    }
                 }
             }
 
-            SettingsFormSection {
-                Button("notification.resetDefaults".localized()) {
-                    manager.resetSettings(for: selectedProvider)
-                    reloadUsageWidgets(for: selectedProvider)
+            if !selectedWindowKinds.isEmpty {
+                SettingsFormSection {
+                    Button("notification.resetDefaults".localized()) {
+                        manager.resetSettings(
+                            for: selectedServiceKey,
+                            windowKinds: selectedWindowKinds
+                        )
+                        reloadUsageWidgets()
+                    }
+                    .settingsButtonStyle(.secondary)
                 }
-                .settingsButtonStyle(.secondary)
             }
 
             SettingsFormSection(title: "notification.colors".localized()) {
@@ -85,56 +95,94 @@ struct ThresholdSettingsView: View {
 
     // MARK: - Provider Picker
 
-    private var primaryWindowTitle: String {
-        selectedProvider == .githubCopilot
-            ? "notification.monthlyWindow".localized()
-            : "notification.primaryWindow".localized()
-    }
-
     private var providerPicker: some View {
-        Picker("", selection: $selectedProvider) {
-            ForEach(UsageProvider.allCases) { provider in
-                Text(provider.displayName).tag(provider)
+        Picker("", selection: $selectedServiceKey) {
+            ForEach(serviceOptions) { option in
+                Text(option.displayName).tag(option.serviceKey)
             }
         }
-        .pickerStyle(.segmented)
+        .pickerStyle(.menu)
         .frame(maxWidth: 260)
         .labelsHidden()
         .accessibilityLabel(Text("notification.provider".localized()))
     }
 
-    // MARK: - Threshold Section
-
-    private enum ThresholdWindowKind {
-        case primary
-        case secondary
+    private var serviceOptions: [NotificationServiceOption] {
+        let builtIn = UsageProvider.allCases.map {
+            NotificationServiceOption(serviceKey: .builtIn($0), displayName: $0.displayName)
+        }
+        let custom = customServiceStore.services.map {
+            NotificationServiceOption(serviceKey: .custom($0.providerID), displayName: $0.displayName)
+        }
+        return builtIn + custom
     }
+
+    private var selectedWindowKinds: [SemanticUsageWindowKind] {
+        if let provider = selectedServiceKey.builtInProvider {
+            return provider == .githubCopilot ? [.oneMonth] : [.fiveHours, .oneWeek]
+        }
+        guard let providerID = selectedServiceKey.customProviderID,
+              let snapshot = CustomUsageSnapshotStore.shared.loadSnapshot(providerID: providerID) else {
+            return manager.serviceSettings[selectedServiceKey]?.windows.keys.sorted {
+                $0.displayOrder < $1.displayOrder
+            } ?? []
+        }
+        return snapshot.windows.map(\.kind).sorted { $0.displayOrder < $1.displayOrder }
+    }
+
+    private func title(for kind: SemanticUsageWindowKind) -> String {
+        let fallback = fallbackTitle(for: kind)
+        guard let providerID = selectedServiceKey.customProviderID,
+              let window = CustomUsageSnapshotStore.shared.loadSnapshot(providerID: providerID)?
+                .windows
+                .first(where: { $0.kind == kind }) else {
+            return fallback
+        }
+        return window.semanticWindow.heading(fallback: fallback)
+    }
+
+    private func fallbackTitle(for kind: SemanticUsageWindowKind) -> String {
+        switch kind {
+        case .fiveHours: return "notification.primaryWindow".localized()
+        case .oneWeek: return "notification.secondaryWindow".localized()
+        case .oneMonth: return "notification.monthlyWindow".localized()
+        case .custom: return "notification.customWindow".localized()
+        }
+    }
+
+    // MARK: - Threshold Section
 
     private func thresholdSection(
         settings: WindowThresholdSettings,
-        windowKind: ThresholdWindowKind
+        windowKind: SemanticUsageWindowKind
     ) -> some View {
         WindowThresholdView(
             settings: settings,
-            onCommit: {
-                reloadUsageWidgets(for: selectedProvider)
-            },
+            onCommit: reloadUsageWidgets,
             onUpdate: { newWindowSettings in
-                var updated = manager.getSettings(for: selectedProvider)
-                switch windowKind {
-                case .primary:
-                    updated.primaryWindow = newWindowSettings
-                case .secondary:
-                    updated.secondaryWindow = newWindowSettings
-                }
-                manager.updateSettings(updated)
+                manager.updateSettings(
+                    newWindowSettings,
+                    for: selectedServiceKey,
+                    windowKind: windowKind
+                )
             }
         )
     }
 
-    private func reloadUsageWidgets(for provider: UsageProvider) {
-        WidgetCenter.shared.reloadTimelines(ofKind: provider.widgetKind)
+    private func reloadUsageWidgets() {
+        if let provider = selectedServiceKey.builtInProvider {
+            WidgetCenter.shared.reloadTimelines(ofKind: provider.widgetKind)
+        } else {
+            WidgetCenter.shared.reloadTimelines(ofKind: CustomUsageViewModel.widgetKind)
+        }
     }
+}
+
+private struct NotificationServiceOption: Identifiable {
+    let serviceKey: UsageServiceKey
+    let displayName: String
+
+    var id: UsageServiceKey { serviceKey }
 }
 
 // MARK: - Window Threshold View

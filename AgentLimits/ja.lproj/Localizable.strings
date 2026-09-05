@@ -125,7 +125,10 @@
 "notification.alertBody5h" = "5時間の使用制限の%d%%に達しました";
 "notification.alertBodyWeek" = "週間の使用制限の%d%%に達しました";
 "notification.alertBodyMonth" = "月間の使用制限の%d%%に達しました";
+"notification.alertBodyCustomWindow" = "カスタムの使用制限の%d%%に達しました";
+"notification.alertBodyCustom" = "「%@」の使用量が%d%%に達しました";
 "notification.monthlyWindow" = "月間の使用制限";
+"notification.customWindow" = "カスタムの使用制限";
 
 /* ccusage */
 "tab.ccusage" = "ccusage";
@@ -134,8 +137,8 @@
 "ccusage.settings" = "設定";
 "ccusage.enabled" = "定期取得を有効にする";
 "ccusage.command" = "実行コマンド";
-"ccusage.additionalArgs" = "追加引数";
-"ccusage.additionalArgsPlaceholder" = "例: --timezone <<timezone>>";
+"ccusage.resetToDefault" = "デフォルトに戻す";
+"ccusage.command.note" = "実行時に {{since}} は当月初日（YYYYMMDD形式）に置き換えられます。";
 "ccusage.testNow" = "今すぐテスト実行";
 "ccusage.status" = "ステータス";
 "ccusage.lastResult" = "最終結果:";
@@ -208,3 +211,45 @@
 "update.releasesPage" = "すべてのリリースを表示";
 "update.neverChecked" = "未確認";
 "settings.providerOrder" = "表示順";
+
+"tab.customUsage" = "カスタム使用量";
+"customUsage.delete.confirmTitle" = "カスタムサービスを削除しますか？";
+"customUsage.delete.action" = "削除";
+"customUsage.add" = "サービスを追加";
+"customUsage.add.providerIDHint" = "表示名やスクリプトなどの設定は、追加後に編集できます。";
+"customUsage.empty.title" = "カスタムサービスがありません";
+"customUsage.empty.message" = "AgentLimits形式の使用量スナップショットを出力するサービスを追加します。";
+"customUsage.identity" = "サービス情報";
+"customUsage.displayName" = "表示名";
+"customUsage.providerID" = "Provider ID";
+"customUsage.website" = "Webサイト（任意）";
+"customUsage.script" = "実行可能スクリプト";
+"customUsage.scriptPath" = "スクリプトのパス";
+"customUsage.chooseScript" = "選択…";
+"customUsage.autoRefresh" = "自動更新";
+"customUsage.status" = "状態";
+"customUsage.testNow" = "テスト実行";
+"customUsage.running" = "実行中…";
+"customUsage.lastAttempt" = "最終試行";
+"customUsage.lastSuccess" = "最終成功";
+"customUsage.schemaHelp" = "スクリプトはstdoutへJSONオブジェクトを1つ出力し、ログはstderrへ出力してください。";
+"customUsage.snapshotFile" = "スナップショットファイル";
+"customUsage.refreshIntervalHint" = "カスタムサービスは「使用制限」タブの更新間隔設定を共有します。";
+"customUsage.notification.runFirst" = "通知を設定する前に、このサービスを正常に実行してください。";
+"customUsage.validation.invalidProviderID" = "Provider IDには小文字、数字、アンダースコア、ハイフンのみ使用できます。";
+"customUsage.validation.unsupportedSchemaVersion" = "未対応のschemaVersionです：%d。";
+"customUsage.validation.providerMismatch" = "スナップショットのprovider「%@」が設定済みprovider「%@」と一致しません。";
+"customUsage.validation.invalidWindowCount" = "スナップショットには1個または2個のウィンドウが必要です。";
+"customUsage.validation.duplicateWindowKind" = "ウィンドウ種別「%@」が重複しています。";
+"customUsage.validation.invalidUsedPercent" = "「%@」のusedPercentは0〜100で指定してください。";
+"customUsage.validation.invalidDuration" = "「%@」のdurationSecondsは正数で指定してください。";
+"customUsage.validation.invalidCounts" = "「%@」のusedCountとlimitCountは有効な値を両方指定してください。";
+"customUsage.validation.invalidJSON" = "カスタム使用量JSONが無効です：%@";
+"customUsage.runner.fileNotFound" = "選択したスクリプトが見つかりません。";
+"customUsage.runner.notExecutable" = "選択したスクリプトを実行できません。";
+"customUsage.runner.launchFailed" = "スクリプトを起動できませんでした：%@";
+"customUsage.runner.timedOut" = "スクリプトが60秒でタイムアウトしました。";
+"customUsage.runner.executionFailed" = "スクリプトが失敗しました（%d）：%@";
+"customUsage.runner.stdoutTooLarge" = "スクリプトのstdoutが256 KiBを超えました。";
+"customUsage.runner.stderrTooLarge" = "スクリプトのstderrが64 KiBを超えました。";
+"customUsage.error.duplicateProviderID" = "同じProvider IDのカスタムサービスがすでに存在します。";
