@@ -175,7 +175,7 @@ Pacemaker shows a time-based usage benchmark to help you stay on track.
 
 ### Creating a Custom Usage Script
 
-To create a script for a service that is not built in, ask an AI coding agent to create it. Give the agent the repository-root [CUSTOM_USAGE_SCRIPT_GUIDE.md](CUSTOM_USAGE_SCRIPT_GUIDE.md), which defines the required decisions, execution constraints, JSON contract, and validation rules. The agent can then implement and test an executable for the chosen service. A sample is available at [scripts/cursor_usage.py](scripts/cursor_usage.py).
+To create a script for a service that is not built in, ask an AI coding agent to create it. Give the agent the repository-root [CUSTOM_USAGE_SCRIPT_GUIDE.md](CUSTOM_USAGE_SCRIPT_GUIDE.md), which defines the required decisions, execution constraints, JSON contract, and validation rules. The agent can then implement and test an executable for the chosen service. Samples are available at [scripts/cursor_usage.py](scripts/cursor_usage.py) and [scripts/antigravity_usage.py](scripts/antigravity_usage.py).
 
 ### JSON Snapshot Output
 

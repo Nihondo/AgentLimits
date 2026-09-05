@@ -119,6 +119,7 @@ xcodebuild test -scheme AgentLimits -destination 'platform=macOS'
 | `AgentLimits/Pacemaker/PacemakerSettingsView.swift` | Pacemaker settings UI (menu bar toggle + ring warning toggle + thresholds + colors) |
 | `AgentLimits/Scripts/agentlimits_statusline_claude.sh` | Claude Code status line script (reads App Group snapshots) |
 | `scripts/cursor_usage.py` | Sample Custom Usage CLI for Cursor's current billing-cycle plan usage (reads Cursor's local state DB and calls its internal usage endpoint) |
+| `scripts/antigravity_usage.py` | Sample Custom Usage CLI for Google Antigravity (`agy` CLI/IDE) Gemini 5h/weekly quota: reads the macOS Keychain OAuth token and calls Cloud Code's `retrieveUserQuotaSummary` (requires a paid Antigravity plan; 403s on free tier) |
 
 ### Features
 

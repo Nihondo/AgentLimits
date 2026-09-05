@@ -52,3 +52,4 @@ fastlane/test_output
 handoff.md
 docs/
 sparkle.md
+__pycache__/

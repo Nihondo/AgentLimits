@@ -174,7 +174,7 @@ macOS Sonoma以降向けのメニューバーアプリと通知センターウ�
 
 ### スクリプトを作成するには
 
-組み込みではないサービスのスクリプトを作成するには、AIコーディングエージェントに作成を依頼します。リポジトリ直下の [CUSTOM_USAGE_SCRIPT_GUIDE.md](CUSTOM_USAGE_SCRIPT_GUIDE.md) をエージェントに渡してください。必要な決定事項、実行時の制約、JSON契約、検証ルールが定義されているため、対象サービス用の実行ファイルを実装・テストできます。[scripts/cursor_usage.py](scripts/cursor_usage.py) にサンプルがあります。
+組み込みではないサービスのスクリプトを作成するには、AIコーディングエージェントに作成を依頼します。リポジトリ直下の [CUSTOM_USAGE_SCRIPT_GUIDE.md](CUSTOM_USAGE_SCRIPT_GUIDE.md) をエージェントに渡してください。必要な決定事項、実行時の制約、JSON契約、検証ルールが定義されているため、対象サービス用の実行ファイルを実装・テストできます。[scripts/cursor_usage.py](scripts/cursor_usage.py) と [scripts/antigravity_usage.py](scripts/antigravity_usage.py) にサンプルがあります。
 
 ### JSONスナップショットの仕様
 
