@@ -21,16 +21,16 @@
 "widget.tokenUsage.thisMonth" = "本月";
 "widget.tokenUsageDescription" = "显示令牌使用量和费用。";
 "widget.pleaseOpenApp" = "请打开应用";
-"widget.monthlyLimit" = "Monthly Limit";
+"widget.monthlyLimit" = "每月限制";
 "widget.customLimit" = "自定义限制";
 "widget.premiumRequests" = "高级请求";
 "widget.copilotBillingDescription" = "显示Copilot账单使用量和费用。";
 
-"widget.custom.service" = "Service";
+"widget.custom.service" = "服务";
 "widget.custom.configuration" = "自定义用量";
-"widget.custom.configurationDescription" = "Choose the custom usage service shown by this widget.";
+"widget.custom.configurationDescription" = "选择此小组件显示的自定义用量服务。";
 "widget.custom.title" = "自定义用量";
-"widget.custom.description" = "Shows usage from a custom AgentLimits service.";
-"widget.custom.unavailable" = "Service unavailable";
-"widget.custom.configure" = "Add a custom service in AgentLimits.";
-"widget.custom.openSettings" = "Open Settings";
+"widget.custom.description" = "显示自定义 AgentLimits 服务的使用量。";
+"widget.custom.unavailable" = "服务不可用";
+"widget.custom.configure" = "在 AgentLimits 中添加自定义服务。";
+"widget.custom.openSettings" = "打开设置";

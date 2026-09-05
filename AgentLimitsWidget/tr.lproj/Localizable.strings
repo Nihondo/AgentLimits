@@ -21,16 +21,16 @@
 "widget.tokenUsage.thisMonth" = "Aylık";
 "widget.tokenUsageDescription" = "Token kullanımını ve maliyetleri gösterir.";
 "widget.pleaseOpenApp" = "Lütfen uygulamayı açın";
-"widget.monthlyLimit" = "Monthly Limit";
+"widget.monthlyLimit" = "Aylık Limit";
 "widget.customLimit" = "Özel limit";
 "widget.premiumRequests" = "Premium İstekler";
 "widget.copilotBillingDescription" = "Copilot faturalandırma kullanımını ve maliyetleri gösterir.";
 
-"widget.custom.service" = "Service";
+"widget.custom.service" = "Hizmet";
 "widget.custom.configuration" = "Özel Kullanım";
-"widget.custom.configurationDescription" = "Choose the custom usage service shown by this widget.";
+"widget.custom.configurationDescription" = "Bu widget'ta gösterilecek özel kullanım hizmetini seçin.";
 "widget.custom.title" = "Özel Kullanım";
-"widget.custom.description" = "Shows usage from a custom AgentLimits service.";
-"widget.custom.unavailable" = "Service unavailable";
-"widget.custom.configure" = "Add a custom service in AgentLimits.";
-"widget.custom.openSettings" = "Open Settings";
+"widget.custom.description" = "Özel bir AgentLimits hizmetinden kullanım gösterir.";
+"widget.custom.unavailable" = "Hizmet kullanılamıyor";
+"widget.custom.configure" = "AgentLimits'te özel bir hizmet ekleyin.";
+"widget.custom.openSettings" = "Ayarları Aç";

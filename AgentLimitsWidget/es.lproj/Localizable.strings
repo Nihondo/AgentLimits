@@ -21,16 +21,16 @@
 "widget.tokenUsage.thisMonth" = "Mensual";
 "widget.tokenUsageDescription" = "Muestra el uso de tokens y costos.";
 "widget.pleaseOpenApp" = "Por favor abra la app";
-"widget.monthlyLimit" = "Monthly Limit";
+"widget.monthlyLimit" = "Límite mensual";
 "widget.customLimit" = "Límite personalizado";
 "widget.premiumRequests" = "Solicitudes Premium";
 "widget.copilotBillingDescription" = "Muestra el uso de facturación y costos de Copilot.";
 
-"widget.custom.service" = "Service";
+"widget.custom.service" = "Servicio";
 "widget.custom.configuration" = "Uso personalizado";
-"widget.custom.configurationDescription" = "Choose the custom usage service shown by this widget.";
+"widget.custom.configurationDescription" = "Elige el servicio de uso personalizado que se mostrará en este widget.";
 "widget.custom.title" = "Uso personalizado";
-"widget.custom.description" = "Shows usage from a custom AgentLimits service.";
-"widget.custom.unavailable" = "Service unavailable";
-"widget.custom.configure" = "Add a custom service in AgentLimits.";
-"widget.custom.openSettings" = "Open Settings";
+"widget.custom.description" = "Muestra el uso de un servicio personalizado de AgentLimits.";
+"widget.custom.unavailable" = "Servicio no disponible";
+"widget.custom.configure" = "Añade un servicio personalizado en AgentLimits.";
+"widget.custom.openSettings" = "Abrir ajustes";

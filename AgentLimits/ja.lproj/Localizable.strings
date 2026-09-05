@@ -234,7 +234,7 @@
 "customUsage.lastSuccess" = "最終成功";
 "customUsage.schemaHelp" = "スクリプトはstdoutへJSONオブジェクトを1つ出力し、ログはstderrへ出力してください。";
 "customUsage.snapshotFile" = "スナップショットファイル";
-"customUsage.refreshIntervalHint" = "カスタムサービスは「使用量」タブの更新間隔設定を共有します。";
+"customUsage.refreshIntervalHint" = "カスタムサービスは「使用制限」タブの更新間隔設定を共有します。";
 "customUsage.notification.runFirst" = "通知を設定する前に、このサービスを正常に実行してください。";
 "customUsage.validation.invalidProviderID" = "Provider IDには小文字、数字、アンダースコア、ハイフンのみ使用できます。";
 "customUsage.validation.unsupportedSchemaVersion" = "未対応のschemaVersionです：%d。";

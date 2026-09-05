@@ -21,16 +21,16 @@
 "widget.tokenUsage.thisMonth" = "Місяць";
 "widget.tokenUsageDescription" = "Показує використання токенів та витрати.";
 "widget.pleaseOpenApp" = "Відкрийте застосунок";
-"widget.monthlyLimit" = "Monthly Limit";
+"widget.monthlyLimit" = "Місячний ліміт";
 "widget.customLimit" = "Власний ліміт";
 "widget.premiumRequests" = "Преміум запити";
 "widget.copilotBillingDescription" = "Показує використання білінгу та витрати Copilot.";
 
-"widget.custom.service" = "Service";
+"widget.custom.service" = "Сервіс";
 "widget.custom.configuration" = "Власне використання";
-"widget.custom.configurationDescription" = "Choose the custom usage service shown by this widget.";
+"widget.custom.configurationDescription" = "Виберіть власний сервіс використання, який показуватиме цей віджет.";
 "widget.custom.title" = "Власне використання";
-"widget.custom.description" = "Shows usage from a custom AgentLimits service.";
-"widget.custom.unavailable" = "Service unavailable";
-"widget.custom.configure" = "Add a custom service in AgentLimits.";
-"widget.custom.openSettings" = "Open Settings";
+"widget.custom.description" = "Показує використання з власного сервісу AgentLimits.";
+"widget.custom.unavailable" = "Сервіс недоступний";
+"widget.custom.configure" = "Додайте власний сервіс в AgentLimits.";
+"widget.custom.openSettings" = "Відкрити налаштування";
