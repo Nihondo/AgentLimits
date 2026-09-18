@@ -676,7 +676,7 @@ enum UsageProvider: String, Codable, CaseIterable, Identifiable, SnapshotFileNam
     /// Codex usage settings page URL
     private static let codexUsageURL = URL(string: "https://chatgpt.com/codex/cloud/settings/analytics#usage")
     /// Claude usage settings page URL
-    private static let claudeUsageURL = URL(string: "https://claude.ai/settings/usage")
+    private static let claudeUsageURL = URL(string: "https://claude.ai/new#settings/usage")
     /// GitHub Copilot billing usage page URL
     private static let copilotUsageURL = URL(string: "https://github.com/settings/billing/usage")
 
