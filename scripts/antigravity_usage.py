@@ -37,6 +37,9 @@ AGY_REFRESH_TIMEOUT_SECONDS = 15
 # "no valid license of this product" on a free-tier Antigravity account, and
 # only works once the account is on a paid/standard plan — there is no
 # request-body workaround for the free tier.
+# The hosts do not return the same groups: the daily host may omit the Gemini
+# group entirely while the production host includes it, so every host is
+# queried and the buckets are merged (see `extract_buckets`).
 CLOUD_QUOTA_HOSTS = (
     "https://daily-cloudcode-pa.googleapis.com",
     "https://cloudcode-pa.googleapis.com",
@@ -128,8 +131,9 @@ def load_keychain_access_token() -> tuple[str, datetime | None] | None:
     return access_token, expires_at
 
 
-def fetch_quota_summary(access_token: str) -> dict[str, Any]:
-    """アクセストークンを使い、Cloud Code経由でretrieveUserQuotaSummaryを取得します。"""
+def fetch_quota_summaries(access_token: str) -> list[dict[str, Any]]:
+    """アクセストークンを使い、全ホストからretrieveUserQuotaSummaryのレスポンスを取得します。"""
+    summaries: list[dict[str, Any]] = []
     last_error: str | None = None
     for host in CLOUD_QUOTA_HOSTS:
         request = Request(
@@ -144,7 +148,7 @@ def fetch_quota_summary(access_token: str) -> dict[str, Any]:
         )
         try:
             with urlopen(request, timeout=CLOUD_REQUEST_TIMEOUT_SECONDS) as response:
-                return json.load(response)
+                summaries.append(json.load(response))
         except HTTPError as error:
             if error.code == 403:
                 raise AntigravityUsageError(
@@ -158,7 +162,9 @@ def fetch_quota_summary(access_token: str) -> dict[str, Any]:
             last_error = f"HTTP {error.code}"
         except (URLError, TimeoutError, json.JSONDecodeError) as error:
             last_error = str(error)
-    raise AntigravityUsageError(f"quota API was unreachable ({last_error or 'unknown error'})")
+    if not summaries:
+        raise AntigravityUsageError(f"quota API was unreachable ({last_error or 'unknown error'})")
+    return summaries
 
 
 # --- レスポンス解析とスナップショット組み立て -------------------------------
@@ -185,16 +191,17 @@ def parse_optional_timestamp(value: Any) -> datetime | None:
     return None
 
 
-def extract_buckets(payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
-    """retrieveUserQuotaSummaryのレスポンスをbucketId毎のバケット辞書へ整形します。"""
-    root = payload.get("response", payload) if isinstance(payload, dict) else {}
-    groups = root.get("groups") if isinstance(root, dict) else None
+def extract_buckets(payloads: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """retrieveUserQuotaSummaryのレスポンス群をbucketId毎のバケット辞書へ統合します(先勝ち)。"""
     buckets: dict[str, dict[str, Any]] = {}
-    for group in groups or []:
-        for bucket in group.get("buckets") or []:
-            bucket_id = bucket.get("bucketId")
-            if isinstance(bucket_id, str) and bucket_id not in buckets:
-                buckets[bucket_id] = bucket
+    for payload in payloads:
+        root = payload.get("response", payload) if isinstance(payload, dict) else {}
+        groups = root.get("groups") if isinstance(root, dict) else None
+        for group in groups or []:
+            for bucket in group.get("buckets") or []:
+                bucket_id = bucket.get("bucketId")
+                if isinstance(bucket_id, str) and bucket_id not in buckets:
+                    buckets[bucket_id] = bucket
     return buckets
 
 
@@ -267,7 +274,7 @@ def fetch_quota_buckets() -> dict[str, dict[str, Any]]:
                 "open Antigravity or run `agy` again manually to refresh it"
             )
 
-    return extract_buckets(fetch_quota_summary(access_token))
+    return extract_buckets(fetch_quota_summaries(access_token))
 
 
 def main() -> None:
