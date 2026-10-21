@@ -40,6 +40,17 @@ AGY_REFRESH_TIMEOUT_SECONDS = 15
 # The hosts do not return the same groups: the daily host may omit the Gemini
 # group entirely while the production host includes it, so every host is
 # queried and the buckets are merged (see `extract_buckets`).
+# The hosts also keep separate usage counters: the Gemini 5h usage can show up
+# only on one host (observed: daily's fetchAvailableModels per-model
+# `quotaInfo`, while the production host still reported a full bucket), so the
+# most-used value across hosts wins (see `merge_bucket`) and the 5h bucket is
+# also derived from `fetchAvailableModels` (see `extract_gemini_five_hour_bucket`).
+AVAILABLE_MODELS_PATH = "/v1internal:fetchAvailableModels"
+# The "Gemini Models" quota group covers the standard Flash/Pro models only
+# (per the API's own group description). Special models that `agy models` lists
+# (e.g. "gemini-4-argon-*") or image models may be metered separately, so they
+# are never used to derive the standard 5h window.
+NON_STANDARD_GEMINI_MODEL_MARKERS = ("argon", "image")
 CLOUD_QUOTA_HOSTS = (
     "https://daily-cloudcode-pa.googleapis.com",
     "https://cloudcode-pa.googleapis.com",
@@ -131,24 +142,42 @@ def load_keychain_access_token() -> tuple[str, datetime | None] | None:
     return access_token, expires_at
 
 
+def post_cloud_code(host: str, path: str, access_token: str) -> Any:
+    """Cloud Codeの内部エンドポイントへ空のJSONボディをPOSTし、デコード済みレスポンスを返します。"""
+    request = Request(
+        host + path,
+        data=b"{}",
+        headers={
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization": f"Bearer {access_token}",
+            **ANTIGRAVITY_HEADERS,
+        },
+    )
+    with urlopen(request, timeout=CLOUD_REQUEST_TIMEOUT_SECONDS) as response:
+        return json.load(response)
+
+
+def fetch_available_model_payloads(access_token: str) -> list[dict[str, Any]]:
+    """全ホストからfetchAvailableModelsのレスポンスを取得します(取得できないホストは無視します)。"""
+    payloads: list[dict[str, Any]] = []
+    for host in CLOUD_QUOTA_HOSTS:
+        try:
+            payload = post_cloud_code(host, AVAILABLE_MODELS_PATH, access_token)
+        except (HTTPError, URLError, TimeoutError, json.JSONDecodeError):
+            continue
+        if isinstance(payload, dict):
+            payloads.append(payload)
+    return payloads
+
+
 def fetch_quota_summaries(access_token: str) -> list[dict[str, Any]]:
     """アクセストークンを使い、全ホストからretrieveUserQuotaSummaryのレスポンスを取得します。"""
     summaries: list[dict[str, Any]] = []
     last_error: str | None = None
     for host in CLOUD_QUOTA_HOSTS:
-        request = Request(
-            host + QUOTA_SUMMARY_PATH,
-            data=b"{}",
-            headers={
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-                "Authorization": f"Bearer {access_token}",
-                **ANTIGRAVITY_HEADERS,
-            },
-        )
         try:
-            with urlopen(request, timeout=CLOUD_REQUEST_TIMEOUT_SECONDS) as response:
-                summaries.append(json.load(response))
+            summaries.append(post_cloud_code(host, QUOTA_SUMMARY_PATH, access_token))
         except HTTPError as error:
             if error.code == 403:
                 raise AntigravityUsageError(
@@ -191,8 +220,27 @@ def parse_optional_timestamp(value: Any) -> datetime | None:
     return None
 
 
+def is_valid_fraction(value: Any) -> bool:
+    """remainingFractionとして使える数値か判定します。"""
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+def merge_bucket(buckets: dict[str, dict[str, Any]], bucket_id: str, bucket: dict[str, Any]) -> None:
+    """同じbucketIdが複数ホストにある場合は、残量が少ない(=使用が反映された)方を採用します。"""
+    current = buckets.get(bucket_id)
+    if current is None:
+        buckets[bucket_id] = bucket
+        return
+    new_fraction = bucket.get("remainingFraction")
+    current_fraction = current.get("remainingFraction")
+    if is_valid_fraction(new_fraction) and (
+        not is_valid_fraction(current_fraction) or new_fraction < current_fraction
+    ):
+        buckets[bucket_id] = bucket
+
+
 def extract_buckets(payloads: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
-    """retrieveUserQuotaSummaryのレスポンス群をbucketId毎のバケット辞書へ統合します(先勝ち)。"""
+    """retrieveUserQuotaSummaryのレスポンス群をbucketId毎のバケット辞書へ統合します。"""
     buckets: dict[str, dict[str, Any]] = {}
     for payload in payloads:
         root = payload.get("response", payload) if isinstance(payload, dict) else {}
@@ -200,9 +248,46 @@ def extract_buckets(payloads: list[dict[str, Any]]) -> dict[str, dict[str, Any]]
         for group in groups or []:
             for bucket in group.get("buckets") or []:
                 bucket_id = bucket.get("bucketId")
-                if isinstance(bucket_id, str) and bucket_id not in buckets:
-                    buckets[bucket_id] = bucket
+                if isinstance(bucket_id, str):
+                    merge_bucket(buckets, bucket_id, bucket)
     return buckets
+
+
+def extract_gemini_five_hour_bucket(payloads: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """fetchAvailableModelsのGeminiモデル別quotaInfoから、5hバケット相当を組み立てます。
+
+    ホストによってはretrieveUserQuotaSummaryがGeminiグループを返さず、別のホストでは使用量が
+    反映されないことがあるため、使用量が反映されるこちらの値で補完します。Geminiモデルは同じ
+    5hプールを共有するため、最も残量が少ないモデルの値を採用します。
+    """
+    now = datetime.now(timezone.utc)
+    selected: dict[str, Any] | None = None
+    for payload in payloads:
+        models = payload.get("models")
+        if not isinstance(models, dict):
+            continue
+        for model_id, model in models.items():
+            if not (isinstance(model_id, str) and model_id.startswith("gemini-") and isinstance(model, dict)):
+                continue
+            if any(marker in model_id for marker in NON_STANDARD_GEMINI_MODEL_MARKERS):
+                continue
+            quota = model.get("quotaInfo")
+            if not isinstance(quota, dict):
+                continue
+            fraction = quota.get("remainingFraction")
+            reset_at = parse_optional_timestamp(quota.get("resetTime"))
+            if not is_valid_fraction(fraction) or reset_at is None:
+                continue
+            # 週次など5hより長い期間のquotaInfoは対象外にする。
+            if (reset_at - now).total_seconds() > WINDOW_DURATION_SECONDS["5h"] + REFRESH_BUFFER_SECONDS:
+                continue
+            if selected is None or fraction < selected["remainingFraction"]:
+                selected = {
+                    "bucketId": BUCKET_ID_BY_KIND["5h"],
+                    "remainingFraction": fraction,
+                    "resetTime": quota["resetTime"],
+                }
+    return selected
 
 
 def build_windows(buckets: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
@@ -274,7 +359,11 @@ def fetch_quota_buckets() -> dict[str, dict[str, Any]]:
                 "open Antigravity or run `agy` again manually to refresh it"
             )
 
-    return extract_buckets(fetch_quota_summaries(access_token))
+    buckets = extract_buckets(fetch_quota_summaries(access_token))
+    five_hour_bucket = extract_gemini_five_hour_bucket(fetch_available_model_payloads(access_token))
+    if five_hour_bucket is not None:
+        merge_bucket(buckets, BUCKET_ID_BY_KIND["5h"], five_hour_bucket)
+    return buckets
 
 
 def main() -> None:
