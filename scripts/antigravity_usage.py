@@ -37,24 +37,18 @@ AGY_REFRESH_TIMEOUT_SECONDS = 15
 # "no valid license of this product" on a free-tier Antigravity account, and
 # only works once the account is on a paid/standard plan — there is no
 # request-body workaround for the free tier.
-# The hosts do not return the same groups: the daily host may omit the Gemini
-# group entirely while the production host includes it, so every host is
-# queried and the buckets are merged (see `extract_buckets`).
-CLOUD_QUOTA_HOSTS = (
-    "https://daily-cloudcode-pa.googleapis.com",
-    "https://cloudcode-pa.googleapis.com",
-)
+# Only the daily host is queried: with the CLI User-Agent below it returns the
+# same groups and values `agy`'s "Models & Quota" panel shows. The production
+# host (cloudcode-pa) answers a separate Gemini pool that stays at 100% and
+# does not match `agy`, so it must not be used even as a fallback.
+CLOUD_QUOTA_HOSTS = ("https://daily-cloudcode-pa.googleapis.com",)
 QUOTA_SUMMARY_PATH = "/v1internal:retrieveUserQuotaSummary"
 
-# Headers that identify the caller as the Antigravity IDE. Harmless to send
-# and matches what the real client sends for this endpoint.
+# The daily host gates groups on the User-Agent: an `agy` CLI fingerprint
+# returns the Gemini group, the IDE (Electron) fingerprint omits it, and no
+# User-Agent at all is rejected with 403.
 ANTIGRAVITY_HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Antigravity/1.0.0 Chrome/138.0.7204.235 Electron/37.3.1 Safari/537.36"
-    ),
-    "X-Goog-Api-Client": "google-cloud-sdk vscode_cloudshelleditor/0.1",
-    "Client-Metadata": json.dumps({"ideType": "ANTIGRAVITY", "platform": "DARWIN", "pluginType": "GEMINI"}),
+    "User-Agent": "antigravity/cli/1.4.0 (aidev_client; os_type=darwin; arch=arm64; auth_method=consumer)",
 }
 
 # Bucket ids observed in a real retrieveUserQuotaSummary response. Antigravity
