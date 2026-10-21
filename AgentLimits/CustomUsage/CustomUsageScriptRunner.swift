@@ -3,7 +3,7 @@
 
 import Foundation
 
-nonisolated protocol CustomUsageScriptRunning: Sendable {
+protocol CustomUsageScriptRunning: Sendable {
     func run(scriptPath: String) async throws -> Data
 }
 
@@ -42,7 +42,7 @@ enum CustomUsageScriptRunnerError: Error, LocalizedError {
 }
 
 /// 実行可能ファイルを直接起動し、stdoutとstderrを取得します。
-nonisolated final class CustomUsageScriptRunner: CustomUsageScriptRunning, @unchecked Sendable {
+final class CustomUsageScriptRunner: CustomUsageScriptRunning, @unchecked Sendable {
     static let defaultTimeoutSeconds: TimeInterval = 60
     static let defaultStdoutLimit = 256 * 1024
     static let defaultStderrLimit = 64 * 1024
