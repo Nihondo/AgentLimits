@@ -166,6 +166,8 @@ private final class LockedFlag: @unchecked Sendable {
     private let lock = NSLock()
     nonisolated(unsafe) private var storedValue = false
 
+    nonisolated init() {}
+
     nonisolated var value: Bool {
         lock.lock()
         defer { lock.unlock() }

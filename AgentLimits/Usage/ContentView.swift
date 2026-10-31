@@ -359,7 +359,7 @@ struct ContentView: View {
             ForEach(UsageProvider.allCases) { provider in
                 let store = webViewPool.getWebViewStore(for: provider)
                 WebViewRepresentable(store: store)
-                    .onReceive(store.$popupWebView) { popup in
+                    .onReceive(store.$popupWebView) { [viewModel] popup in
                         if let popup {
                             popupWebView = popup
                             popupWebViewStore = store
